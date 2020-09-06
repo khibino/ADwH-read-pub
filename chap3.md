@@ -212,10 +212,31 @@ inits = map fromSL . scanl (flip snocSL) nilSL
 -- length . inits の計算量は線形時間になる
 ```
 
-symmetric リストを利用しない inits の別の定義は演習問題
+symmetric リストを利用しない `inits` の別の定義は演習問題
 
-Data.Sequence のフィンガーツリーが名前だけ紹介されていた
+`Data.Sequence` のフィンガーツリーが名前だけ紹介されていた
 
+
+## Symmetric lists/演習問題3.3
+
+`consSL`, `headSL`
+
+## Symmetric lists/演習問題3.4
+
+`initSL`
+
+## Symmetric lists/演習問題3.5
+
+`dropWhileSL`
+
+```
+dropWhile . fromSL = fromSL . dropWhileSL
+```
+
+## Symmetric lists/演習問題3.7
+
+オンラインアルゴリズムの `inits`
+`length . inits` が線形時間
 
 ## 3.2 Random-access lists
 
@@ -310,4 +331,87 @@ fromT (Leaf x) = [x]
 fromT (Node _ t1 t2) = fromT t1 ++ fromT t2
 ```
 
-fromT の効率化は演習問題
+`fromT` の効率化は演習問題
+
+
+### Random-access lists/fetchRA
+
+
+```
+fetchRA :: Nat -> RAList a -> a
+fetchRA k (Zero:xs)  = fetchRA k xs
+fetchRA k (One t:xs) = if k < size t
+                       then fetchT k t else fetchRA (k - size t) xs
+
+fetchT :: Nat -> Tree a -> a
+fetchT 0 (Leaf x)       = x
+fetchT k (Node n t1 t2) = if k < m
+                          then fetchT k t1 else fetchT (k - m) t2
+                          where m = n `div` 2
+```
+
+```
+fetch k . fromRA = fetchRA k
+```
+
+### Random-access lists/Other operations
+
+```
+nullRA   :: RAList a -> Bool
+nilRA    :: RAList a
+consRA   :: a -> RAList a -> RAList a
+unconsRA :: RAList a -> (a, RAList a)
+updateRA :: Nat -> a -> RAList a -> RAList a
+```
+
+`updateRA` は演習問題
+
+### Random-access lists/consRA
+
+```
+inc []     = [1]
+inc (0:bs) = 1:bs
+inc (1:bs) = 0:inc bs
+
+consRA x xs = consT (Leaf x) xs
+consT t1 []          = [One t1]
+consT t1 (Zero:xs)   = One t1:xs
+consT t1 (One t2:xs) = Zero:consT (node t1 t2) xs
+```
+
+### Random-access lists/unconsRA
+
+```
+dec [1]    = []
+dec (1:ds) = 0:ds
+dec (0:ds) = 1:dec ds
+
+unconsRA xs = (x,ys) where (Leaf x,ys) = unconsT xs
+unconsT :: RAList a -> (Tree a, RAList a)
+unconsT (One t:xs) = if null xs then (t,[]) else (t,Zero:xs)
+unconsT (Zero:xs)  = (t1,One t2:ys) where (Node _ t1 t2,ys) = unconsT xs
+```
+
+### Random-access lists/unconsRA example
+
+```
+unconsRA xs = (x,ys) where (Leaf x,ys) = unconsT xs
+unconsT :: RAList a -> (Tree a, RAList a)
+unconsT (One t:xs) = if null xs then (t,[]) else (t,Zero:xs)
+unconsT (Zero:xs)  = (t1,One t2:ys) where (Node _ t1 t2,ys) = unconsT xs
+```
+
+```
+unconsRA [Zero,Zero,One t]
+
+  (t1,One t2:ys) where (Node _ t1 t2,ys) = unconsT [Zero,One (tree "abcd")]
+     t1 = Leaf 'a', t2 = Leaf 'b', ys = [One (tree "cd")]
+  (t3,One t4:zs) where (Node _ t3 t4,zs) = unconsT [One (tree "abcd")]
+     t3 = tree "ab", t4 = tree "cd", zs = []
+  (tree "abcd",[])
+     Node 4 (tree "ab") (tree "cd")
+```
+
+### Random-access lists/演習問題3.11
+
+`updateRA`
