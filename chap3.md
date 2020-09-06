@@ -218,3 +218,96 @@ Data.Sequence のフィンガーツリーが名前だけ紹介されていた
 
 
 ## 3.2 Random-access lists
+
+### Random-access lists/導入
+
+```
+fetch :: Nat -> [a] -> a
+fetch k xs = if k == 0 then head xs else fetch (k - 1) (tail xs)
+
+-- 通常のリストの k 番目の取り出し
+-- θ(k) ステップ
+```
+
+```
+cons, head, tail, fetch
+
+-- 長さ n の Random-access list に対して O(log n) ステップ
+```
+
+### Random-access lists/導入II
+
+```
+data Tree a = Leaf a | Node (Tree a) (Tree a)
+
+size :: Num p => Tree a -> p
+size (Leaf x)     = 1
+size (Node t1 t2) = size t1 + size t2
+```
+
+Random-access list の操作では木のサイズを利用するものがある
+
+
+### Random-access lists/導入III
+
+```
+data Tree a = Leaf a | Node Nat (Tree a) (Tree a)
+
+size :: Tree a -> Int
+size (Leaf x)     = 1
+size (Node n _ _) = n
+
+node :: Tree a -> Tree a -> Tree a
+node t1 t2 = Node (size t1 + size t2) t1 t2
+-- 正しいサイズ情報を設定
+-- smart constructor
+```
+
+### Random-access lists/導入IV
+
+Random-access list は完全二分木の列
+
+```
+ [Zero,                                       -- 0
+  One (Node 2 (Leaf 'a') (Leaf 'b')),         -- 1
+  One (Node 4 (Node 2 (Leaf 'c') (Leaf 'd'))  -- 1
+              (Node 2 (Leaf 'e') (Leaf 'f')))]
+6の 2進bitの逆順は 011, "abcdef" から構成
+```
+
+```
+ [One (Leaf 'a'),                             -- 1
+  Zero,                                       -- 0
+  One (Node 4 (Node 2 (Leaf 'b') (Leaf 'c'))  -- 1
+              (Node 2 (Leaf 'd') (Leaf 'e')))]
+5の 2進bitの逆順は 101, "abcde" から構成
+```
+
+### Random-access lists/導入V
+
+Random-access list は完全二分木の列
+
+```
+空のリストは []
+末尾の Zero は付けない
+```
+
+### Random-access lists/導入VI
+
+```
+data Digit a = Zero | One (Tree a)
+type RAList a = [Digit a]
+```
+
+```
+fromRA :: RAList a -> [a]
+fromRA = concatMap from
+         where from Zero    = []
+               from (One t) = fromT t
+
+fromT :: Tree a -> [a]
+fromT (Leaf x) = [x]
+fromT (Node _ t1 t2) = fromT t1 ++ fromT t2
+```
+
+fromT の効率化は演習問題
