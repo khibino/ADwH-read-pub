@@ -3,6 +3,7 @@ marp: true
 ---
 <!-- theme: gaia -->
 <!-- template: invert -->
+<!-- size: 4:3 -->
 <!-- page_number: true -->
 <!-- paginate: true -->
 <!-- headingDivider: 3 -->
@@ -106,7 +107,8 @@ lastSL (xs,ys) = if null ys then head xs else head ys
 ```
 
 ```haskell
--- わかりにくいエラーを直す
+-- わかりにくいエラーを直す -
+-- error の代わりに ⊥ を利用して簡単にしてもよい
 
 lastSL :: ([p], [p]) -> p
 lastSL (xs,ys) = if null ys
