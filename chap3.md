@@ -219,15 +219,15 @@ symmetric リストを利用しない `inits` の別の定義は演習問題
 `Data.Sequence` の Finger-Tree が名前だけ紹介されていた
 
 
-## Symmetric lists/Exercise 3.3
+### Symmetric lists/Exercise 3.3
 
 `consSL`, `headSL`
 
-## Symmetric lists/Exercise 3.4
+### Symmetric lists/Exercise 3.4
 
 `initSL`
 
-## Symmetric lists/Exercise 3.5
+### Symmetric lists/Exercise 3.5
 
 `dropWhileSL`
 
@@ -235,10 +235,11 @@ symmetric リストを利用しない `inits` の別の定義は演習問題
 dropWhile f . fromSL = fromSL . dropWhileSL f
 ```
 
-## Symmetric lists/Exercise 3.7
+### Symmetric lists/Exercise 3.7
 
 オンラインアルゴリズムの `inits`
 `length . inits` が線形時間
+
 
 ## 3.2 Random-access lists
 
@@ -414,6 +415,28 @@ unconsRA [Zero,Zero,One t]
      Node 4 (tree "ab") (tree "cd")
 ```
 
-### Random-access lists/演習問題3.11
+### Random-access lists/Exercise 3.8
+
+`fromT` の計算時間の見積り
+`fromT` の効率化
+
+### Random-access lists/Exercise 3.9
+
+適切なエラーメッセージを出す `fetchRA`
+
+
+### Random-access lists/Exercise 3.11
 
 `updateRA`
+
+
+### Random-access lists/Exercise 3.12
+
+```
+(//) :: RAList a -> [(Nat,a)] -> RAList a
+```
+
+
+### Random-access lists/Exercise 3.13
+
+`headRA`, `tailRA`
