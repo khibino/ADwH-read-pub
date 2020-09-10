@@ -24,8 +24,8 @@ style: |
 
 ---
 
-多くは普通のリストで効率的に実装できるが
-ときどき別の構造が必要
+-普通のリストで効率的に実装できるものも多いが
+-ときどき別の構造が必要
 
 * symmetric lists
 * random-access lists
@@ -107,7 +107,7 @@ lastSL (xs,ys) = if null ys then head xs else head ys
 ```
 
 ```haskell
--- わかりにくいエラーを直す -
+-- わかりにくいエラーを直す
 -- error の代わりに ⊥ を利用して簡単にしてもよい
 
 lastSL :: ([p], [p]) -> p
@@ -216,26 +216,26 @@ inits = map fromSL . scanl (flip snocSL) nilSL
 
 symmetric リストを利用しない `inits` の別の定義は演習問題
 
-`Data.Sequence` のフィンガーツリーが名前だけ紹介されていた
+`Data.Sequence` の Finger-Tree が名前だけ紹介されていた
 
 
-## Symmetric lists/演習問題3.3
+## Symmetric lists/Exercise 3.3
 
 `consSL`, `headSL`
 
-## Symmetric lists/演習問題3.4
+## Symmetric lists/Exercise 3.4
 
 `initSL`
 
-## Symmetric lists/演習問題3.5
+## Symmetric lists/Exercise 3.5
 
 `dropWhileSL`
 
 ```
-dropWhile . fromSL = fromSL . dropWhileSL
+dropWhile f . fromSL = fromSL . dropWhileSL f
 ```
 
-## Symmetric lists/演習問題3.7
+## Symmetric lists/Exercise 3.7
 
 オンラインアルゴリズムの `inits`
 `length . inits` が線形時間
