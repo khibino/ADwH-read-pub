@@ -36,6 +36,10 @@ style: |
 
 ## 3.1 Symmetric lists
 
+リストの先頭に要素を加える(cons) のは定数時間
+リストの末尾に要素を加える(snoc) のは線形時間
+
+このような偏りがない構造
 
 ### Symmetric lists/導入
 
@@ -273,6 +277,8 @@ Random-access list の操作では木のサイズを利用するものがある
 
 ### Random-access lists/導入III
 
+木のなかにサイズを入れる
+
 ```
 data Tree a = Leaf a | Node Nat (Tree a) (Tree a)
 
@@ -310,10 +316,9 @@ Random-access list は完全二分木の列
 
 Random-access list は完全二分木の列
 
-```
-空のリストは []
-末尾の Zero は付けない
-```
+* 空のリストは `[]`
+* 末尾の `Zero` は付けない
+
 
 ### Random-access lists/導入VI
 
