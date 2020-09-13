@@ -24,8 +24,7 @@ style: |
 
 ---
 
--普通のリストで効率的に実装できるものも多いが
--ときどき別の構造が必要
+普通のリストとは別の構造が必要なことがある
 
 * symmetric lists
 * random-access lists
@@ -440,3 +439,109 @@ unconsRA [Zero,Zero,One t]
 ### Random-access lists/Exercise 3.13
 
 `headRA`, `tailRA`
+
+
+## 3.3 Arrays
+
+`Data.Array` ライブラリを紹介していく内容
+
+### Arrays/構成
+
+```
+Array i e
+i - 添字の型
+e - 要素の型
+```
+
+```
+array :: Ix i = (i,i) -> [(i,e)] -> Array i e
+```
+
+```
+listArray :: Ix i => (i,i) -> [e] -> Array i e
+listArray (l,r) xs = array (l,r) (zip (l..r) xs)
+```
+
+### Arrays/構成II
+
+```
+accumArray :: Ix i => (e -> v -> e) -> e -> (i,i) -> [(i,v)] -> Array i e
+```
+
+おおむねこんな意味
+
+```
+accumArray f e (l,r) ivs =
+  array (l,r) [(j,foldl f e [v|(i,v) <- ivs,i == j])|j <- [l..r]]
+```
+
+`i` が `(l,r)` の範囲にあるかどうかも検査される
+
+
+### Arrays/accumArray の例
+
+```
+accumArray f e (l,r) ivs =
+  array (l,r) [(j,foldl f e [v|(i,v) <- ivs,i == j])|j <- [l..r]]
+```
+
+```
+sort :: Nat -> [Nat] -> [Nat]
+sort m xs = concatMap copy (accocs a)
+            where a = accumArray (+) 0 (0,m) (zip xs (repeat 1))
+                  copy (x,k) = replicate k x
+```
+
+
+### Arrays/操作
+
+```
+assocs :: Array i e -> [(i,e)]
+```
+
+添字と値の対のリストを添字順に返す
+
+```
+elems :: Ix i => Array i e -> [e]
+elems = map snd . assocs
+```
+
+添字順の要素のリスト
+
+
+### Arrays/操作II
+
+```
+(!) :: Ix i => Array i e -> i -> e
+```
+
+値の参照 `(!)` は定数時間
+
+```
+assocs xs = [(i,xa!i)|i <- range(bounds xs)]
+```
+
+配列のサイズに比例した時間
+
+
+### Arrays/操作III
+
+
+値の更新は線形時間
+
+```
+(//) :: Ix i => Array i e -> [(i,e)] -> Array i e
+```
+
+```
+foldl update (array (1,n) []) (zip [1..n] xs)
+  where update xa (i,x) = xa // [(i,x)]
+```
+
+$\Theta(n^2)$ ステップ
+
+```
+array (1,n) (zip [1..n] xs)
+```
+
+$\Theta(n)$ ステップ
