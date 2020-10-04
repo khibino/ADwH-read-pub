@@ -492,7 +492,7 @@ accumArray f e (l,r) ivs =
 
 ```
 sort :: Nat -> [Nat] -> [Nat]
-sort m xs = concatMap copy (accocs a)
+sort m xs = concatMap copy (assocs a)
             where a = accumArray (+) 0 (0,m) (zip xs (repeat 1))
                   copy (x,k) = replicate k x
 ```
@@ -523,7 +523,7 @@ elems = map snd . assocs
 値の参照 `(!)` は定数時間
 
 ```
-assocs xs = [(i,xa!i)|i <- range(bounds xs)]
+assocs xa = [(i,xa!i)|i <- range(bounds xs)]
 ```
 
 配列のサイズに比例した時間
