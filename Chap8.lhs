@@ -478,33 +478,78 @@ gstep は次で定めます
 
   gstep x ts  <-- MinWith lcost (extend x ts)
 
-To give a constructive definition of gstep and to prove that monotonicity holds,  consider the two trees of Figure 8.1 in which t1 is a leaf.
-The tree on the left is the  result of rolling up the forest [t1,t2,...,tn] into a single tree.
+To give a constructive definition of gstep and to prove that monotonicity holds, consider the two trees of Figure 8.1 in which t1 is a leaf.
+The tree on the left is the result of rolling up the forest [t1,t2,...,tn] into a single tree.
 The tree on the right is obtained by adding x as a new leaf after rolling up the first j elements of the forest.
- The trees are labelled with cost information, so
+
+gstep の構成的な定義を与え, 単調性が保たれることを示すために, 図8.1 の t1 が葉となっているような, 2つの木を考えましょう。
+左側の木は [t1,t2,...,tn] を一つの木へと巻き上げた結果です。
+右側の木は始めの j 要素を forest へと巻き上げたあとに x を新らたな葉として加えることで得られます。
+
+図 p.183 上 - 図 8.1
+
+  左
+         c{n}
+        /   \
+     c{n-1} t{n}
+      /  \
+     /    \
+    c2   t{n-1}
+   /  \
+  t1  t2
+
+  右
+        c'{n}
+        /  \
+       /    t{n}
+    c'{j+1}
+     /    \
+   c'{j}  t{j+1}
+   /  \
+  x    c{j}
+      /  \
+     /    t{j}
+    t1
+
+The trees are labelled with cost information, so
+
+木にはコストの情報のラベルが付いています。なので, 2 <= k <= n に対して次が成り立ちます。
 
   c1 = cost t1
-  ck = 1 + (c{k-1} max cost tk)
+  c{k} = 1 + (c{k-1} max cost t{k})
 
-for 2 <= k <= n.
 In particular, [c1, c2,...,cn] is strictly increasing.
-A similar definition  holds for the costs on the right:
+A similar definition holds for the costs on the right:
+
+とくに, [c1, c2,...cn] は厳密に増加します。
+似たような定義が右の木のコストについて, j+1 <= k <= n 対して成り立ちます。
 
   c'j = 1+ (x max cj)
   c'k = 1+ (c k1 max cost tk)
 
 for j+1 <= k <= n.
-In particular, since adding a new leaf cannot reduce costs, we have  ck <= c'k for j <= k <= n.
+In particular, since adding a new leaf cannot reduce costs, we have c{k} <= c'{k} for j <= k <= n.
+
+とくに, 新たな葉を加えてもコストを減らくことはできないので, j <= k <= n に対して c{k} <= c'{k} です。
+
 
 The aim is to define gstep by choosing j to minimise [c'n, c'{n-1},...,c'j, x].
-For  example, consider the five trees [t1,t2,...,t5] with costs [5,2,4,9,6].
+For example, consider the five trees [t1,t2,...,t5] with costs [5,2,4,9,6].
 Then
 
-  [c1,c2,...,c5 ]=[5,6,7,10,11]
+意図としては,  [c'{n}, c'{n-1},...,c'{j}, x] を最小にするように j を選ぶことで gstep を定義することです。
+たとえば, 5つの木 [t1,t2,...,t5] を考えてみましょう
+
+  [c1,c2,...,c5] = [5,6,7,10,11]
 
 Take x = 8.
-There are five possible ways of adding x to the forest, namely by rolling  up j trees for 1 <= j <= 5.
-Here they are, with costs on the left and accumulated costs  on the right:
+There are five possible ways of adding x to the forest, namely by rolling up j trees for 1 <= j <= 5.
+Here they are, with costs on the left and accumulated costs on the right:
+
+x = 8 としましょう。
+x を forest に加えるのに 5通りの方法がありえます。すなわち 1 <= j <= 5 に対する j まで巻き上げることです。
+ここで, コストは左, 累積したコストは右です:
+
 
   [8,5,2,4,9,6] --> [8,9,10,11,12,13]
   [8,6,4,9,6] --> [8,9,10,11,12]
@@ -512,52 +557,81 @@ Here they are, with costs on the left and accumulated costs  on the right:
   [8,10,6] --> [8,11,12]
   [8,11] --> [8,12]
 
-The forest which minimises lcost is the third one, whose lexical cost is the reverse  of [8,9,10,11].
+The forest which minimises lcost is the third one, whose lexical cost is the reverse of [8,9,10,11].
+
+lcost を最小にする forest は 3番目のものです。その字句順コストは [8,9,10,11] の反転です。
 
 We claim that the best choice of j is the smallest value in the range 1 <= j < n, if it  exists, such that
 
-  1+(x max cj) < c{j+1}
+最も良い j の選択は範囲 1 <= j < n において次のような最小の値であると主張します
+
+  1+(x `max` c{j}) < c{j+1}   (8.1)
 
 p.184
 
 If no such j exists, then choose j = n. For example, with
 
-  [c1, c2,c3,c4, c5 ]=[5,6,7,10,11]
+そのような j が無ければ, j = n を選択します。例えば
+
+  [c1,c2,c3,c4,c5] = [5,6,7,10,11]
 
 and x = 8, the smallest j satisfying (8.1) is j = 3, with the result
 
-  [x,1+ (x max c3),c4, c5 ]=[8,9,10,11]
+で, x = 8 なら, (8.1) を満たす最小の j は j = 3 で, 結果は次のようになります。
+
+  [x,1+(x max c3),c4,c5] = [8,9,10,11]
 
 On the other hand, with x = 9 we have j = 5, with the result
 
+一方, x = 9 なら j = 5 で, 結果は次のようになります。
+
   [x,1+ (x max c5)] = [9,12]
 
-To prove (8.1), suppose the claim holds for both j and k, where 1 <= j < k < n. Then,  setting c'j = 1+ (x max cj) and c'k = 1+ (x max ck), the two sequences
+To prove (8.1), suppose the claim holds for both j and k, where 1 <= j < k < n.
+Then, setting c'{j} = 1+(x `max` c{j}) and c'{k} = 1 + (x `max` c{k}), the two sequences
 
-  as = [x,c'j,c{j+1},...,ck1,ck, c{k+1},...,cn]
-  bs = [x, c'k,c{k+1},...,cn]
+(8.1) を証明するために, 1 <= j < k < n において j と k が両方とも主張を満たすことを仮定します。
+c'{j} = 1+(x `max` c{j}) ,  c'{k} = 1 + (x `max` c{k}) とすると
 
-are such that reverse as<reverse bs because ck < c'k. Hence, the smaller the value  of j, the lower is the cost.
+  as = [x,c'{j},c{j+1},...,c{k-1},c{k},c{k+1},...,c{n}]
+  bs = [x, c'{k},c{k+1},...,c{n}]
+
+are such that `reverse as` < `reverse bs` because c{k} < c'{k}. Hence, the smaller the value of j, the lower is the cost.
+
+では `reverse as` < `reverse bs` です。なぜなら c{k} < c'{k} だからです。よって, より小さい j の値, より小さいものがコストとなります。
 
 To show that gstep x is monotonic with respect to lcost, suppose
 
-  lcost t1 = [cn,cn1,...,c1]
-  lcost t2 = [dm,dm1,...,d1]
+`lcost` については `gstep x` が単調であることを示すには, 次を仮定します
 
-where lcost t1 <= lcost t2. If these costs are equal, then so are the costs of adding a  new leaf to either tree. Otherwise, if lcost t1 < lcost t2 and we remove the common  prefix, say one of length k, then we are left with two trees t'1 and t'2 with
+  lcost t1 = [c{n},c{n-1},...,c1]
+  lcost t2 = [d{m},d{m-1},...,d1]
 
-  lcost t'1 = [cp,...,c1]
-  lcost t'2 = [dq,...,d1]
+where lcost t1 <= lcost t2.
+If these costs are equal, then so are the costs of adding a new leaf to either tree.
+Otherwise, if lcost t1 < lcost t2 and we remove the common prefix, say one of length k, then we are left with two trees t'1 and t'2 with
 
-where p = nk, q = mk and cp < dq. It is sufficient to show that
+ここで lcost t1 <= lcost t2 です。
+これらのコストが等しいなら, 新たな葉をどちらかの木に加えます。
+そうでなく, lcost t1 < lcost t2 なら共通の接頭辞を削除し, (この長さを k とします) 2つの木 t'1 と t'2 が残ります。
 
-  lcost (gstep x t'1) lcost (gstep x t'2)
+  lcost t'1 = [c{p},...,c1]
+  lcost t'2 = [d{q},...,d1]
+
+where p = n-k, q = m-k and c{p} < d{q}.
+It is sufficient to show that
+
+ここで p = n-k, q = m-k かつ c{p} < d{q} です。
+次を示すのには十分です
+
+  lcost (gstep x t'1) <= lcost (gstep x t'2)
 
 Firstly, suppose (8.1) holds for t'1 and j < p. Then
+まず t'1 と j < p について (8.1) を仮定します。すると
 
-  lcost (gstep x t'1)=[cp,...,c{j+1},1+ (x max cj),x]
+  lcost (gstep x t'1) = [c{p},...,c{j+1},1+(x `max` c{j}),x]
 
-But cp < dq, and since gstep x t'2 can only increase the cost of t'2, we have in this  case that
+But c{p} < d{q}, and since `gstep x t'2` can only increase the cost of t'2, we have in this case that
 
   lcost (gstep x t'1) < lcost t'2 <= lcost (gstep x t'2)
 
