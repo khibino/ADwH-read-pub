@@ -567,6 +567,21 @@ We claim that the best choice of j is the smallest value in the range 1 <= j < n
 
   1+(x `max` c{j}) < c{j+1}   (8.1)
 
+{- 追記
+
+  c{j+1} = 1 + (c{j} `max` cost t{j+1})  -- x を挿入する前の木
+    {- ここから cost t{j+1} < c{j+1} -}
+
+  x 挿入後に c'{j+1} が c{j+1} 以下になる(大きくならない)ようにするには
+
+  c'{j} = 1 + (x `max` c{j})
+  c'{j+1} = 1 + (c'{j} `max` cont t{j+1}) <= c{j+1}
+
+  (c'{j} `max` cont t{j+1}) < c{j+1}
+  c'{j} < c{j+1} かつ cont t{j+1} < c{j+1} -- こちらは上でもともと成立
+  1 + (x `max` c{j}) < c{j+1}
+ -}
+
 p.184
 
 If no such j exists, then choose j = n. For example, with
