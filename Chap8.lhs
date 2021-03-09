@@ -46,12 +46,12 @@ The height of a tree is defined by
 > height (Node u v) = 1 + height u `max` height v
 
 
-With a leaf-labelled tree of size n and height h we have the relationship h < n ≤ 2^h, so h >= ceiling(log n).
+With a leaf-labelled tree of size n and height h we have the relationship h < n ≤ 2^h, so h ≥ ceiling(log n).
 
 The fringe of a tree is the list of leaf labels in left-to-right order:
 
 サイズがn で高さがh のリーフラベル付き木では
-h < n ≤ 2^h の関係が成り立つので h >= ceiling(log n) です。
+h < n ≤ 2^h の関係が成り立つので h ≥ ceiling(log n) です。
 
 木のフリンジとは左から右の順に葉のラベルを並べたリストのことです:
 
@@ -516,7 +516,7 @@ The trees are labelled with cost information, so
 木にはコストの情報のラベルが付いています。なので, 2 ≤ k ≤ n に対して次が成り立ちます。
 
   c1 = cost t1
-  c{k} = 1 + (c{k-1} max cost t{k})
+  c{k} = 1 + (c{k-1} `max` cost t{k})
 
 In particular, [c1, c2,...,cn] is strictly increasing.
 A similar definition holds for the costs on the right:
@@ -524,8 +524,8 @@ A similar definition holds for the costs on the right:
 とくに, [c1, c2,...cn] は厳密に増加します。
 似たような定義が右の木のコストについて, j+1 ≤ k ≤ n 対して成り立ちます。
 
-  c'j = 1+ (x max cj)
-  c'k = 1+ (c k1 max cost tk)
+  c'j = 1+ (x `max` c{j})
+  c'k = 1+ (c k1 `max` cost t{k})
 
 for j+1 ≤ k ≤ n.
 In particular, since adding a new leaf cannot reduce costs, we have c{k} ≤ c'{k} for j ≤ k ≤ n.
@@ -595,13 +595,13 @@ and x = 8, the smallest j satisfying (8.1) is j = 3, with the result
 
 で, x = 8 なら, (8.1) を満たす最小の j は j = 3 で, 結果は次のようになります。
 
-  [x,1+(x max c3),c4,c5] = [8,9,10,11]
+  [x,1+(x `max` c3),c4,c5] = [8,9,10,11]
 
 On the other hand, with x = 9 we have j = 5, with the result
 
 一方, x = 9 なら j = 5 で, 結果は次のようになります。
 
-  [x,1+ (x max c5)] = [9,12]
+  [x,1+ (x `max` c5)] = [9,12]
 
 To prove (8.1), suppose the claim holds for both j and k, where 1 ≤ j < k < n.
 Then, setting c'{j} = 1+(x `max` c{j}) and c'{k} = 1 + (x `max` c{k}), the two sequences
@@ -653,9 +653,9 @@ But c{p} < d{q}, and since `gstep x t'2` can only increase the cost of t'2, we h
 
 In the second case, suppose (8.1) does not hold for t'1. In this case
 
-  lcost (gstep x t'1)=[1+ (x max cp),x]
+  lcost (gstep x t'1)=[1+ (x `max` cp),x]
 
-Now, either 1+ (x max cp) < dq, in which case
+Now, either 1+ (x `max` cp) < dq, in which case
 
   lcost (gstep x t'1) < lcost t'2 ≤ lcost (gstep x t'2)
 
@@ -683,16 +683,17 @@ That means that (8.1) does not hold for t'2 either, and so we have
 
 p.185
 
-  lcost (gstep x t 1) = [1+ (x `max` c{p}),x]
-                      ≤ [1+ (x `max` d{q}),x] = lcost (gstep x t 2)
+  lcost (gstep x t'1) = [1+ (x `max` c{p}),x]
+                      ≤ [1+ (x `max` d{q}),x] = lcost (gstep x t'2)
 
 That completes the proof of monotonicity.
 
-The next task is to implement gtep. We can rewrite (8.1) by arguing
+The next task is to implement gtep.
+We can rewrite (8.1) by arguing
 
-       1+ (x max cj) < c{j+1}
-  <==> 1+ (x max cj) < 1+ (cj max cost t{j+1})
-  <==> (x max cj) < cost t{j+1}
+       1+ (x `max` c{j}) < c{j+1}
+  ⟺  1+ (x `max` c{j}) < 1+ (c{j} `max` cost t{j+1})
+  ⟺  (x `max` c{j}) < cost t{j+1}
 
 Hence mct = foldrn gstep Leaf, where
 
@@ -703,7 +704,7 @@ where add is defined by
 
   add x ts = Leaf x: join x ts
   join x [u] =[u]
-  join x (u: v :ts) = if x max cost u<cost v
+  join x (u: v :ts) = if x `max` cost u < cost v
                       then u: v :ts else join x (Node u v: ts)
 
 However, instead of computing spines at each step and then rolling up the spine  again, we can roll up the forest at the end of the computation. What is wanted for  this step are functions hstep and g for which
@@ -801,7 +802,7 @@ p.188
 
 The simplest way to prevent the problem arising is to choose codes so  that no code is a proper prefix of any other  a prefix-free code.
 
-As well as requiring unique decipherability, we also want the coding to be optimal.  An optimal coding scheme is one that minimises the expected length of the coded  text. More precisely, if characters cj, for 1 <= j <= n, have frequencies of occurrence  pj, then we want to choose codes with lengths lj such that
+As well as requiring unique decipherability, we also want the coding to be optimal.  An optimal coding scheme is one that minimises the expected length of the coded  text. More precisely, if characters c{j}, for 1 <= j <= n, have frequencies of occurrence  pj, then we want to choose codes with lengths lj such that
 
 Σ_{j=1}^{n} pj・lj
 
@@ -817,7 +818,7 @@ There are four aspects to the problem of implementing Huffman coding: (i) collec
 
 [(c1,w1),(c2,w2),...,(cn,wn)]
 
-where for 1 <= j <= n the cj are the characters and the wj are positive integers,  called weights, indicating the frequencies of the characters in the text. The relative  frequency of character cj occurring is therefore wj/W, where W = wj. We will  suppose w1 w2  wn, so that the weights are given in ascending order.
+where for 1 <= j <= n the c{j} are the characters and the wj are positive integers,  called weights, indicating the frequencies of the characters in the text. The relative  frequency of character c{j} occurring is therefore wj/W, where W = wj. We will  suppose w1 w2  wn, so that the weights are given in ascending order.
 
 In terms of trees, the cost function we want to minimise can be defined in the  following way. By definition, the depth of a leaf is the length of the path from the  root of the tree to the leaf. We can define the list of depths of the leaves in a tree by
 
