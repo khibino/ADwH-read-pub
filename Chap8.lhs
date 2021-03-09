@@ -567,7 +567,8 @@ We claim that the best choice of j is the smallest value in the range 1 ≤ j < 
 
   1+(x `max` c{j}) < c{j+1}   (8.1)
 
-{- 追記
+{-
+  (8.1) の導出
 
   c{j+1} = 1 + (c{j} `max` cost t{j+1})  -- x を挿入する前の木
     {- ここから cost t{j+1} < c{j+1} -}
