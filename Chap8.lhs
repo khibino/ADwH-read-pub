@@ -46,12 +46,12 @@ The height of a tree is defined by
 > height (Node u v) = 1 + height u `max` height v
 
 
-With a leaf-labelled tree of size n and height h we have the relationship h < n <= 2^h,  so h >= ceiling(log n).
+With a leaf-labelled tree of size n and height h we have the relationship h < n ≤ 2^h, so h >= ceiling(log n).
 
 The fringe of a tree is the list of leaf labels in left-to-right order:
 
 サイズがn で高さがh のリーフラベル付き木では
-h < n <= 2^h の関係が成り立つので h >= ceiling(log n) です。
+h < n ≤ 2^h の関係が成り立つので h >= ceiling(log n) です。
 
 木のフリンジとは左から右の順に葉のラベルを並べたリストのことです:
 
@@ -357,7 +357,7 @@ As we saw at the end of the previous chapter, this condition is satisfied if the
 
 前の章の最後で見たように, この条件は
 
-  cost t <= cost t' cost (gstep x t) <= cost (gstep x t)
+  cost t ≤ cost t' cost (gstep x t) ≤ cost (gstep x t)
 
 holds for all trees t and t' in mktrees xs.
 However, no such function gstep exists to satisfy the monotonicity condition. Consider the two trees t1 and t2:
@@ -430,7 +430,7 @@ fringe [5,6,7,9] から作られる 5つの木です。
 それぞれの木の部分木はそのコストのラベルが付いているので, t1 と t2 はどちらも考えられる最小のコスト 10 を持ちます。
 しかし, 単調性の条件は
 
-cost t1 <= cost t2 ==> cost (gstep x t1) <= cost (gstep x t2)
+cost t1 ≤ cost t2 ==> cost (gstep x t1) ≤ cost (gstep x t2)
 
 fails for any definition of gstep.
 Take, for example, x = 8.
@@ -470,7 +470,7 @@ This time we can show
 
 今回は次を示せます
 
-  lcost t1 <= lcost t2 ==> lcost (gstep x t1) <= lcost (gstep x t2)
+  lcost t1 ≤ lcost t2 ==> lcost (gstep x t1) ≤ lcost (gstep x t2)
 
 where gstep is specified by
 
@@ -513,7 +513,7 @@ gstep の構成的な定義を与え, 単調性が保たれることを示すた
 
 The trees are labelled with cost information, so
 
-木にはコストの情報のラベルが付いています。なので, 2 <= k <= n に対して次が成り立ちます。
+木にはコストの情報のラベルが付いています。なので, 2 ≤ k ≤ n に対して次が成り立ちます。
 
   c1 = cost t1
   c{k} = 1 + (c{k-1} max cost t{k})
@@ -522,15 +522,15 @@ In particular, [c1, c2,...,cn] is strictly increasing.
 A similar definition holds for the costs on the right:
 
 とくに, [c1, c2,...cn] は厳密に増加します。
-似たような定義が右の木のコストについて, j+1 <= k <= n 対して成り立ちます。
+似たような定義が右の木のコストについて, j+1 ≤ k ≤ n 対して成り立ちます。
 
   c'j = 1+ (x max cj)
   c'k = 1+ (c k1 max cost tk)
 
-for j+1 <= k <= n.
-In particular, since adding a new leaf cannot reduce costs, we have c{k} <= c'{k} for j <= k <= n.
+for j+1 ≤ k ≤ n.
+In particular, since adding a new leaf cannot reduce costs, we have c{k} ≤ c'{k} for j ≤ k ≤ n.
 
-とくに, 新たな葉を加えてもコストを減らくことはできないので, j <= k <= n に対して c{k} <= c'{k} です。
+とくに, 新たな葉を加えてもコストを減らくことはできないので, j ≤ k ≤ n に対して c{k} ≤ c'{k} です。
 
 
 The aim is to define gstep by choosing j to minimise [c'n, c'{n-1},...,c'j, x].
@@ -543,11 +543,11 @@ Then
   [c1,c2,...,c5] = [5,6,7,10,11]
 
 Take x = 8.
-There are five possible ways of adding x to the forest, namely by rolling up j trees for 1 <= j <= 5.
+There are five possible ways of adding x to the forest, namely by rolling up j trees for 1 ≤ j ≤ 5.
 Here they are, with costs on the left and accumulated costs on the right:
 
 x = 8 としましょう。
-x を forest に加えるのに 5通りの方法がありえます。すなわち 1 <= j <= 5 に対する j まで巻き上げることです。
+x を forest に加えるのに 5通りの方法がありえます。すなわち 1 ≤ j ≤ 5 に対する j まで巻き上げることです。
 ここで, コストは左, 累積したコストは右です:
 
 
@@ -561,9 +561,9 @@ The forest which minimises lcost is the third one, whose lexical cost is the rev
 
 lcost を最小にする forest は 3番目のものです。その字句順コストは [8,9,10,11] の反転です。
 
-We claim that the best choice of j is the smallest value in the range 1 <= j < n, if it  exists, such that
+We claim that the best choice of j is the smallest value in the range 1 ≤ j < n, if it  exists, such that
 
-最も良い j の選択は範囲 1 <= j < n において次のような最小の値であると主張します
+最も良い j の選択は範囲 1 ≤ j < n において次のような最小の値であると主張します
 
   1+(x `max` c{j}) < c{j+1}   (8.1)
 
@@ -575,7 +575,7 @@ We claim that the best choice of j is the smallest value in the range 1 <= j < n
   x 挿入後に c'{j+1} が c{j+1} 以下になる(大きくならない)ようにするには
 
   c'{j} = 1 + (x `max` c{j})
-  c'{j+1} = 1 + (c'{j} `max` cont t{j+1}) <= c{j+1}
+  c'{j+1} = 1 + (c'{j} `max` cont t{j+1}) ≤ c{j+1}
 
   (c'{j} `max` cont t{j+1}) < c{j+1}
   c'{j} < c{j+1} かつ cont t{j+1} < c{j+1} -- こちらは上でもともと成立
@@ -602,10 +602,10 @@ On the other hand, with x = 9 we have j = 5, with the result
 
   [x,1+ (x max c5)] = [9,12]
 
-To prove (8.1), suppose the claim holds for both j and k, where 1 <= j < k < n.
+To prove (8.1), suppose the claim holds for both j and k, where 1 ≤ j < k < n.
 Then, setting c'{j} = 1+(x `max` c{j}) and c'{k} = 1 + (x `max` c{k}), the two sequences
 
-(8.1) を証明するために, 1 <= j < k < n において j と k が両方とも主張を満たすことを仮定します。
+(8.1) を証明するために, 1 ≤ j < k < n において j と k が両方とも主張を満たすことを仮定します。
 c'{j} = 1+(x `max` c{j}) ,  c'{k} = 1 + (x `max` c{k}) とすると
 
   as = [x,c'{j},c{j+1},...,c{k-1},c{k},c{k+1},...,c{n}]
@@ -622,11 +622,11 @@ To show that gstep x is monotonic with respect to lcost, suppose
   lcost t1 = [c{n},c{n-1},...,c1]
   lcost t2 = [d{m},d{m-1},...,d1]
 
-where lcost t1 <= lcost t2.
+where lcost t1 ≤ lcost t2.
 If these costs are equal, then so are the costs of adding a new leaf to either tree.
 Otherwise, if lcost t1 < lcost t2 and we remove the common prefix, say one of length k, then we are left with two trees t'1 and t'2 with
 
-ここで lcost t1 <= lcost t2 です。
+ここで lcost t1 ≤ lcost t2 です。
 これらのコストが等しいなら, 新たな葉をどちらかの木に加えます。
 そうでなく, lcost t1 < lcost t2 なら共通の接頭辞を削除し, (この長さを k とします) 2つの木 t'1 と t'2 が残ります。
 
@@ -639,7 +639,7 @@ It is sufficient to show that
 ここで p = n-k, q = m-k かつ c{p} < d{q} です。
 次を示すのには十分です
 
-  lcost (gstep x t'1) <= lcost (gstep x t'2)
+  lcost (gstep x t'1) ≤ lcost (gstep x t'2)
 
 Firstly, suppose (8.1) holds for t'1 and j < p. Then
 まず t'1 と j < p について (8.1) を仮定します。すると
@@ -648,7 +648,7 @@ Firstly, suppose (8.1) holds for t'1 and j < p. Then
 
 But c{p} < d{q}, and since `gstep x t'2` can only increase the cost of t'2, we have in this case that
 
-  lcost (gstep x t'1) < lcost t'2 <= lcost (gstep x t'2)
+  lcost (gstep x t'1) < lcost t'2 ≤ lcost (gstep x t'2)
 
 In the second case, suppose (8.1) does not hold for t'1. In this case
 
@@ -656,14 +656,34 @@ In the second case, suppose (8.1) does not hold for t'1. In this case
 
 Now, either 1+ (x max cp) < dq, in which case
 
-  lcost (gstep x t'1) < lcost t'2 lcost (gstep x t'2)
+  lcost (gstep x t'1) < lcost t'2 ≤ lcost (gstep x t'2)
 
-or 1+ (x max cp) dq, in which case x >= d{q-1} and 1+ (x max d{q-1}) >= dq. That  means that (8.1) does not hold for t'2 either, and so we have
+or 1+(x `max` c{p}) ≥ d{q}, in which case x ≥ d{q} - 1 and 1+(x `max` d{q-1}) ≥ d{q}.
+That means that (8.1) does not hold for t'2 either, and so we have
+
+{-
+    x ≥ d{q} - 1 から 1+(x `max` d{q-1}) ≥ d{q} を示す
+
+    {- d{q} の定義 -}
+    d{q} = 1 + (d{q-1} `max` cost t{q})
+
+    x ≥ d{q} - 1
+      ⟺ {- 元の式を残す, d{q} の定義 -}
+    x ≥ d{q} - 1 ⋀ x ≥ d{q-1} `max` cost t{q}
+      ⟹ {- a `max` b ≥ a  |  a <- d{q-1}, b <- cost t{q} -}
+    x ≥ d{q} - 1 ⋀ x ≥ d{q-1} `max` cost t{q} ≥ d{q-1}
+      ⟹ {- 推移律 ≥  -}
+    x ≥ d{q} - 1 ⋀ x ≥ d{q-1}
+      ⟹ {- a ≥ b から a = a `max` b | a <- x, b <- d{q-1} -}
+    x `max` d{q-1} ≥ d{q} - 1
+      ⟺ {- 両辺 +1 -}
+    1+(x `max` d{q-1}) ≥ d{q}
+-}
 
 p.185
 
-  lcost (gstep x t 1)=[1+ (x max cp), x]
-                    <=[1+ (x max dq),x] = lcost (gstep x t 2)
+  lcost (gstep x t 1) = [1+ (x `max` c{p}),x]
+                      ≤ [1+ (x `max` d{q}),x] = lcost (gstep x t 2)
 
 That completes the proof of monotonicity.
 
