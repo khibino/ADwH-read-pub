@@ -695,6 +695,12 @@ We can rewrite (8.1) by arguing
   ⟺  1+ (x `max` c{j}) < 1+ (c{j} `max` cost t{j+1})
   ⟺  (x `max` c{j}) < cost t{j+1}
 
+{-
+   c{j} `max` cost t{j+1} = c{j} とすると
+   c{j} ≤ (x `max` c{j}) < c{j} となり矛盾するので,
+   c{j} `max` cost t{j+1} = cost t{j+1} の場合のみありえる
+-}
+
 Hence mct = foldrn gstep Leaf, where
 
   gstep :: Nat -> Tree Nat -> Tree Nat
