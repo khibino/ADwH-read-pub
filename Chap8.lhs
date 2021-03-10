@@ -708,10 +708,10 @@ Hence mct = foldrn gstep Leaf, where
 
 where add is defined by
 
-  add x ts = Leaf x: join x ts
-  join x [u] =[u]
-  join x (u: v :ts) = if x `max` cost u < cost v
-                      then u: v :ts else join x (Node u v: ts)
+  add x ts = Leaf x : join x ts
+  join x [u] = [u]
+  join x (u:v:ts) = if x `max` cost u < cost v
+                    then u:v:ts else join x (Node u v : ts)
 
 However, instead of computing spines at each step and then rolling up the spine  again, we can roll up the forest at the end of the computation. What is wanted for  this step are functions hstep and g for which
 
@@ -778,7 +778,7 @@ It remains to estimate the running time of mct. The critical measure is the numb
 
 p.187
 
-  (2 (n - 1) - m')  + 1 + (m' - m) <= 2n - m
+  (2 (n - 1) - m')  + 1 + (m' - m) ≤ 2n - m
 
 calls of join, establishing the induction. Hence the algorithm takes linear time.
 
@@ -808,7 +808,7 @@ p.188
 
 The simplest way to prevent the problem arising is to choose codes so  that no code is a proper prefix of any other  a prefix-free code.
 
-As well as requiring unique decipherability, we also want the coding to be optimal.  An optimal coding scheme is one that minimises the expected length of the coded  text. More precisely, if characters c{j}, for 1 <= j <= n, have frequencies of occurrence  pj, then we want to choose codes with lengths lj such that
+As well as requiring unique decipherability, we also want the coding to be optimal.  An optimal coding scheme is one that minimises the expected length of the coded  text. More precisely, if characters c{j}, for 1 ≤ j ≤ n, have frequencies of occurrence  pj, then we want to choose codes with lengths lj such that
 
 Σ_{j=1}^{n} pj・lj
 
@@ -824,7 +824,7 @@ There are four aspects to the problem of implementing Huffman coding: (i) collec
 
 [(c1,w1),(c2,w2),...,(cn,wn)]
 
-where for 1 <= j <= n the c{j} are the characters and the wj are positive integers,  called weights, indicating the frequencies of the characters in the text. The relative  frequency of character c{j} occurring is therefore wj/W, where W = wj. We will  suppose w1 w2  wn, so that the weights are given in ascending order.
+where for 1 ≤ j ≤ n the c{j} are the characters and the wj are positive integers,  called weights, indicating the frequencies of the characters in the text. The relative  frequency of character c{j} occurring is therefore wj/W, where W = wj. We will  suppose w1 w2  wn, so that the weights are given in ascending order.
 
 In terms of trees, the cost function we want to minimise can be defined in the  following way. By definition, the depth of a leaf is the length of the path from the  root of the tree to the leaf. We can define the list of depths of the leaves in a tree by
 
