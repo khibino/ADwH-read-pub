@@ -294,18 +294,18 @@ We can now define
 
 これで次のような定義が可能です
 
-> mktrees :: [a] -> [Tree a]
-> mktrees = map rollup . mkforests
+> mktreesF :: [a] -> [Tree a]
+> mktreesF = map rollup . mkforests
 
 where mkforests builds the forests:
 
 ここで mkforests は森を構築します:
 
 > mkforests :: [a] -> [Forest a]
-> mkforests = foldrn (concatMap . extend) (wrap . wrap . Leaf)
+> mkforests = foldrn (concatMap . extendF) (wrap . wrap . Leaf)
 
-> extend :: a -> Forest a -> [Forest a]
-> extend x ts = [Leaf x : rollup (take k ts) : drop k ts | k <- [1 .. length ts] ]
+> extendF :: a -> Forest a -> [Forest a]
+> extendF x ts = [Leaf x : rollup (take k ts) : drop k ts | k <- [1 .. length ts] ]
 
 The new version of extend is arguably simpler than the previous one.
 It works by  rolling up some initial segment of the forest into a tree and adding a new leaf as the  first tree in the new forest.
