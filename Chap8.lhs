@@ -170,18 +170,18 @@ mktrees関数はいくつかの方法で定義することができます。
 ここではつの帰納的な定義を与えますが他の可能性については演習で議論します。
 最初の方法は次の定義です
 
-> mktreesT' :: [a] -> [Tree a]
-> mktreesT' [x] = [Leaf x]
-> mktreesT' (x:xs) = concatMap (extendT x) (mktreesT' xs)
+> mktrees0 :: [a] -> [Tree a]
+> mktrees0 [x] = [Leaf x]
+> mktrees0 (x:xs) = concatMap (extend x) (mktrees0 xs)
 
 The function extend returns a list of all the ways in which a new element can be  added as a leftmost leaf in a tree:
 
 関数 extend は新しい要素をツリーの左端の葉として追加することができるすべての方法のリストを返します:
 
-> extendT :: a -> Tree a -> [Tree a]
-> extendT x (Leaf y)   = [Node (Leaf x) (Leaf y)]
-> extendT x (Node u v) = [Node (Leaf x) (Node u v)] ++
->                        [Node u' v | u' <- extendT x u]
+> extend :: a -> Tree a -> [Tree a]
+> extend x (Leaf y)   = [Node (Leaf x) (Leaf y)]
+> extend x (Node u v) = [Node (Leaf x) (Node u v)] ++
+>                       [Node u' v | u' <- extend x u]
 
 For example, applying extend x to the tree
 
@@ -245,7 +245,7 @@ then the definition of mktrees above can be recast in the form
 
 上の mktrees の定義は次のような形で再構成できます
 
-> mktreesT = foldrn (concatMap . extendT) (wrap . Leaf)
+> mktrees = foldrn (concatMap . extend) (wrap . Leaf)
 
 where wrap converts a value into a singleton list.
 
