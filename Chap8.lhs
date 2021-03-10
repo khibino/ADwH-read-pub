@@ -322,18 +322,18 @@ extend x [t1, t2, t3] =  [Leaf x, t1, t2, t3]
 The two versions of mktrees are not the same function simply because they produce  the trees in a different order.
 We will come back to spine and rollup later on.
 
-Let us now return to the first definition of mktrees, the one expressed directly as  an instance of foldrn.
-To fuse the two component functions in the definition of mct  we can appeal to the fusion law of foldrn.
+Let us now return to the first definition of `mktrees`, the one expressed directly as  an instance of `foldrn`.
+To fuse the two component functions in the definition of `mct` we can appeal to the fusion law of `foldrn`.
 The context-sensitive version of this law  states that
 
 木を生成する順番が違というだけでも, mktreesの2つのバージョンは同じ機能ではありません。
 spineとrollupについては後ほど説明します。
 
-ここで, foldrn のインスタンスとして直接表現された, 最初の mktrees の定義に戻りましょう。
-mct の定義を構成する2つの関数を融合させるために foldrn の融合法則に訴えることができます。
+ここで, `foldrn` のインスタンスとして直接表現された, 最初の `mktrees` の定義に戻りましょう。
+mct の定義を構成する2つの関数を融合させるために `foldrn` の融合法則に訴えることができます。
 この法則の文脈依存版は次のようになります
 
-foldn f2 g2 xs <- M (foldrn f1 g1 xs)
+foldrn f2 g2 xs <- M (foldrn f1 g1 xs)
 
 for all finite, nonempty lists xs, provided g2 x <- M (g1 x) and
 f2 x (M (foldrn f1 g1 xs)) <- M (f1 x (foldrn f1 g1 xs))
@@ -713,13 +713,19 @@ where add is defined by
   join x (u:v:ts) = if x `max` cost u < cost v
                     then u:v:ts else join x (Node u v : ts)
 
-However, instead of computing spines at each step and then rolling up the spine  again, we can roll up the forest at the end of the computation. What is wanted for  this step are functions hstep and g for which
+However, instead of computing spines at each step and then rolling up the spine again,
+we can roll up the forest at the end of the computation.
+What is wanted for  this step are functions hstep and g for which
 
   foldrn gstep Leaf = rollup . foldrn hstep g
 
-We can discover hstep and g by appealing to the fusion law for foldrn. Notice that  here we are applying the fusion law for foldrn in the anti-fusion, or fission direction,  splitting a fold into two parts.
+We can discover hstep and g by appealing to the fusion law for foldrn.
+Notice that  here we are applying the fusion law for foldrn in the anti-fusion,
+or fission direction, splitting a fold into two parts.
 
-Firstly, we require rollupg = Leaf. Since rollup [Leaf x] = Leaf x, we can define  g by g = wrap  Leaf. Secondly, we want
+Firstly, we require rollup . g = Leaf.
+Since rollup [Leaf x] = Leaf x, we can define  g by g = wrap  Leaf.
+Secondly, we want
 
   rollup (hstep x ts) = gstep x (rollup ts)
 
