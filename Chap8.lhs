@@ -1,3 +1,4 @@
+{- p.177- }
 
 8章 - Greedy altorithms on trees - 木における貪欲アルゴリズム
 =====
@@ -8,31 +9,31 @@ The first problem is closely  related to the tree-building algorithms we have se
 The second problem, Huffman coding trees, is of practical importance in  compressing data effectively.
 Unlike the problems in the previous chapter, the two  greedy tree-building algorithms require us to reason about the nondeterministic  function MinWith in order to prove that they work.
 
-次の2つの問題は木に関する問題なので貪欲なアルゴリズムは丘の中腹ではなく木の中で行われます。
-これらの問題は2つの異なるコストの定義について最小のコストで木を構築するという課題に関係しています。
-最初の問題は以前にバイナリ検索やソートで見た木を構築するアルゴリズムと密接に関連しています。
-2つ目の問題であるハフマン符号化木はデータを効果的に圧縮する上で実用的に重要な問題です。
-前章の問題とは異なり2つの貪欲な木の構築アルゴリズムはそれらが機能することを証明するために非決定論的な関数MinWithについて推論する必要があります。
+次の2つの問題は木に関する問題なので貪欲なアルゴリズムは丘の中腹ではなく木の中で行われる。
+これらの問題は2つの異なるコストの定義について最小のコストで木を構築するという課題に関係している。
+最初の問題は以前にバイナリ検索やソートで見た木を構築するアルゴリズムと密接に関連している。
+2つ目の問題であるハフマン符号化木はデータを効果的に圧縮する上で実用的に重要な問題である。
+前章の問題とは異なり2つの貪欲な木の構築アルゴリズムはそれらが機能することを証明するために非決定論的な関数MinWithについて推論する必要がある。
 
 8.1 Minimum-height trees - 高さが最小の木
 -----
 
 Throughout the chapter we fix attention on one type of tree, called a leaf-labelled tree:
 
-この章ではリーフラベル付き木と呼ばれる木の一種に注目しています:
+この章ではリーフラベル付き木と呼ばれる木の一種に注目している:
 
 > data Tree a = Leaf a | Node (Tree a) (Tree a)
 >             deriving Show
 
-A leaf-labelled tree is therefore a binary tree with information stored only at the  leaves.
+A leaf-labelled tree is therefore a binary tree with information stored only at the leaves.
 Essentially this species of tree, though with an additional constructor Null,  was described in Section 5.2 on Mergesort.
 
 The size of a leaf-labelled tree is the number of its leaves:
 
-リーフラベル付き木は葉のみに情報が格納されたバイナリ木です。
-基本的にこの種の木はコンストラクタ `Null` を追加していますがMergesort の項 5.2 で説明しました。
+リーフラベル付き木は葉のみに情報が格納されたバイナリ木である。
+基本的にこの種の木はコンストラクタ `Null` を追加していますがMergesort の項 5.2 で説明した。
 
-リーフラベル付き木のサイズはその葉の数です:
+リーフラベル付き木のサイズはその葉の数となる:
 
 > size :: Tree a -> Nat
 > size (Leaf x) = 1
@@ -40,7 +41,7 @@ The size of a leaf-labelled tree is the number of its leaves:
 
 The height of a tree is defined by
 
-木の高さは次で定義されます
+木の高さは次で定義される
 
 > height (Leaf x) = 0
 > height (Node u v) = 1 + height u `max` height v
@@ -48,12 +49,14 @@ The height of a tree is defined by
 
 With a leaf-labelled tree of size n and height h we have the relationship h < n ≤ 2^h, so h ≥ ceiling(log n).
 
+{- p.178 -}
+
 The fringe of a tree is the list of leaf labels in left-to-right order:
 
 サイズがn で高さがh のリーフラベル付き木では
-h < n ≤ 2^h の関係が成り立つので h ≥ ceiling(log n) です。
+h < n ≤ 2^h の関係が成り立つので h ≥ ceiling(log n) となる。
 
-木のフリンジとは左から右の順に葉のラベルを並べたリストのことです:
+木のフリンジとは左から右の順に葉のラベルを並べたリストである:
 
 > fringe :: Tree a -> [a]
 > fringe (Leaf x) = [x]
@@ -66,25 +69,25 @@ Consider the problem of building a tree of minimum height with a given list as  
 We have already encountered two ways of solving this problem, both of  which can be implemented to take linear time.
 The first solution is the divide-andconquer, or top-down, method of Section 5.2:
 
-したがって fringe は以前に flatten と呼んだのと本質的には同じです。
-木の fringe は常に空ではないリストであることに注意してください。
+したがって fringe は以前に flatten と呼んだものと本質的には同じになる。
+木の fringe は常に空ではないリストであることに注意しよう。
 
-与えられたリストを fringe とし最小の高さの木を作る問題を考えてみましょう。
-この問題を解くための2つの方法をすでに見てきましたがどちらも線形時間をかけて実装することができます。
-最初の解決法は第5.2節の分割統治,つまりトップダウンの方法です:
+与えられたリストを fringe とし最小の高さの木を作る問題を考えてみよう。
+この問題を解くための2つの方法をすでに見てきましたがどちらも線形時間をかけて実装することができる。
+最初の解決法は第5.2節の分割統治, つまりトップダウンの方法である:
 
 > mktree :: [a] -> Tree a
 > mktree [x] = Leaf x
 > mktree xs  = Node (mktree ys) (mktree zs)
 >   where (ys,zs) = splitAt (length xs `div` 2) xs
 
-This definition does not take linear time, but it is easy to convert it into one that  does.
-The trick, as we have seen in the treatment of Mergesort in Section 5.2, is to  avoid repeated halving by tupling.
+This definition does not take linear time, but it is easy to convert it into one that does.
+The trick, as we have seen in the treatment of Mergesort in Section 5.2, is to avoid repeated halving by tupling.
 Second, we have the bottom-up method, also  described in Section 5.2:
 
-この定義は線形時間を取りませんが線形時間を取るものに変換するのは簡単です。
-第5.2節のMergesortの扱いで見たようにコツはタプリングを使って, 半減を繰り返すのを避けることです。
-第二にセクション5.2でも説明したボトムアップ方式があります。
+この定義は線形時間を取らないが線形時間を取るものに変換するのは簡単である。
+第5.2節のMergesortの扱いで見たようにコツはタプリングを使って, 半減を繰り返すのを避けることにある。
+第二にセクション5.2でも説明したボトムアップ方式がある。
 
 > mktree2 :: [a] -> Tree a
 > mktree2 = unwrap . until single (pairWith Node) . map Leaf
@@ -97,30 +100,32 @@ The reason why the bottom-up method also produces  a minimum-height tree is left
 
 Let us now change the problem slightly: given a nonempty list of natural numbers,  can we find a linear-time algorithm for building a tree with minimum cost and the  given list as fringe, where
 
-これら2つの木の構築方法は異なる木になりますが両方とも最小の高さを持ちます。
-この性質がmktreeの最初の定義にも当てはまることを示すために長さnの入力に対するmktreeの高さをH(n)とします。
-そしてHは , H(1) = 0, H(n) = 1 + H(ceiling(n/2)) の再帰の解 H(n) = log n を満たし(演習8.1を参照), 可能な最小高さになります。
-ボトムアップ法でも最小高さの木が得られる理由は別の問題として残しておきます。
+これら2つの木の構築方法は異なる木になりますが両方とも最小の高さを持つ。
+この性質がmktreeの最初の定義にも当てはまることを示すために長さnの入力に対するmktreeの高さをH(n)とする。
+そしてHは , H(1) = 0, H(n) = 1 + H(ceiling(n/2)) の再帰の解 H(n) = log n を満たし(演習8.1を参照), 可能な最小の高さになる。
+ボトムアップ法でも最小高さの木が得られる理由は別の問題として残しておく。
 
-ここで問題を少し変えてみましょう。
+ここで問題を少し変えてみよう。
 空ではない自然数のリストが与えられるたとき,
-与えられたリストをフリンジとするような木を構築するための最小のコストの線形時間アルゴリズムを見つけることができるでしょうか。
+与えられたリストをフリンジとするような木を構築するための最小のコストの線形時間アルゴリズムを見つけることができるだろうか。
 ここで,
 
 > cost :: Tree Nat -> Nat
 > cost (Leaf x) = x
 > cost (Node u v) = 1 + cost u `max` cost v
 
-とします。
+とする。
 
 The function cost has the same definition as height except that the height of a leaf  is the label value rather than 0.
 In fact, if each leaf is replaced by a tree whose height  is given by the label value, the problem is really of the following form:
 given a list  of trees together with their heights, can we find a linear-time algorithm to combine  them into a single tree of minimum height without changing the shape or order of  the component trees? To appreciate the problem consider the two trees with the  same fringe in which each node is labelled with its cost.
 
-関数 cost は葉の高さが0ではなくラベル値であることを除いて高さと同じ定義を持っています。
-実際各葉がラベル値で与えられた高さを持つ木で置き換えられた場合問題は次のような形になります。
-木のリストとその高さが与えられた場合構成木の形状や順序を変えることなくそれらを最小の高さの1本の木に結合する線形時間アルゴリズムを見つけることができるでしょうか?
-この問題を理解するためにそれぞれのノードがそのコストをラベルに持つ同じフリンジを持つ2本の木を考えてみましょう。
+関数 cost は葉の高さが0ではなくラベル値であることを除いて高さと同じ定義を持っている。
+実際各葉がラベル値で与えられた高さを持つ木で置き換えられた場合問題は次のような形になる。
+木のリストとその高さが与えられた場合構成木の形状や順序を変えることなくそれらを最小の高さの1本の木に結合する線形時間アルゴリズムを見つけることができるだろうか?
+{- p.179 -}
+この問題を理解するためにそれぞれのノードがそのコストをラベルに持つ同じフリンジを持つ2本の木を考えてみよう。
+
 
 図 p.179 上
 
@@ -147,11 +152,11 @@ It is not obvious how to construct a tree with minimum cost, at least not effici
 We start off with a specification and then calculate the algorithm.
 The specification is phrased as one of refinement:
 
-左側の木はコストが6ですが右側の木は最小コストが5です。
-最小コストの木をどのようにして構築するかは明らかではなく少なくとも効率的ではありません。
-まずは仕様を決めてからアルゴリズムを計算します。
+左側の木はコスト6を持つが右側の木は最小コスト5を持つ。
+最小コストの木をどのようにして構築するかは明らかではなく少なくとも効率的ではない。
+まずは仕様を決めてからアルゴリズムを計算する。
 
-仕様は改善されたもののうちの一つとして表現されます:
+仕様は改善されたもののうちの一つとして表現される:
 
  mct :: [Nat] -> Tree Nat
  mct xs <- MinWith cost (mktrees xs)
@@ -163,12 +168,12 @@ The function mktrees can be defined in a number of ways.
 We are going to give  two inductive definitions; other possibilities are discussed in the exercises.
 The first method is to define
 
-ここで mktrees xs はフリンジ xs を持つ可能性のあるすべての木のリストです。
-言い換えれば mct xs は mktrees xs の最小コストを持ついくつかの要素です。
+ここで mktrees xs はフリンジ xs を持つ可能性のあるすべての木のリストである。
+言い換えれば mct xs は mktrees xs の最小コストを持ついくつかの要素になる。
 
-mktrees関数はいくつかの方法で定義することができます。
-ここではつの帰納的な定義を与えますが他の可能性については演習で議論します。
-最初の方法は次の定義です
+mktrees関数はいくつかの方法で定義することができる。
+ここではつの帰納的な定義を与えますが他の可能性については演習で議論する。
+最初の方法は次の定義だ
 
 > mktrees0 :: [a] -> [Tree a]
 > mktrees0 [x] = [Leaf x]
@@ -176,7 +181,7 @@ mktrees関数はいくつかの方法で定義することができます。
 
 The function extend returns a list of all the ways in which a new element can be  added as a leftmost leaf in a tree:
 
-関数 extend は新しい要素をツリーの左端の葉として追加することができるすべての方法のリストを返します:
+関数 extend は新しい要素をツリーの左端の葉として追加することができるすべての方法のリストを返す:
 
 > extend :: a -> Tree a -> [Tree a]
 > extend x (Leaf y)   = [Node (Leaf x) (Leaf y)]
@@ -197,7 +202,9 @@ y   t1
 
 produces the three trees
 
-3つの木を生成します
+3つの木を生成する
+
+{- p.180 -}
 
 図 p.180 上
 
@@ -232,10 +239,10 @@ We might have taken mktrees [] = [] and so defined mktrees as an instance of fol
 But MinWith is not defined on an empty list and we have to restrict the input to  nonempty lists.
 The Haskell standard library does not provide a sufficiently general  fold function for nonempty lists (the function foldr1 is not quite general enough),  but if we define foldrn by
 
-mktrees [] = [] とし mktrees を foldr のインスタンスとして定義したかもしれません。
-しかしMinWithは空リストでは定義されておらず入力を非空リストに限定しなければなりません。
-Haskell標準ライブラリは空でないリストに対して十分に一般的な畳み込み関数を提供していません。
-(関数foldr1は十分に一般的ではありません)が foldrn を次のように定義したなら
+mktrees [] = [] とし mktrees を foldr のインスタンスとして定義したかもしれない。
+しかしMinWithは空リストでは定義されておらず入力を非空リストに限定しなければならない。
+Haskell標準ライブラリは空でないリストに対して十分に一般的な畳み込み関数を提供していない。
+(関数foldr1は十分に一般的ではない)が foldrn を次のように定義したなら
 
 > foldrn :: (a -> b -> b) -> (a -> b) -> [a] -> b
 > foldrn f g [x]    = g x
@@ -243,7 +250,7 @@ Haskell標準ライブラリは空でないリストに対して十分に一般�
 
 then the definition of mktrees above can be recast in the form
 
-上の mktrees の定義は次のような形で再構成できます
+上の mktrees の定義は次のような形で再構成できる
 
 > mktrees = foldrn (concatMap . extend) (wrap . Leaf)
 
@@ -251,15 +258,15 @@ where wrap converts a value into a singleton list.
 
 The second inductive way of building a tree is to first build a forest, a list of trees:
 
-ここでの wrap は値をシングルトンリストに変換します
+ここでの wrap は値をシングルトンリストに変換する
 
-木を構成する 2つ目の帰納的な方法は最初に森(木のリスト)を構成することです:
+木を構成する 2つ目の帰納的な方法は最初に森(木のリスト)を構成することだ:
 
 > type Forest a = [Tree a]
 
 A forest can be rolled up into a tree using
 
-森は木へ '巻き上げる' ことができます
+森は木へ '巻き上げる' ことができる
 
 > rollup :: [Tree a] -> Tree a
 > rollup = foldl1 Node
@@ -267,14 +274,14 @@ A forest can be rolled up into a tree using
 The function foldl1 is the Haskell prelude function for folding a nonempty list from  left to right.
 For example,
 
-関数 foldl1 は Haskell のプレリュード関数で,空でないリストを左から右へ畳み込みます。
+関数 foldl1 は Haskell のプレリュード関数で,空でないリストを左から右へ畳み込む。
 たとえば,
 
 rollup [t1, t2, t3, t4] = Node (Node (Node t1 t2) t3) t4
 
 The converse to rollup is the function spine, defined by
 
-rollup の逆は spine 関数で, 次のように定義されます
+rollup の逆は spine 関数で, 次のように定義される
 
 > spine :: Tree a -> [Tree a]
 > spine (Leaf x)   = [Leaf x]
@@ -284,22 +291,24 @@ This function returns the leftmost leaf of a tree,
 followed by a list of the right  subtrees along the path from the leftmost leaf of the tree to the root.
 Provided the  first tree in a forest ts is a leaf, we have
 
-この関数は根からの最左の葉のパスに沿った右の部分木が続く最左の葉を返します。
-森 ts の最初の木は葉になります。
-次が成立します
+この関数は根からの最左の葉のパスに沿った右の部分木が続く最左の葉を返す。
+森 ts の最初の木は葉になる。
+次が成立する
 
  spine (rollup ts) = ts
 
 We can now define
 
-これで次のような定義が可能です
+これで次のような定義が可能だ
 
 > mktreesF :: [a] -> [Tree a]
 > mktreesF = map rollup . mkforests
 
+{- p.181 -}
+
 where mkforests builds the forests:
 
-ここで mkforests は森を構築します:
+ここで mkforests は森を構築する:
 
 > mkforests :: [a] -> [Forest a]
 > mkforests = foldrn (concatMap . extendF) (wrap . wrap . Leaf)
@@ -311,9 +320,9 @@ The new version of extend is arguably simpler than the previous one.
 It works by  rolling up some initial segment of the forest into a tree and adding a new leaf as the  first tree in the new forest.
 For example,
 
-新しいバージョンのextendは以前のものよりも間違いなくシンプルです。
-これは森の初期セグメントを木に巻き上げ新しい森の最初の木として新しいリーフを追加することで動作します。
-例えば以下のようになります
+新しいバージョンの extend は以前のものよりも間違いなく単純だ。
+これは森の初期セグメントを木に巻き上げ新しい森の最初の木として新しいリーフを追加することで動作する。
+例えば以下のようになる
 
 extend x [t1, t2, t3] =  [Leaf x, t1, t2, t3]
                          [Leaf x, Node t1 t2, t3]
@@ -326,12 +335,12 @@ Let us now return to the first definition of `mktrees`, the one expressed direct
 To fuse the two component functions in the definition of `mct` we can appeal to the fusion law of `foldrn`.
 The context-sensitive version of this law  states that
 
-木を生成する順番が違というだけでも, mktreesの2つのバージョンは同じ機能ではありません。
-spineとrollupについては後ほど説明します。
+木を生成する順番が違というだけでも, mktreesの2つのバージョンは同じ機能ではない。
+spineとrollupについては後ほど説明する。
 
-ここで, `foldrn` のインスタンスとして直接表現された, 最初の `mktrees` の定義に戻りましょう。
-mct の定義を構成する2つの関数を融合させるために `foldrn` の融合法則に訴えることができます。
-この法則の文脈依存版は次のようになります
+ここで, `foldrn` のインスタンスとして直接表現された, 最初の `mktrees` の定義に戻ろう。
+mct の定義を構成する2つの関数を融合させるために `foldrn` の融合法則を利用することができる。
+この法則の文脈依存版は次のようになる
 
 foldrn f2 g2 xs <- M (foldrn f1 g1 xs)
 
@@ -340,14 +349,14 @@ f2 x (M (foldrn f1 g1 xs)) <- M (f1 x (foldrn f1 g1 xs))
 
 任意の有限の空でないリスト xs に対して g2 x <- M (g1 x) と
 f2 x (M (foldrn f1 g1 xs)) <- M (f1 x (foldrn f1 g1 xs))
-が与えられます。
+が与えられる。
 
-For our problem, M = MinWith cost, f1 = concatMap extend, and g1 = wrap leaf.
+For our problem, M = MinWith cost, f1 = concatMap extend, and g1 = wrap . leaf.
 Since Leaf x = MinWith cost [Leaf x], we can take g2 = Leaf.
 For the second fusion  condition we have to find a function, gstep say, so that
 
-我々の問題では, M = MinWith cost, f1 = concatMap extend, g1 = wrap leaf です。
-Leaf x = MinWith cost [Leaf x] なので g2 = Leaf を得ます。
+我々の問題では, M = MinWith cost, f1 = concatMap extend, g1 = wrap . Leaf だ。
+Leaf x = MinWith cost [Leaf x] なので g2 = Leaf を得る。
 
 
   gstep x (MinWith cost (mktrees xs))
@@ -388,6 +397,8 @@ mktrees xs 内の任意の木 t と t' に対して単調性が成り立つと�
 
 
 
+{- p.182 -}
+
 which, along with the three trees
 
 3 つの木とともに
@@ -426,8 +437,8 @@ are the five trees that can be built with fringe [5,6,7,9].
 The subtrees of each tree have been labelled with their costs, so both t1 and t2 have the minimum possible cost 10.
 However, the monotonicity condition
 
-fringe [5,6,7,9] から作られる 5つの木です。
-それぞれの木の部分木はそのコストのラベルが付いているので, t1 と t2 はどちらも考えられる最小のコスト 10 を持ちます。
+(これらは) fringe [5,6,7,9] から作られる 5つの木だ。
+それぞれの木の部分木はそのコストのラベルが付いているので, t1 と t2 はどちらも考えられる最小のコスト 10 を持つ。
 しかし, 単調性の条件は
 
 cost t1 ≤ cost t2 ==> cost (gstep x t1) ≤ cost (gstep x t2)
@@ -438,18 +449,18 @@ Adding 8 to t1 in the best possible way gives a tree with minimum cost 11, while
 So there is no way we can define a function gstep for which the fusion condition holds.
 Once again we appear to be stuck, even  with a refinement version of fusion.
 
-どのような gstep でも果たされません。
-たとえば x = 8 を取るとします。
-8 を t1 に加えるのに, 考えうる最良の方法から,最小のコスト 11 の木を得ます。さらに 8 を t2 に加える最良の方法からはコスト 10 の木を得ます。
-よって融合条件を保持する関数 gstep を定義することができる方法はありません。
+どのような gstep でも果たされない。
+たとえば x = 8 を取るとする。
+8 を t1 に加えるのに, 考えうる最良の方法から,最小のコスト 11 の木を得ます。さらに 8 を t2 に加える最良の方法からはコスト 10 の木を得る。
+よって融合条件を保持する関数 gstep を定義することができる方法はない。
 
 The only way out of the wood is to change the cost function, and once again lexical ordering comes to the rescue.
 Notice that the list of costs [10,8,7,5] reading downwards along the left spine of t2 is lexically less than the costs [10,9,5] along the left spine of t1.
 The lexical cost, lcost say, is defined by
 
-この問題をのりこえる唯一の方法はコスト関数を変えることであり, ふたたび字句順序が助けになります。
-t2 の左の spine に沿って下向きに読めるコストのリスト [10,8,7,5] は t1 の左の spine に沿ったコスト [10,9,5] よりも字句的に小さいことに注意しましょう。
-字句順コスト( lcost と呼びます ) は次のように定義されます
+この問題をのりこえる唯一の方法はコスト関数を変えることであり, ふたたび字句順序が助けになる。
+t2 の左の spine に沿って下向きに読めるコストのリスト [10,8,7,5] は t1 の左の spine に沿ったコスト [10,9,5] よりも字句的に小さいことに注意しよう。
+字句順コスト( lcost と呼ぼう ) は次のように定義される
 
 > lcost ::Tree Nat -> [Nat]
 > lcost = reverse . scanl1 op . map cost . spine
@@ -459,22 +470,22 @@ The costs of the trees along the left spine are accumulated from left to right b
 For example, spine t2 has tree costs [5,6,7,9] and accumulation gives the list [5,7,8,10], which, when reversed, gives the lexical cost of t2.
 Minimising lcost also minimises cost (why?), so we can revise the second fusion condition to read
 
-左の spine に沿った木のコストは scanl1 op によって左から右に累積され, 反転されます。
-たとえば, spine t2 は木のコスト [5,6,7,9] を持ち累積はリスト [5,7,8,10 ] で, 反転すると t2 の 字句順コストを与えます。
-lcost を最小にすると cost も最小になり(なぜでしょう?), 第二の融合条件を次のように修正できます
+左の spine に沿った木のコストは scanl1 op によって左から右に累積され, 反転される。
+たとえば, spine t2 は木のコスト [5,6,7,9] を持ち累積はリスト [5,7,8,10 ] で, 反転すると t2 の 字句順コストを与える。
+lcost を最小にすると cost も最小になり(なぜでしょう?), 第二の融合条件を次のように修正でる
 
   gstep x (MinWith lcost (mktrees xs))
     <-- MinWith lcost (concatMap (extend x) (mktrees xs))
 
 This time we can show
 
-今回は次を示せます
+今回は次を示すことができる
 
   lcost t1 ≤ lcost t2 ==> lcost (gstep x t1) ≤ lcost (gstep x t2)
 
 where gstep is specified by
 
-gstep は次で定めます
+gstep は次で定める
 
   gstep x ts  <-- MinWith lcost (extend x ts)
 
@@ -482,9 +493,11 @@ To give a constructive definition of gstep and to prove that monotonicity holds,
 The tree on the left is the result of rolling up the forest [t1,t2,...,tn] into a single tree.
 The tree on the right is obtained by adding x as a new leaf after rolling up the first j elements of the forest.
 
-gstep の構成的な定義を与え, 単調性が保たれることを示すために, 図8.1 の t1 が葉となっているような, 2つの木を考えましょう。
-左側の木は [t1,t2,...,tn] を一つの木へと巻き上げた結果です。
-右側の木は始めの j 要素を forest へと巻き上げたあとに x を新らたな葉として加えることで得られます。
+gstep の構成的な定義を与え, 単調性が保たれることを示すために, 図8.1 の t1 が葉となっているような, 2つの木を考えよう。
+左側の木は [t1,t2,...,tn] を一つの木へと巻き上げた結果だ。
+{- p.183 -}
+右側の木は始めの j 要素を forest へと巻き上げたあとに x を新らたな葉として加えることで得られる。
+
 
 図 p.183 上 - 図 8.1
 
@@ -513,7 +526,7 @@ gstep の構成的な定義を与え, 単調性が保たれることを示すた
 
 The trees are labelled with cost information, so
 
-木にはコストの情報のラベルが付いています。なので, 2 ≤ k ≤ n に対して次が成り立ちます。
+木にはコストの情報のラベルが付いている。なので, 2 ≤ k ≤ n に対して次が成り立つ。
 
   c1 = cost t1
   c{k} = 1 + (c{k-1} `max` cost t{k})
@@ -522,7 +535,7 @@ In particular, [c1, c2,...,cn] is strictly increasing.
 A similar definition holds for the costs on the right:
 
 とくに, [c1, c2,...cn] は厳密に増加します。
-似たような定義が右の木のコストについて, j+1 ≤ k ≤ n 対して成り立ちます。
+似たような定義が右の木のコストについて, j+1 ≤ k ≤ n 対して成り立つ。
 
   c'j = 1+ (x `max` c{j})
   c'k = 1+ (c k1 `max` cost t{k})
@@ -530,15 +543,15 @@ A similar definition holds for the costs on the right:
 for j+1 ≤ k ≤ n.
 In particular, since adding a new leaf cannot reduce costs, we have c{k} ≤ c'{k} for j ≤ k ≤ n.
 
-とくに, 新たな葉を加えてもコストを減らくことはできないので, j ≤ k ≤ n に対して c{k} ≤ c'{k} です。
+とくに, 新たな葉を加えてもコストを減らすことはできないので, j ≤ k ≤ n に対して c{k} ≤ c'{k} だ。
 
 
 The aim is to define gstep by choosing j to minimise [c'n, c'{n-1},...,c'j, x].
 For example, consider the five trees [t1,t2,...,t5] with costs [5,2,4,9,6].
 Then
 
-意図としては,  [c'{n}, c'{n-1},...,c'{j}, x] を最小にするように j を選ぶことで gstep を定義することです。
-たとえば, 5つの木 [t1,t2,...,t5] を考えてみましょう
+意図としては,  [c'{n}, c'{n-1},...,c'{j}, x] を最小にするように j を選ぶことで gstep を定義することだ。
+たとえば, 5つの木 [t1,t2,...,t5] を考えてみよう
 
   [c1,c2,...,c5] = [5,6,7,10,11]
 
@@ -546,9 +559,9 @@ Take x = 8.
 There are five possible ways of adding x to the forest, namely by rolling up j trees for 1 ≤ j ≤ 5.
 Here they are, with costs on the left and accumulated costs on the right:
 
-x = 8 としましょう。
-x を forest に加えるのに 5通りの方法がありえます。すなわち 1 ≤ j ≤ 5 に対する j まで巻き上げることです。
-ここで, コストは左, 累積したコストは右です:
+x = 8 としよう。
+x を forest に加えるのに 5通りの方法がありえる。つまりは 1 ≤ j ≤ 5 に対する j まで巻き上げだ。
+ここで, コストは左, 累積したコストは右となる:
 
 
   [8,5,2,4,9,6] --> [8,9,10,11,12,13]
@@ -559,11 +572,11 @@ x を forest に加えるのに 5通りの方法がありえます。すなわ�
 
 The forest which minimises lcost is the third one, whose lexical cost is the reverse of [8,9,10,11].
 
-lcost を最小にする forest は 3番目のものです。その字句順コストは [8,9,10,11] の反転です。
+lcost を最小にする forest は 3番目のものだ。その字句順コストは [8,9,10,11] の反転である。
 
 We claim that the best choice of j is the smallest value in the range 1 ≤ j < n, if it  exists, such that
 
-最も良い j の選択は範囲 1 ≤ j < n において次のような最小の値であると主張します
+ここで, 最も良い j の選択は範囲 1 ≤ j < n において次のような最小の値であると主張しよう
 
   1+(x `max` c{j}) < c{j+1}   (8.1)
 
@@ -583,42 +596,44 @@ We claim that the best choice of j is the smallest value in the range 1 ≤ j < 
   1 + (x `max` c{j}) < c{j+1}
  -}
 
-p.184
+{- p.184 -}
 
 If no such j exists, then choose j = n. For example, with
 
-そのような j が無ければ, j = n を選択します。例えば
+そのような j が無ければ, j = n を選択する。例えば
 
   [c1,c2,c3,c4,c5] = [5,6,7,10,11]
 
 and x = 8, the smallest j satisfying (8.1) is j = 3, with the result
 
-で, x = 8 なら, (8.1) を満たす最小の j は j = 3 で, 結果は次のようになります。
+で, x = 8 なら, (8.1) を満たす最小の j は j = 3 で, 結果は次のようになる。
 
   [x,1+(x `max` c3),c4,c5] = [8,9,10,11]
 
 On the other hand, with x = 9 we have j = 5, with the result
 
-一方, x = 9 なら j = 5 で, 結果は次のようになります。
+一方, x = 9 なら j = 5 で, 結果は次のようになる。
 
   [x,1+ (x `max` c5)] = [9,12]
 
 To prove (8.1), suppose the claim holds for both j and k, where 1 ≤ j < k < n.
 Then, setting c'{j} = 1+(x `max` c{j}) and c'{k} = 1 + (x `max` c{k}), the two sequences
 
-(8.1) を証明するために, 1 ≤ j < k < n において j と k が両方とも主張を満たすことを仮定します。
+(8.1) を証明するために, 1 ≤ j < k < n において j と k が両方とも主張を満たすことを仮定する。
 c'{j} = 1+(x `max` c{j}) ,  c'{k} = 1 + (x `max` c{k}) とすると
 
   as = [x,c'{j},c{j+1},...,c{k-1},c{k},c{k+1},...,c{n}]
   bs = [x, c'{k},c{k+1},...,c{n}]
 
-are such that `reverse as` < `reverse bs` because c{k} < c'{k}. Hence, the smaller the value of j, the lower is the cost.
+are such that `reverse as` < `reverse bs` because c{k} < c'{k}.
+Hence, the smaller the value of j, the lower is the cost.
 
-では `reverse as` < `reverse bs` です。なぜなら c{k} < c'{k} だからです。よって, より小さい j の値, より小さいものがコストとなります。
+では `reverse as` < `reverse bs` だ。なぜなら c{k} < c'{k} だからである。
+よって, より小さい j の値, より小さいものがコストとなる。
 
 To show that gstep x is monotonic with respect to lcost, suppose
 
-`lcost` については `gstep x` が単調であることを示すには, 次を仮定します
+`lcost` については `gstep x` が単調であることを示すには, 次を仮定する
 
   lcost t1 = [c{n},c{n-1},...,c1]
   lcost t2 = [d{m},d{m-1},...,d1]
@@ -627,9 +642,9 @@ where lcost t1 ≤ lcost t2.
 If these costs are equal, then so are the costs of adding a new leaf to either tree.
 Otherwise, if lcost t1 < lcost t2 and we remove the common prefix, say one of length k, then we are left with two trees t'1 and t'2 with
 
-ここで lcost t1 ≤ lcost t2 です。
-これらのコストが等しいなら, 新たな葉をどちらかの木に加えます。
-そうでなく, lcost t1 < lcost t2 なら共通の接頭辞を削除し, (この長さを k とします) 2つの木 t'1 と t'2 が残ります。
+ここで lcost t1 ≤ lcost t2 だ。
+これらのコストが等しいなら, 新たな葉をどちらかの木に加える。
+そうでなく, lcost t1 < lcost t2 なら共通の接頭辞を削除し, (この長さを k とする) 2つの木 t'1 と t'2 が残る。
 
   lcost t'1 = [c{p},...,c1]
   lcost t'2 = [d{q},...,d1]
@@ -637,13 +652,13 @@ Otherwise, if lcost t1 < lcost t2 and we remove the common prefix, say one of le
 where p = n-k, q = m-k and c{p} < d{q}.
 It is sufficient to show that
 
-ここで p = n-k, q = m-k かつ c{p} < d{q} です。
-次を示すのには十分です
+ここで p = n-k, q = m-k かつ c{p} < d{q} である。
+これは次を示すのには十分だ
 
   lcost (gstep x t'1) ≤ lcost (gstep x t'2)
 
 Firstly, suppose (8.1) holds for t'1 and j < p. Then
-まず t'1 と j < p について (8.1) を仮定します。すると
+まず t'1 と j < p について (8.1) を仮定する。すると
 
   lcost (gstep x t'1) = [c{p},...,c{j+1},1+(x `max` c{j}),x]
 
@@ -681,7 +696,7 @@ That means that (8.1) does not hold for t'2 either, and so we have
     1+(x `max` d{q-1}) ≥ d{q}
 -}
 
-p.185
+{- p.185 -}
 
   lcost (gstep x t'1) = [1+ (x `max` c{p}),x]
                       ≤ [1+ (x `max` d{q}),x] = lcost (gstep x t'2)
@@ -746,7 +761,7 @@ Hence we can take hstep = add, provided the first element of ts is a leaf. But  
 
 We now have mct = rollup  foldrn add (wrap . Leaf). As a final step, repeated  evaluations of cost can be eliminated by pairing each tree in the forest with its cost.  That leads to the final algorithm
 
-p.186
+{- p.186 -}
 
 > type Pair = (Tree Nat,Nat)
 > mct :: [Nat] ->  Tree Nat
@@ -787,7 +802,7 @@ with cost 7.
 
 It remains to estimate the running time of mct. The critical measure is the number  of calls to join. We can prove by induction that any sequence of hstep operations  applied to a list of length n and returning a forest of length m involves at most  2n - m calls to join. The base case, n = 1 and m = 1, is obvious. For the induction  step, note that join applied to a list of length m and returning a list of length m is  called m'-m times. Thus, using the induction step that hstep applied to a list of  length n - 1 and returning a forest of length m involves at most 2(n-1)-m' calls of join, we have hstep applied to a list of length n, and returning a forest of length  m involves at most
 
-p.187
+{- p.187 -}
 
   (2 (n - 1) - m')  + 1 + (m' - m) ≤ 2n - m
 
@@ -815,7 +830,7 @@ then text can be coded as the bit sequence 010110 of length 6. However, it is  i
 
 Under this scheme, text would be coded as the sequence 01010 of length 5.  However, the string tee would also be coded by 01010. Obviously this is not what is wanted.
 
-p.188
+{- p.188 -}
 
 The simplest way to prevent the problem arising is to choose codes so  that no code is a proper prefix of any other  a prefix-free code.
 
