@@ -713,6 +713,11 @@ where add is defined by
   join x (u:v:ts) = if x `max` cost u < cost v
                     then u:v:ts else join x (Node u v : ts)
 
+{-
+   join がやっていること
+   x や後続の木のコストと同じくらいのコストになるまで木をまとめる
+ -}
+
 However, instead of computing spines at each step and then rolling up the spine again,
 we can roll up the forest at the end of the computation.
 What is wanted for  this step are functions hstep and g for which
@@ -720,11 +725,11 @@ What is wanted for  this step are functions hstep and g for which
   foldrn gstep Leaf = rollup . foldrn hstep g
 
 We can discover hstep and g by appealing to the fusion law for foldrn.
-Notice that  here we are applying the fusion law for foldrn in the anti-fusion,
+Notice that here we are applying the fusion law for foldrn in the anti-fusion,
 or fission direction, splitting a fold into two parts.
 
 Firstly, we require rollup . g = Leaf.
-Since rollup [Leaf x] = Leaf x, we can define  g by g = wrap  Leaf.
+Since rollup [Leaf x] = Leaf x, we can define g by g = wrap . Leaf.
 Secondly, we want
 
   rollup (hstep x ts) = gstep x (rollup ts)
