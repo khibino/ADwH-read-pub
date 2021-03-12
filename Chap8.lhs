@@ -658,27 +658,38 @@ It is sufficient to show that
   lcost (gstep x t'1) ≤ lcost (gstep x t'2)
 
 Firstly, suppose (8.1) holds for t'1 and j < p. Then
+
 まず t'1 と j < p について (8.1) を仮定する。すると
 
   lcost (gstep x t'1) = [c{p},...,c{j+1},1+(x `max` c{j}),x]
 
 But c{p} < d{q}, and since `gstep x t'2` can only increase the cost of t'2, we have in this case that
 
+しかし c{p} < {q} なので, `gstep x t'2` ができるのは t'2 コストを増やすことだけで, この場合は次のようになる
+
   lcost (gstep x t'1) < lcost t'2 ≤ lcost (gstep x t'2)
 
 In the second case, suppose (8.1) does not hold for t'1. In this case
 
-  lcost (gstep x t'1)=[1+ (x `max` cp),x]
+二番目のケースは (8.1) が t'1 について成り立たないと仮定する。この場合は次のようになる
 
-Now, either 1+ (x `max` cp) < dq, in which case
+  lcost (gstep x t'1) = [1+ (x `max` c{p}),x]
+
+Now, either 1+ (x `max` c{p}) < d{q}, in which case
+
+今や次の場合のどちらかである。
+1+ (x `max` c{p}) < d{q} の場合,
 
   lcost (gstep x t'1) < lcost t'2 ≤ lcost (gstep x t'2)
 
 or 1+(x `max` c{p}) ≥ d{q}, in which case x ≥ d{q} - 1 and 1+(x `max` d{q-1}) ≥ d{q}.
 That means that (8.1) does not hold for t'2 either, and so we have
 
+あるいは 1+(x `max` c{p}) ≥ d{q} の場合, x ≥ d{q} - 1 かつ 1+(x `max` d{q-1}) ≥ d{q} である。
+この意味するところは (8.1) が t'2 についても成り立たないということだ。
+
 {-
-    x ≥ d{q} - 1 から 1+(x `max` d{q-1}) ≥ d{q} を示す
+    x ≥ d{q} - 1 から 1 + (x `max` d{q-1}) ≥ d{q} を示す
 
     {- d{q} の定義 -}
     d{q} = 1 + (d{q-1} `max` cost t{q})
@@ -691,9 +702,11 @@ That means that (8.1) does not hold for t'2 either, and so we have
       ⟹ {- 推移律 ≥  -}
     x ≥ d{q} - 1 ⋀ x ≥ d{q-1}
       ⟹ {- a ≥ b から a = a `max` b | a <- x, b <- d{q-1} -}
+    x ≥ d{q} - 1 ⋀ x = x `max` d{q-1}
+      ⟹ {- rewrite - x = x `max` d{q-1} -}
     x `max` d{q-1} ≥ d{q} - 1
       ⟺ {- 両辺 +1 -}
-    1+(x `max` d{q-1}) ≥ d{q}
+    1 + (x `max` d{q-1}) ≥ d{q}
 -}
 
 {- p.185 -}
@@ -703,17 +716,38 @@ That means that (8.1) does not hold for t'2 either, and so we have
 
 That completes the proof of monotonicity.
 
+単調性の証明はこれで完了した。
+
 The next task is to implement gtep.
 We can rewrite (8.1) by arguing
+
+次にやることは gstep を実装することだ。
+次の主張で (8.1) を書き換えることができる。
 
        1+ (x `max` c{j}) < c{j+1}
   ⟺  1+ (x `max` c{j}) < 1+ (c{j} `max` cost t{j+1})
   ⟺  (x `max` c{j}) < cost t{j+1}
 
 {-
-   c{j} `max` cost t{j+1} = c{j} とすると
-   c{j} ≤ (x `max` c{j}) < c{j} となり矛盾するので,
-   c{j} `max` cost t{j+1} = cost t{j+1} の場合のみありえる
+   c{j} `max` cost t{j+1} = c{j} が偽であることから
+   c{j} `max` cost t{j+1} = cost t{j+1} を示す
+
+   1 + (x `max` c{j}) < 1 + (c{j} `max` cost t{j+1}) ⋀ c{j} `max` cost t{j+1} = c{j}
+      ⟹ {- 両辺 - 1 -}
+   x `max` c{j} < c{j} `max` cost t{j+1} ⋀ c{j} `max` cost t{j+1} = c{j}
+      ⟹ {- rewrite - c{j} `max` cost t{j+1} = c{j} -}
+   x `max` c{j} < c{j}
+      ⟹ {- b ≤ a `max` b -}
+   c{j} ≤ x `max` c{j} < c{j}
+      ⟺
+   ∅ (False)
+
+   よって
+
+   c{j} `max` cost t{j+1} = cost t{j+1} ⋁ c{j} `max` cost t{j+1} = c{j}
+      ⟹
+   c{j} `max` cost t{j+1} = cost t{j+1}
+
 -}
 
 Hence mct = foldrn gstep Leaf, where
