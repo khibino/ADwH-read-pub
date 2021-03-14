@@ -74,7 +74,7 @@ The first solution is the divide-andconquer, or top-down, method of Section 5.2:
 
 与えられたリストを fringe とし最小の高さの木を作る問題を考えてみよう。
 この問題を解くための2つの方法をすでに見てきましたがどちらも線形時間をかけて実装することができる。
-最初の解決法は第5.2節の分割統治, つまりトップダウンの方法である:
+最初の解決法は第5.2節の分割統治、つまりトップダウンの方法である:
 
 > mktree :: [a] -> Tree a
 > mktree [x] = Leaf x
@@ -86,7 +86,7 @@ The trick, as we have seen in the treatment of Mergesort in Section 5.2, is to a
 Second, we have the bottom-up method, also  described in Section 5.2:
 
 この定義は線形時間を取らないが線形時間を取るものに変換するのは簡単である。
-第5.2節のMergesortの扱いで見たようにコツはタプリングを使って, 半減を繰り返すのを避けることにある。
+第5.2節のMergesortの扱いで見たようにコツはタプリングを使って、半減を繰り返すのを避けることにある。
 第二にセクション5.2でも説明したボトムアップ方式がある。
 
 > mktree2 :: [a] -> Tree a
@@ -102,7 +102,7 @@ Let us now change the problem slightly: given a nonempty list of natural numbers
 
 これら2つの木の構築方法は異なる木になりますが両方とも最小の高さを持つ。
 この性質がmktreeの最初の定義にも当てはまることを示すために長さnの入力に対するmktreeの高さをH(n)とする。
-そしてHは , H(1) = 0, H(n) = 1 + H(ceiling(n/2)) の再帰の解 H(n) = log n を満たし(演習8.1を参照), 可能な最小の高さになる。
+そしてHは、H(1) = 0, H(n) = 1 + H(ceiling(n/2)) の再帰の解 H(n) = log n を満たし(演習8.1を参照)、可能な最小の高さになる。
 ボトムアップ法でも最小高さの木が得られる理由は別の問題として残しておく。
 
 ここで問題を少し変えてみよう。
@@ -752,10 +752,14 @@ We can rewrite (8.1) by arguing
 
 Hence mct = foldrn gstep Leaf, where
 
+mct = foldrn gstep Leaf なので、ここでは
+
   gstep :: Nat -> Tree Nat -> Tree Nat
   gstep x = rollup . add x . spine
 
 where add is defined by
+
+add は次のように定義される
 
   add x ts = Leaf x : join x ts
   join x [u] = [u]
@@ -769,7 +773,11 @@ where add is defined by
 
 However, instead of computing spines at each step and then rolling up the spine again,
 we can roll up the forest at the end of the computation.
-What is wanted for  this step are functions hstep and g for which
+What is wanted for this step are functions hstep and g for which
+
+しかし、それぞれの段階で spine を計算しつつ spine を '巻き上げる' 代わりに、
+計算の最後に forest を '巻き上げる' ようにできます。
+この方法では次のような関数 hstep と g が要求されます
 
   foldrn gstep Leaf = rollup . foldrn hstep g
 
