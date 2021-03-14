@@ -281,7 +281,7 @@ rollup [t1, t2, t3, t4] = Node (Node (Node t1 t2) t3) t4
 
 The converse to rollup is the function spine, defined by
 
-rollup の逆は spine 関数で, 次のように定義される
+rollup の逆は spine 関数で、次のように定義される
 
 > spine :: Tree a -> [Tree a]
 > spine (Leaf x)   = [Leaf x]
@@ -335,10 +335,10 @@ Let us now return to the first definition of `mktrees`, the one expressed direct
 To fuse the two component functions in the definition of `mct` we can appeal to the fusion law of `foldrn`.
 The context-sensitive version of this law  states that
 
-木を生成する順番が違というだけでも, mktreesの2つのバージョンは同じ機能ではない。
+木を生成する順番が違というだけでも、mktreesの2つのバージョンは同じ機能ではない。
 spineとrollupについては後ほど説明する。
 
-ここで, `foldrn` のインスタンスとして直接表現された, 最初の `mktrees` の定義に戻ろう。
+ここで、`foldrn` のインスタンスとして直接表現された、最初の `mktrees` の定義に戻ろう。
 mct の定義を構成する2つの関数を融合させるために `foldrn` の融合法則を利用することができる。
 この法則の文脈依存版は次のようになる
 
@@ -364,7 +364,7 @@ Leaf x = MinWith cost [Leaf x] なので g2 = Leaf を得る。
 
 As we saw at the end of the previous chapter, this condition is satisfied if the monotonicity condition
 
-前の章の最後で見たように, この条件は
+前の章の最後で見たように、この条件は
 
   cost t ≤ cost t' cost (gstep x t) ≤ cost (gstep x t)
 
@@ -372,7 +372,7 @@ holds for all trees t and t' in mktrees xs.
 However, no such function gstep exists to satisfy the monotonicity condition. Consider the two trees t1 and t2:
 
 mktrees xs 内の任意の木 t と t' に対して単調性が成り立つときに満たされます。
-しかし, 単調性を満たすそのような関数 gstep は存在しません。
+しかし、単調性を満たすそのような関数 gstep は存在しません。
 木 t1 と t2 を考えてみます。
 
 
@@ -438,8 +438,8 @@ The subtrees of each tree have been labelled with their costs, so both t1 and t2
 However, the monotonicity condition
 
 (これらは) fringe [5,6,7,9] から作られる 5つの木だ。
-それぞれの木の部分木はそのコストのラベルが付いているので, t1 と t2 はどちらも考えられる最小のコスト 10 を持つ。
-しかし, 単調性の条件は
+それぞれの木の部分木はそのコストのラベルが付いているので、t1 と t2 はどちらも考えられる最小のコスト 10 を持つ。
+しかし、単調性の条件は
 
 cost t1 ≤ cost t2 ==> cost (gstep x t1) ≤ cost (gstep x t2)
 
@@ -451,7 +451,7 @@ Once again we appear to be stuck, even  with a refinement version of fusion.
 
 どのような gstep でも果たされない。
 たとえば x = 8 を取るとする。
-8 を t1 に加えるのに, 考えうる最良の方法から,最小のコスト 11 の木を得ます。さらに 8 を t2 に加える最良の方法からはコスト 10 の木を得る。
+8 を t1 に加えるのに、考えうる最良の方法から、最小のコスト 11 の木を得ます。さらに 8 を t2 に加える最良の方法からはコスト 10 の木を得る。
 よって融合条件を保持する関数 gstep を定義することができる方法はない。
 
 The only way out of the wood is to change the cost function, and once again lexical ordering comes to the rescue.
@@ -470,9 +470,9 @@ The costs of the trees along the left spine are accumulated from left to right b
 For example, spine t2 has tree costs [5,6,7,9] and accumulation gives the list [5,7,8,10], which, when reversed, gives the lexical cost of t2.
 Minimising lcost also minimises cost (why?), so we can revise the second fusion condition to read
 
-左の spine に沿った木のコストは scanl1 op によって左から右に累積され, 反転される。
-たとえば, spine t2 は木のコスト [5,6,7,9] を持ち累積はリスト [5,7,8,10 ] で, 反転すると t2 の 字句順コストを与える。
-lcost を最小にすると cost も最小になり(なぜでしょう?), 第二の融合条件を次のように修正でる
+左の spine に沿った木のコストは scanl1 op によって左から右に累積され、反転される。
+たとえば、spine t2 は木のコスト [5,6,7,9] を持ち累積はリスト [5,7,8,10 ] で, 反転すると t2 の 字句順コストを与える。
+lcost を最小にすると cost も最小になり(なぜでしょう?)、第二の融合条件を次のように修正でる
 
   gstep x (MinWith lcost (mktrees xs))
     <-- MinWith lcost (concatMap (extend x) (mktrees xs))
@@ -493,7 +493,7 @@ To give a constructive definition of gstep and to prove that monotonicity holds,
 The tree on the left is the result of rolling up the forest [t1,t2,...,tn] into a single tree.
 The tree on the right is obtained by adding x as a new leaf after rolling up the first j elements of the forest.
 
-gstep の構成的な定義を与え, 単調性が保たれることを示すために, 図8.1 の t1 が葉となっているような, 2つの木を考えよう。
+gstep の構成的な定義を与え、単調性が保たれることを示すために、図8.1 の t1 が葉となっているような、2つの木を考えよう。
 左側の木は [t1,t2,...,tn] を一つの木へと巻き上げた結果だ。
 {- p.183 -}
 右側の木は始めの j 要素を forest へと巻き上げたあとに x を新らたな葉として加えることで得られる。
@@ -526,7 +526,7 @@ gstep の構成的な定義を与え, 単調性が保たれることを示すた
 
 The trees are labelled with cost information, so
 
-木にはコストの情報のラベルが付いている。なので, 2 ≤ k ≤ n に対して次が成り立つ。
+木にはコストの情報のラベルが付いている。なので、2 ≤ k ≤ n に対して次が成り立つ。
 
   c1 = cost t1
   c{k} = 1 + (c{k-1} `max` cost t{k})
@@ -534,8 +534,8 @@ The trees are labelled with cost information, so
 In particular, [c1, c2,...,cn] is strictly increasing.
 A similar definition holds for the costs on the right:
 
-とくに, [c1, c2,...cn] は厳密に増加します。
-似たような定義が右の木のコストについて, j+1 ≤ k ≤ n 対して成り立つ。
+とくに、[c1, c2,...cn] は厳密に増加します。
+似たような定義が右の木のコストについて、j+1 ≤ k ≤ n 対して成り立つ。
 
   c'j = 1+ (x `max` c{j})
   c'k = 1+ (c k1 `max` cost t{k})
@@ -543,15 +543,15 @@ A similar definition holds for the costs on the right:
 for j+1 ≤ k ≤ n.
 In particular, since adding a new leaf cannot reduce costs, we have c{k} ≤ c'{k} for j ≤ k ≤ n.
 
-とくに, 新たな葉を加えてもコストを減らすことはできないので, j ≤ k ≤ n に対して c{k} ≤ c'{k} だ。
+とくに、新たな葉を加えてもコストを減らすことはできないので、j ≤ k ≤ n に対して c{k} ≤ c'{k} だ。
 
 
 The aim is to define gstep by choosing j to minimise [c'n, c'{n-1},...,c'j, x].
 For example, consider the five trees [t1,t2,...,t5] with costs [5,2,4,9,6].
 Then
 
-意図としては,  [c'{n}, c'{n-1},...,c'{j}, x] を最小にするように j を選ぶことで gstep を定義することだ。
-たとえば, 5つの木 [t1,t2,...,t5] を考えてみよう
+意図としては、 [c'{n}, c'{n-1},...,c'{j}, x] を最小にするように j を選ぶことで gstep を定義することだ。
+たとえば、5つの木 [t1,t2,...,t5] を考えてみよう
 
   [c1,c2,...,c5] = [5,6,7,10,11]
 
@@ -561,7 +561,7 @@ Here they are, with costs on the left and accumulated costs on the right:
 
 x = 8 としよう。
 x を forest に加えるのに 5通りの方法がありえる。つまりは 1 ≤ j ≤ 5 に対する j まで巻き上げだ。
-ここで, コストは左, 累積したコストは右となる:
+ここで、コストは左、累積したコストは右となる:
 
 
   [8,5,2,4,9,6] --> [8,9,10,11,12,13]
@@ -576,7 +576,7 @@ lcost を最小にする forest は 3番目のものだ。その字句順コス�
 
 We claim that the best choice of j is the smallest value in the range 1 ≤ j < n, if it  exists, such that
 
-ここで, 最も良い j の選択は範囲 1 ≤ j < n において次のような最小の値であると主張しよう
+ここで、最も良い j の選択は範囲 1 ≤ j < n において次のような最小の値であると主張しよう
 
   1+(x `max` c{j}) < c{j+1}   (8.1)
 
@@ -606,21 +606,21 @@ If no such j exists, then choose j = n. For example, with
 
 and x = 8, the smallest j satisfying (8.1) is j = 3, with the result
 
-で, x = 8 なら, (8.1) を満たす最小の j は j = 3 で, 結果は次のようになる。
+で、x = 8 なら, (8.1) を満たす最小の j は j = 3 で、結果は次のようになる。
 
   [x,1+(x `max` c3),c4,c5] = [8,9,10,11]
 
 On the other hand, with x = 9 we have j = 5, with the result
 
-一方, x = 9 なら j = 5 で, 結果は次のようになる。
+一方、x = 9 なら j = 5 で、結果は次のようになる。
 
   [x,1+ (x `max` c5)] = [9,12]
 
 To prove (8.1), suppose the claim holds for both j and k, where 1 ≤ j < k < n.
 Then, setting c'{j} = 1+(x `max` c{j}) and c'{k} = 1 + (x `max` c{k}), the two sequences
 
-(8.1) を証明するために, 1 ≤ j < k < n において j と k が両方とも主張を満たすことを仮定する。
-c'{j} = 1+(x `max` c{j}) ,  c'{k} = 1 + (x `max` c{k}) とすると
+(8.1) を証明するために、1 ≤ j < k < n において j と k が両方とも主張を満たすことを仮定する。
+c'{j} = 1+(x `max` c{j}) , c'{k} = 1 + (x `max` c{k}) とすると
 
   as = [x,c'{j},c{j+1},...,c{k-1},c{k},c{k+1},...,c{n}]
   bs = [x, c'{k},c{k+1},...,c{n}]
@@ -629,11 +629,11 @@ are such that `reverse as` < `reverse bs` because c{k} < c'{k}.
 Hence, the smaller the value of j, the lower is the cost.
 
 では `reverse as` < `reverse bs` だ。なぜなら c{k} < c'{k} だからである。
-よって, より小さい j の値, より小さいものがコストとなる。
+よって、より小さい j の値、より小さいものがコストとなる。
 
 To show that gstep x is monotonic with respect to lcost, suppose
 
-`lcost` については `gstep x` が単調であることを示すには, 次を仮定する
+`lcost` については `gstep x` が単調であることを示すには、次を仮定する
 
   lcost t1 = [c{n},c{n-1},...,c1]
   lcost t2 = [d{m},d{m-1},...,d1]
@@ -643,8 +643,8 @@ If these costs are equal, then so are the costs of adding a new leaf to either t
 Otherwise, if lcost t1 < lcost t2 and we remove the common prefix, say one of length k, then we are left with two trees t'1 and t'2 with
 
 ここで lcost t1 ≤ lcost t2 だ。
-これらのコストが等しいなら, 新たな葉をどちらかの木に加える。
-そうでなく, lcost t1 < lcost t2 なら共通の接頭辞を削除し, (この長さを k とする) 2つの木 t'1 と t'2 が残る。
+これらのコストが等しいなら、新たな葉をどちらかの木に加える。
+そうでなく、lcost t1 < lcost t2 なら共通の接頭辞を削除し、(この長さを k とする) 2つの木 t'1 と t'2 が残る。
 
   lcost t'1 = [c{p},...,c1]
   lcost t'2 = [d{q},...,d1]
@@ -665,7 +665,7 @@ Firstly, suppose (8.1) holds for t'1 and j < p. Then
 
 But c{p} < d{q}, and since `gstep x t'2` can only increase the cost of t'2, we have in this case that
 
-しかし c{p} < {q} なので, `gstep x t'2` ができるのは t'2 コストを増やすことだけで, この場合は次のようになる
+しかし c{p} < {q} なので、`gstep x t'2` ができるのは t'2 コストを増やすことだけで、この場合は次のようになる
 
   lcost (gstep x t'1) < lcost t'2 ≤ lcost (gstep x t'2)
 
@@ -685,7 +685,7 @@ Now, either 1+ (x `max` c{p}) < d{q}, in which case
 or 1+(x `max` c{p}) ≥ d{q}, in which case x ≥ d{q} - 1 and 1+(x `max` d{q-1}) ≥ d{q}.
 That means that (8.1) does not hold for t'2 either, and so we have
 
-あるいは 1+(x `max` c{p}) ≥ d{q} の場合, x ≥ d{q} - 1 かつ 1+(x `max` d{q-1}) ≥ d{q} である。
+あるいは 1+(x `max` c{p}) ≥ d{q} の場合、x ≥ d{q} - 1 かつ 1+(x `max` d{q-1}) ≥ d{q} である。
 この意味するところは (8.1) が t'2 についても成り立たないということだ。
 
 {-
