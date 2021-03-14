@@ -353,7 +353,7 @@ f2 x (M (foldrn f1 g1 xs)) <- M (f1 x (foldrn f1 g1 xs))
 
 For our problem, M = MinWith cost, f1 = concatMap extend, and g1 = wrap . leaf.
 Since Leaf x = MinWith cost [Leaf x], we can take g2 = Leaf.
-For the second fusion  condition we have to find a function, gstep say, so that
+For the second fusion condition we have to find a function, gstep say, so that
 
 我々の問題では, M = MinWith cost, f1 = concatMap extend, g1 = wrap . Leaf だ。
 Leaf x = MinWith cost [Leaf x] なので g2 = Leaf を得る。
@@ -686,8 +686,6 @@ or 1+(x `max` c{p}) ≥ d{q}, in which case x ≥ d{q} - 1 and 1+(x `max` d{q-1}
 That means that (8.1) does not hold for t'2 either, and so we have
 
 あるいは 1+(x `max` c{p}) ≥ d{q} の場合、x ≥ d{q} - 1 かつ 1+(x `max` d{q-1}) ≥ d{q} である。
-この意味するところは (8.1) が t'2 についても成り立たないということだ。
-
 {-
     x ≥ d{q} - 1 から 1 + (x `max` d{q-1}) ≥ d{q} を示す
 
@@ -708,6 +706,7 @@ That means that (8.1) does not hold for t'2 either, and so we have
       ⟺ {- 両辺 +1 -}
     1 + (x `max` d{q-1}) ≥ d{q}
 -}
+この意味するところは (8.1) が t'2 についても成り立たないということだ。
 
 {- p.185 -}
 
@@ -776,8 +775,8 @@ we can roll up the forest at the end of the computation.
 What is wanted for this step are functions hstep and g for which
 
 しかし、それぞれの段階で spine を計算しつつ spine を '巻き上げる' 代わりに、
-計算の最後に forest を '巻き上げる' ようにできます。
-この方法では次のような関数 hstep と g が要求されます
+計算の最後に forest を '巻き上げる' ようにできる。
+この方法では次のような関数 hstep と g が要求される
 
   foldrn gstep Leaf = rollup . foldrn hstep g
 
@@ -785,13 +784,37 @@ We can discover hstep and g by appealing to the fusion law for foldrn.
 Notice that here we are applying the fusion law for foldrn in the anti-fusion,
 or fission direction, splitting a fold into two parts.
 
+foldrn の融合法則を利用することで hstep と g を見つけることができる。
+foldrn の融合法則を融合しない、分解する方向に利用し、fold を 2つの部分に分けることに注意する。
+
 Firstly, we require rollup . g = Leaf.
 Since rollup [Leaf x] = Leaf x, we can define g by g = wrap . Leaf.
 Secondly, we want
 
+第一に、 rollup . g = Leaf である必要がある。
+{-
+    foldrn gstep Leaf [x] = rollup . foldrn hstep g [x]
+
+    foldrn の定義から
+      左辺  Leaf x
+      右辺  rollup (g x)
+ -}
+rollup [Leaf x] = Leaf x なので、g を g = wrap . Leaf と定義できる。
+第二に、次のものが
+
   rollup (hstep x ts) = gstep x (rollup ts)
 
+{-
+    foldrn の融合法則を適用するのに必要な条件の cons の場合。
+    foldrn f2 g2 xs = h (foldrn f1 g1 xs) の融合が成立するには
+    f2 x (h y) = h (f1 x y)
+      y <- ts, f2 <- gstep, h <- rollup, f1 <- hstep
+ -}
+
 for all x and all ts of the form ts = foldrn hstep g xs. Now,
+
+任意の x と ts = foldrn hstep g xs の形をしている任意の ts について要求される。
+ところで、
 
     gstep x (rollup ts)
   = {definition of gstep}
@@ -799,9 +822,15 @@ for all x and all ts of the form ts = foldrn hstep g xs. Now,
   = {provided the first element of ts is a leaf}
     rollup (add x ts)
 
-Hence we can take hstep = add, provided the first element of ts is a leaf. But  ts = foldrn add (wrap . Leaf) xs for some xs and it is immediate from the definition  of add that the first element of ts is indeed a leaf.
+Hence we can take `hstep = add`, provided the first element of ts is a leaf.
+But `ts = foldrn add (wrap . Leaf) xs` for some xs and it is immediate from the definition of add that the first element of ts is indeed a leaf.
 
-We now have mct = rollup  foldrn add (wrap . Leaf). As a final step, repeated  evaluations of cost can be eliminated by pairing each tree in the forest with its cost.  That leads to the final algorithm
+よって、 ts の最初の要素が leaf であるという条件下で hstep = add を取ることができる。
+しかし、 ある xs に対して ts = foldrn add (wrap . Leaf) xs だと、 add の定義からただちに ts の最初の要素が実際に leaf となる。
+
+We now have mct = rollup . foldrn add (wrap . Leaf).
+As a final step, repeated  evaluations of cost can be eliminated by pairing each tree in the forest with its cost.
+That leads to the final algorithm
 
 {- p.186 -}
 
