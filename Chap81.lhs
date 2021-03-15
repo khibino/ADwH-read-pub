@@ -859,7 +859,7 @@ The functions leaf and node are the smart constructors
 
 For example, the greedy algorithm applied to the list [5,3,1,4,2] produces the forests
 
-たとえば、貪欲アルゴリズムがリスト [5,3,1,4,2] に適用されると、次の forest を作る
+たとえば、貪欲アルゴリズムがリスト [5,3,1,4,2] に適用されると、次の forest を構築する
 
   [Leaf 2]
   [Leaf 4,Leaf 2]
@@ -909,13 +909,17 @@ calls of join, establishing the induction.
 Hence the algorithm takes linear time.
 
 join の呼び出しを含み、帰納法が成立する。
-このように、このアルゴリズムは線形時時間となる。
+このように、このアルゴリズムは線形時時間を消費する。
 
 Before leaving the problem of building a minimum-cost tree, we make one final remark.
 Observe that, when the input is a list consisting entirely of zeros, building  a minimum-cost tree means building a minimum-height tree.
-It follows that the  greedy algorithm, with minor changes, also works when the cost is the height of the  tree.
+It follows that the  greedy algorithm, with minor changes, also works when the cost is the height of the tree.
 The changes are left as an exercise.
 
+最小コスト木のこの問題から離れるまえに、最後の指摘をしておこう。
+入力が全て 0 からなるリストの場合、最小コスト木は最小高さ木を構築するということに気づくだろう。
+当然の結果として、コストが木の高さであるときにも、(少し変更した)貪欲アルゴリズムもうまく動作する。
+この変更したものは演習として残しておく。
 
 ------
 
