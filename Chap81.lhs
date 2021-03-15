@@ -260,13 +260,13 @@ The second inductive way of building a tree is to first build a forest, a list o
 
 ここでの wrap は値をシングルトンリストに変換する
 
-木を構成する 2つ目の帰納的な方法は最初に森(木のリスト)を構成することだ:
+木を構成する 2つ目の帰納的な方法は最初に forest(森) (木のリスト)を構成することだ:
 
 > type Forest a = [Tree a]
 
 A forest can be rolled up into a tree using
 
-森は木へ '巻き上げる' ことができる
+forest は木へ '巻き上げる' ことができる
 
 > rollup :: [Tree a] -> Tree a
 > rollup = foldl1 Node
@@ -289,10 +289,10 @@ rollup の逆は spine 関数で、次のように定義される
 
 This function returns the leftmost leaf of a tree,
 followed by a list of the right  subtrees along the path from the leftmost leaf of the tree to the root.
-Provided the  first tree in a forest ts is a leaf, we have
+Provided the first tree in a forest ts is a leaf, we have
 
 この関数は根からの最左の葉のパスに沿った右の部分木が続く最左の葉を返す。
-森 ts の最初の木は葉になる。
+forest ts の最初の木は葉になる。
 次が成立する
 
  spine (rollup ts) = ts
@@ -308,7 +308,7 @@ We can now define
 
 where mkforests builds the forests:
 
-ここで mkforests は森を構築する:
+ここで mkforests は forest を構築する:
 
 > mkforests :: [a] -> [Forest a]
 > mkforests = foldrn (concatMap . extendF) (wrap . wrap . Leaf)
@@ -321,7 +321,7 @@ It works by  rolling up some initial segment of the forest into a tree and addin
 For example,
 
 新しいバージョンの extend は以前のものよりも間違いなく単純だ。
-これは森の初期セグメントを木に巻き上げ新しい森の最初の木として新しいリーフを追加することで動作する。
+これは forest の初期セグメントを木に巻き上げ新しい forest の最初の木として新しいリーフを追加することで動作する。
 例えば以下のようになる
 
 extend x [t1, t2, t3] =  [Leaf x, t1, t2, t3]
@@ -494,7 +494,7 @@ The tree on the left is the result of rolling up the forest [t1,t2,...,tn] into 
 The tree on the right is obtained by adding x as a new leaf after rolling up the first j elements of the forest.
 
 gstep の構成的な定義を与え、単調性が保たれることを示すために、図8.1 の t1 が葉となっているような、2つの木を考えよう。
-左側の木は [t1,t2,...,tn] を一つの木へと巻き上げた結果だ。
+左側の木は forest [t1,t2,...,tn] を一つの木へと巻き上げた結果だ。
 {- p.183 -}
 右側の木は始めの j 要素を forest へと巻き上げたあとに x を新らたな葉として加えることで得られる。
 
