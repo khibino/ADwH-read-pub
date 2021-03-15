@@ -381,7 +381,7 @@ Hence t <- MCC ts and t <- MCC (gstep ts).
 ------
 
 > data Tree a = Leaf a | Node (Tree a) (Tree a)
->             deriving Show
+>             deriving (Eq, Show)
 
 > type Nat = Int
 

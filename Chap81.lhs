@@ -23,7 +23,7 @@ Throughout the chapter we fix attention on one type of tree, called a leaf-label
 この章ではリーフラベル付き木と呼ばれる木の一種に注目している:
 
 > data Tree a = Leaf a | Node (Tree a) (Tree a)
->             deriving Show
+>             deriving (Eq, Show)
 
 A leaf-labelled tree is therefore a binary tree with information stored only at the leaves.
 Essentially this species of tree, though with an additional constructor Null,  was described in Section 5.2 on Mergesort.
