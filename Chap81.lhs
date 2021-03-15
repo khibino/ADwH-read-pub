@@ -842,7 +842,7 @@ That leads to the final algorithm
 > mct :: [Nat] ->  Tree Nat
 > mct = rollup . map fst . foldrn hstep (wrap . leaf)
 > hstep :: Nat ->  [Pair] ->  [Pair]
-> hstep x ts = leaf x :join x ts
+> hstep x ts = leaf x : join x ts
 > join :: Nat -> [Pair] -> [Pair]
 > join x [u] =[u]
 > join x (u:v:ts) = if x `max` snd u < snd v
@@ -885,17 +885,31 @@ with cost 7.
 
 It remains to estimate the running time of mct.
 The critical measure is the number of calls to join.
-We can prove by induction that any sequence of hstep operations applied to a list of length n and returning a forest of length m involves at most `2n - m` calls to join.
+We can prove by induction that any sequence of hstep operations applied to a list of length n
+and returning a forest of length m involves at most `2n - m` calls to join.
 The base case, n = 1 and m = 1, is obvious.
-For the induction  step, note that join applied to a list of length m and returning a list of length m is  called m'-m times.
-Thus, using the induction step that hstep applied to a list of length n - 1 and returning a forest of length m involves at most 2(n-1)-m' calls of join,
-we have hstep applied to a list of length n, and returning a forest of length  m involves at most
+For the induction step, note that join applied to a list of length m' and returning a list of length m is called m'-m times.
+Thus, using the induction step that hstep applied to a list of length n - 1 and returning a forest of length m' involves at most 2(n-1)-m' calls of join,
+we have hstep applied to a list of length n, and returning a forest of length m involves at most
+
+残るのは mct の実行時間の見積もりだ。
+計測で重要なのは join の呼び出し回数だ。
+長さ n のリストに適用され、長さ m の forest を返すような hstep 操作の任意の列が
+最大でも 2n - m の join の呼び出しを含むことを帰納法によって証明できる。
+ベースケースは、あきらかに n = 1 かつ m = 1 だ。
+帰納法のステップでは、長さ m' のリストに適用され、長さ m のリストを返す join が m'-m 回呼び出されることに注意する。
+そして、長さ n - 1 のリストに適用され、長さ m' の forest を返す hstep が最大でも 2(n-1)-m' の join の呼び出しを含むという帰納法のステップを利用する。
+長さ n リストのリストに適用され、長さ m の forest を返す hstep は最大でも
 
 {- p.187 -}
 
   (2 (n - 1) - m')  + 1 + (m' - m) ≤ 2n - m
 
-calls of join, establishing the induction. Hence the algorithm takes linear time.
+calls of join, establishing the induction.
+Hence the algorithm takes linear time.
+
+join の呼び出しを含み、帰納法が成立する。
+このように、このアルゴリズムは線形時時間となる。
 
 Before leaving the problem of building a minimum-cost tree, we make one final remark.
 Observe that, when the input is a list consisting entirely of zeros, building  a minimum-cost tree means building a minimum-height tree.
