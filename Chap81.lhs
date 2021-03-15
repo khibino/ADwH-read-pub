@@ -829,8 +829,12 @@ But `ts = foldrn add (wrap . Leaf) xs` for some xs and it is immediate from the 
 しかし、 ある xs に対して ts = foldrn add (wrap . Leaf) xs だと、 add の定義からただちに ts の最初の要素が実際に leaf となる。
 
 We now have mct = rollup . foldrn add (wrap . Leaf).
-As a final step, repeated  evaluations of cost can be eliminated by pairing each tree in the forest with its cost.
+As a final step, repeated evaluations of cost can be eliminated by pairing each tree in the forest with its cost.
 That leads to the final algorithm
+
+今や mct = rollup . foldrn add (wrap . Leaf) とできる。
+最後の段階は、コストの繰り返し評価される部分が forest のそれぞれの木をペアリングすることで削除できることだ。
+最終的なアルゴリズムは次のようになる。
 
 {- p.186 -}
 
@@ -846,12 +850,16 @@ That leads to the final algorithm
 
 The functions leaf and node are the smart constructors
 
+関数 leaf と node はスマートコンストラクタだ。
+
 > leaf :: Nat -> Pair
 > leaf x = (Leaf x,x)
 > node :: Pair ->  Pair ->  Pair
 > node (u,c) (v,d) = (Node u v, 1 + c `max` d)
 
 For example, the greedy algorithm applied to the list [5,3,1,4,2] produces the forests
+
+たとえば、貪欲アルゴリズムがリスト [5,3,1,4,2] に適用されると、次の forest を作る
 
   [Leaf 2]
   [Leaf 4,Leaf 2]
@@ -860,6 +868,8 @@ For example, the greedy algorithm applied to the list [5,3,1,4,2] produces the f
   [Leaf 5,Node (Node (Leaf 3) (Leaf 1)) (Node (Leaf 4) (Leaf 2))]
 
 The final forest is then rolled up into the final tree
+
+最後の forest は最終的に次の木に巻き上げられ、
 
    /\
   5  \
@@ -870,6 +880,8 @@ The final forest is then rolled up into the final tree
  3  1  4  2
 
 with cost 7.
+
+コストは 7 だ。
 
 It remains to estimate the running time of mct.
 The critical measure is the number of calls to join.
