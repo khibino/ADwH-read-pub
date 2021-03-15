@@ -31,7 +31,7 @@ Essentially this species of tree, though with an additional constructor Null,  w
 The size of a leaf-labelled tree is the number of its leaves:
 
 リーフラベル付き木は葉のみに情報が格納されたバイナリ木である。
-基本的にこの種の木はコンストラクタ `Null` を追加していますがMergesort の項 5.2 で説明した。
+基本的にこの種の木はコンストラクタ `Null` を追加したものは Mergesort の項 5.2 で説明した。
 
 リーフラベル付き木のサイズはその葉の数となる:
 
@@ -47,14 +47,14 @@ The height of a tree is defined by
 > height (Node u v) = 1 + height u `max` height v
 
 
-With a leaf-labelled tree of size n and height h we have the relationship h < n ≤ 2^h, so h ≥ ceiling(log n).
+With a leaf-labelled tree of size n and height h we have the relationship h < n ≤ 2^h, so h ≥ ⌈log n⌉.
 
 {- p.178 -}
 
 The fringe of a tree is the list of leaf labels in left-to-right order:
 
 サイズがn で高さがh のリーフラベル付き木では
-h < n ≤ 2^h の関係が成り立つので h ≥ ceiling(log n) となる。
+h < n ≤ 2^h の関係が成り立つので h ≥ ⌈log n⌉ となる。
 
 木のフリンジとは左から右の順に葉のラベルを並べたリストである:
 
