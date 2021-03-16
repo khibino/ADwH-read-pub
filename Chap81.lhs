@@ -76,9 +76,9 @@ The first solution is the divide-andconquer, or top-down, method of Section 5.2:
 この問題を解くための2つの方法をすでに見てきましたがどちらも線形時間をかけて実装することができる。
 最初の解決法は第5.2節の分割統治、つまりトップダウンの方法である:
 
-> mktree :: [a] -> Tree a
-> mktree [x] = Leaf x
-> mktree xs  = Node (mktree ys) (mktree zs)
+> mktree0 :: [a] -> Tree a
+> mktree0 [x] = Leaf x
+> mktree0 xs  = Node (mktree0 ys) (mktree0 zs)
 >   where (ys,zs) = splitAt (length xs `div` 2) xs
 
 This definition does not take linear time, but it is easy to convert it into one that does.
@@ -89,8 +89,8 @@ Second, we have the bottom-up method, also  described in Section 5.2:
 第5.2節のMergesortの扱いで見たようにコツはタプリングを使って、半減を繰り返すのを避けることにある。
 第二にセクション5.2でも説明したボトムアップ方式がある。
 
-> mktree2 :: [a] -> Tree a
-> mktree2 = unwrap . until single (pairWith Node) . map Leaf
+> mktree :: [a] -> Tree a
+> mktree = unwrap . until single (pairWith Node) . map Leaf
 
 These two ways of building a tree lead to different trees but both have minimum  height.
 To show that this property holds for the first definition of mktree,
