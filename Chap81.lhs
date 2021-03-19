@@ -95,19 +95,23 @@ Second, we have the bottom-up method, also  described in Section 5.2:
 These two ways of building a tree lead to different trees but both have minimum  height.
 To show that this property holds for the first definition of mktree,
 let H(n)  denote the height of mktree for an input of length n.
-Then H satisfies the recurrence  H(1) = 0 and H(n) = 1+H(n/2) with solution H(n) = ceiling(log n) (see Exercise 8.1),  the minimum height possible.
+Then H satisfies the recurrence  H(1) = 0 and H(n) = 1 + H(⌈n/2⌉) with solution H(n) = ⌈log n⌉ (see Exercise 8.1),
+the minimum height possible.
 The reason why the bottom-up method also produces  a minimum-height tree is left as another exercise.
 
-Let us now change the problem slightly: given a nonempty list of natural numbers,  can we find a linear-time algorithm for building a tree with minimum cost and the  given list as fringe, where
+Let us now change the problem slightly: given a nonempty list of natural numbers,
+can we find a linear-time algorithm for building a tree with minimum cost and the given list as fringe, where
 
-これら2つの木の構築方法は異なる木になりますが両方とも最小の高さを持つ。
+これら2つの木の構築方法は異なる木を生成するが両方とも最小の高さを持つ。
 この性質がmktreeの最初の定義にも当てはまることを示すために長さnの入力に対するmktreeの高さをH(n)とする。
-そしてHは、H(1) = 0, H(n) = 1 + H(ceiling(n/2)) の再帰の解 H(n) = log n を満たし(演習8.1を参照)、可能な最小の高さになる。
+そしてHは、H(1) = 0, H(n) = 1 + H(⌈n/2⌉) の再帰の解 H(n) = ⌈log n⌉ を満たし(練習問題8.1を参照)、
+可能な最小の高さになる。
 ボトムアップ法でも最小高さの木が得られる理由は別の問題として残しておく。
 
 ここで問題を少し変えてみよう。
 空ではない自然数のリストが与えられるたとき,
-与えられたリストをフリンジとするような木を構築するための最小のコストの線形時間アルゴリズムを見つけることができるだろうか。
+与えられたリストをフリンジとするような木を構築するための
+最小のコストの線形時間アルゴリズムを見つけることができるだろうか。
 ここで,
 
 > cost :: Tree Nat -> Nat
@@ -156,7 +160,7 @@ The specification is phrased as one of refinement:
 最小コストの木をどのようにして構築するかは明らかではなく少なくとも効率的ではない。
 まずは仕様を決めてからアルゴリズムを計算する。
 
-仕様は改善されたもののうちの一つとして表現される:
+仕様は良かったもののうちの一つとして表現される:
 
  mct :: [Nat] -> Tree Nat
  mct xs <- MinWith cost (mktrees xs)
@@ -333,9 +337,9 @@ We will come back to spine and rollup later on.
 
 Let us now return to the first definition of `mktrees`, the one expressed directly as  an instance of `foldrn`.
 To fuse the two component functions in the definition of `mct` we can appeal to the fusion law of `foldrn`.
-The context-sensitive version of this law  states that
+The context-sensitive version of this law states that
 
-木を生成する順番が違というだけでも、mktreesの2つのバージョンは同じ機能ではない。
+木を生成する順番が違うというだけでも、mktreesの2つのバージョンは同じ機能ではない。
 spineとrollupについては後ほど説明する。
 
 ここで、`foldrn` のインスタンスとして直接表現された、最初の `mktrees` の定義に戻ろう。
@@ -351,13 +355,13 @@ f2 x (M (foldrn f1 g1 xs)) <- M (f1 x (foldrn f1 g1 xs))
 f2 x (M (foldrn f1 g1 xs)) <- M (f1 x (foldrn f1 g1 xs))
 が与えられる。
 
-For our problem, M = MinWith cost, f1 = concatMap extend, and g1 = wrap . leaf.
+For our problem, M = MinWith cost, f1 = concatMap . extend, and g1 = wrap . leaf.
 Since Leaf x = MinWith cost [Leaf x], we can take g2 = Leaf.
 For the second fusion condition we have to find a function, gstep say, so that
 
 我々の問題では, M = MinWith cost, f1 = concatMap extend, g1 = wrap . Leaf だ。
 Leaf x = MinWith cost [Leaf x] なので g2 = Leaf を得る。
-
+二番目の融合条件のための、次のような関数 (gstep と呼ぼう ) を見つける必要がある
 
   gstep x (MinWith cost (mktrees xs))
       <- MinWith cost (concatMap (extend x) (mktrees xs))
