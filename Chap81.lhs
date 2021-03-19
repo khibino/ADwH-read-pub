@@ -366,11 +366,12 @@ Leaf x = MinWith cost [Leaf x] なので g2 = Leaf を得る。
   gstep x (MinWith cost (mktrees xs))
       <- MinWith cost (concatMap (extend x) (mktrees xs))
 
-As we saw at the end of the previous chapter, this condition is satisfied if the monotonicity condition
+As we saw at the end of the previous chapter,
+this condition is satisfied if the monotonicity condition
 
 前の章の最後で見たように、この条件は
 
-  cost t ≤ cost t' cost (gstep x t) ≤ cost (gstep x t)
+  cost t ≤ cost t' cost (gstep x t) ≤ cost (gstep x t')
 
 holds for all trees t and t' in mktrees xs.
 However, no such function gstep exists to satisfy the monotonicity condition. Consider the two trees t1 and t2:
