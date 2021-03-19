@@ -1,25 +1,3 @@
-<!--
----
-marp: true
----
- -->
-
-<!-- theme: gaia -->
-<!-- template: invert -->
-<!-- size: 4:3 -->
-<!-- page_number: true -->
-<!-- paginate: true -->
-<!-- headingDivider: 3 -->
-<!--
-style: |
-    h1, h2, h3, h4, h5, header, footer {
-	    color: white;
-	}
-	section {
-	    background-color: black;
-        color: white;
-	}
- -->
 
 # 8章 Greedy algorithms on trees
 
