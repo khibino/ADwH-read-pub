@@ -241,7 +241,7 @@ digraph treeExample1 {
 
 ```haskell
 mct :: [Nat] -> Tree Nat
-mct xs <- MinWith cost (mktrees xs)
+mct xs ← MinWith cost (mktrees xs)
 ```
 
 mktrees でできる木のうち、コストが最小のもの
@@ -375,7 +375,7 @@ Forest 版の mktrees はこの後では利用しないが紹介だけされて�
 
 ```haskell
 mct :: [Nat] -> Tree Nat
-mct xs <- MinWith cost (mktrees xs)
+mct xs ← MinWith cost (mktrees xs)
 ```
 
 ```haskell
@@ -385,12 +385,12 @@ mktrees = foldrn (concatMap . extend) (wrap . Leaf)
 foldrn の refinement バージョンの融合法則と context-sensitive fusion condition
 
 ```haskell
-foldrn f2 g2 xs <- M (foldrn f1 g1 xs)
+foldrn f2 g2 xs ← M (foldrn f1 g1 xs)
 ```
 
 ```haskell
-g2 x <- M (g1 x) -- 一番目
-f2 x (M (foldrn f1 g1 xs)) <- M (f1 x (foldrn f1 g1 xs)) -- 二番目
+g2 x ← M (g1 x) -- 一番目
+f2 x (M (foldrn f1 g1 xs)) ← M (f1 x (foldrn f1 g1 xs)) -- 二番目
 ```
 
 今回の問題では
@@ -410,7 +410,7 @@ mktrees = foldrn (concatMap . extend) (wrap . Leaf)
 ```
 
 ```haskell
-f2 x (M (foldrn f1 g1 xs)) <- M (f1 x (foldrn f1 g1 xs))
+f2 x (M (foldrn f1 g1 xs)) ← M (f1 x (foldrn f1 g1 xs))
 ```
 
 ```haskell
@@ -423,23 +423,23 @@ context-sensitive fusion condition の二番目に当てはめると
 
 ```haskell
 gstep x (MinWith cost (mktrees xs))
-    <- MinWith cost (concatMap (extend x) (mktrees xs))
+    ← MinWith cost (concatMap (extend x) (mktrees xs))
 ```
+
+---
 
 ## mct / cost monotonicity
 
 
 ```haskell
 gstep x (MinWith cost (mktrees xs))
-    <- MinWith cost (concatMap (extend x) (mktrees xs))
+    ← MinWith cost (concatMap (extend x) (mktrees xs))
 ```
 
 これが成立するためには mktrees で構成される任意の t, t' について単調性が成立しなければならない
 (前の章の最後)
 
-```
-cost t ≤ cost t' cost (gstep x t) ≤ cost (gstep x t')
-```
+cost t ≤ cost t' ⇒ cost (gstep x t) ≤ cost (gstep x t')
 
 実はこの単調性を満たすような gstep は存在しない
 
@@ -475,27 +475,19 @@ t2
 
 t1, t2 は最小のコスト 10 を持つ
 
-t1 に 8 を加えると最小のコストは 11
-t2 に 8 を加えると最小のコストは 10
+- t1 に 8 を加えると最小のコストは 11
+- t2 に 8 を加えると最小のコストは 10
 
-```
-cost t1 ≤ cost t2 ==> cost (gstep x t1) ≤ cost (gstep x t2)
-```
+cost t1 ≤ cost t2 ⇒ cost (gstep x t1) ≤ cost (gstep x t2)
 
 が成立しない
 
 ---
 
-## mct / lcost monotonicity
+## mct / lexical cost
 
-```
-lcost ::Tree Nat -> [Nat]
-lcost = reverse . scanl1 op . map cost . spine
-  where op x y = 1 + (x `max` y)
-```
-
-t2 の lcost、 [10,8,7,5] は
-t1 の lcost、 [10,9,5] より小さい
+t2 の lexical cost、 [10,8,7,5] は
+t1 の lexical cost、 [10,9,5] より小さい
 
 t1
 ```
@@ -517,4 +509,111 @@ t2
     7   7
    / \
   5   6
+```
+
+---
+
+## mct / lcost monotonicity
+
+```
+lcost ::Tree Nat -> [Nat]
+lcost = reverse . scanl1 op . map cost . spine
+  where op x y = 1 + (x `max` y)
+```
+
+lcost を t2 に適用する例: spine のコスト ( [5,6,7,9] ) を累積 ( [5,7,8,10] ) して reverse
+
+lcost を最小にすると cost も最小になる (なぜ?)
+- lcost の先頭が cost になるからでは
+
+context-sensitive fusion condition の二番目を次にように修正する
+
+```haskell
+gstep x (MinWith lcost (mktrees xs))
+    ← MinWith lcost (concatMap (extend x) (mktrees xs))
+```
+
+lcost の場合は次を示すことができる
+
+lcost t1 ≤ lcost t2 ⇒ lcost (gstep x t1) ≤ lcost (gstep x t2)
+
+gstep を次のように定める
+
+```haskell
+gstep x ts ← MinWith lcost (extend x ts)
+```
+
+---
+
+## revised gstep monotonicity
+
+新たな gstep の定義では単調性が成立することを確認する
+
+p.183 上  図8.1
+
+左 - [t1,t2,...,tn] を rollup したもの
+```
+         c{n}
+        /   \
+     c{n-1} t{n}
+      /  \
+     /    \
+    c2   t{n-1}
+   /  \
+  t1  t2
+```
+
+右 - 始めの j 要素を rollup したあとに x を葉として加えたもの
+```
+        c'{n}
+        /  \
+       /    t{n}
+    c'{j+1}
+     /    \
+   c'{j}  t{j+1}
+   /  \
+  x    c{j}
+      /  \
+     /    t{j}
+    t1
+```
+
+## revised gstep monotonicity
+
+2 ≤ k ≤ n に対して次が成立し、$[c_1, c_2,...c_n]$ は厳密に増加する
+
+$c_1 =$ cost $t_1$
+
+$c_{k} = 1 + (c_{k-1}$ `max` cost $t_{k})$
+
+```
+         c{n}
+        /   \
+     c{n-1} t{n}
+      /  \
+     /    \
+    c2   t{n-1}
+   /  \
+  t1  t2
+```
+
+
+また、$j+1 ≤ k ≤ n$ に対して次が成立する
+
+$c'_j = 1 + (x$ `max` $c_{j})$
+
+$c'_k = 1 + (c'_{k-1}$ `max` cost $t_{k})$
+
+```
+        c'{n}
+        /  \
+       /    t{n}
+    c'{j+1}
+     /    \
+   c'{j}  t{j+1}
+   /  \
+  x    c{j}
+      /  \
+     /    t{j}
+    t1
 ```
