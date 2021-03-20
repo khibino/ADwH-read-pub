@@ -152,7 +152,8 @@ given a list  of trees together with their heights, can we find a linear-time al
 
 
 The tree on the left has cost 6, but the  tree on the right has minimum cost 5.
-It is not obvious how to construct a tree with minimum cost, at least not efficiently, and that is where a greedy algorithm enters  the stage.
+It is not obvious how to construct a tree with minimum cost, at least not efficiently,
+and that is where a greedy algorithm enters the stage.
 We start off with a specification and then calculate the algorithm.
 The specification is phrased as one of refinement:
 
@@ -476,7 +477,7 @@ For example, spine t2 has tree costs [5,6,7,9] and accumulation gives the list [
 Minimising lcost also minimises cost (why?), so we can revise the second fusion condition to read
 
 左の spine に沿った木のコストは scanl1 op によって左から右に累積され、反転される。
-たとえば、spine t2 は木のコスト [5,6,7,9] を持ち累積はリスト [5,7,8,10 ] で, 反転すると t2 の 字句順コストを与える。
+たとえば、spine t2 は木のコスト [5,6,7,9] を持ち累積はリスト [5,7,8,10] で, 反転すると t2 の 字句順コストを与える。
 lcost を最小にすると cost も最小になり(なぜでしょう?)、第二の融合条件を次のように修正でる
 
   gstep x (MinWith lcost (mktrees xs))
