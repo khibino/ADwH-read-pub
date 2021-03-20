@@ -540,11 +540,11 @@ The trees are labelled with cost information, so
 In particular, [c1, c2,...,cn] is strictly increasing.
 A similar definition holds for the costs on the right:
 
-とくに、[c1, c2,...cn] は厳密に増加します。
+とくに、[c1, c2,...cn] は厳密に増加する。
 似たような定義が右の木のコストについて、j+1 ≤ k ≤ n 対して成り立つ。
 
   c'j = 1+ (x `max` c{j})
-  c'k = 1+ (c k1 `max` cost t{k})
+  c'k = 1+ (c{k-1} `max` cost t{k})
 
 for j+1 ≤ k ≤ n.
 In particular, since adding a new leaf cannot reduce costs, we have c{k} ≤ c'{k} for j ≤ k ≤ n.
