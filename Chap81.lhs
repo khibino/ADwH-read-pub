@@ -643,7 +643,7 @@ Then, setting c'{j} = 1+(x `max` c{j}) and c'{k} = 1 + (x `max` c{k}), the two s
 c'{j} = 1+(x `max` c{j}) , c'{k} = 1 + (x `max` c{k}) とすると
 
   as = [x,c'{j},c{j+1},...,c{k-1},c{k},c{k+1},...,c{n}]
-  bs = [x, c'{k},c{k+1},...,c{n}]
+  bs = [x,c'{k},c{k+1},...,c{n}]
 
 are such that `reverse as` < `reverse bs` because c{k} < c'{k}.
 Hence, the smaller the value of j, the lower is the cost.
@@ -663,7 +663,7 @@ If these costs are equal, then so are the costs of adding a new leaf to either t
 Otherwise, if lcost t1 < lcost t2 and we remove the common prefix, say one of length k, then we are left with two trees t'1 and t'2 with
 
 ここで lcost t1 ≤ lcost t2 だ。
-これらのコストが等しいなら、新たな葉をどちらかの木に加える。
+これらのコストが等しいなら、新たな葉を両方の木に加えてもコストが等しい。
 そうでなく、lcost t1 < lcost t2 なら共通の接頭辞を削除し、(この長さを k とする) 2つの木 t'1 と t'2 が残る。
 
   lcost t'1 = [c{p},...,c1]
@@ -679,19 +679,19 @@ It is sufficient to show that
 
 Firstly, suppose (8.1) holds for t'1 and j < p. Then
 
-まず t'1 と j < p について (8.1) を仮定する。すると
+第一に t'1 と j < p について (8.1) を仮定する。すると
 
   lcost (gstep x t'1) = [c{p},...,c{j+1},1+(x `max` c{j}),x]
 
 But c{p} < d{q}, and since `gstep x t'2` can only increase the cost of t'2, we have in this case that
 
-しかし c{p} < {q} なので、`gstep x t'2` ができるのは t'2 コストを増やすことだけで、この場合は次のようになる
+しかし c{p} < d{q} なので、`gstep x t'2` ができるのは t'2 コストを増やすことだけで、この場合は次のようになる
 
   lcost (gstep x t'1) < lcost t'2 ≤ lcost (gstep x t'2)
 
 In the second case, suppose (8.1) does not hold for t'1. In this case
 
-二番目のケースは (8.1) が t'1 について成り立たないと仮定する。この場合は次のようになる
+第二のケースは (8.1) が t'1 について成り立たないと仮定する。この場合は次のようになる
 
   lcost (gstep x t'1) = [1+ (x `max` c{p}),x]
 
