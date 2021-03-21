@@ -89,7 +89,7 @@ mktree xs  = Node (mktree ys) (mktree zs)
 
 ---
 
-## Minimum-height trees / tupling
+## Minimum-height trees / bottom up
 
 ```haskell
 mktree :: [a] -> Tree a
@@ -484,6 +484,10 @@ cost t1 ≤ cost t2 ⇒ cost (gstep x t1) ≤ cost (gstep x t2)
 
 ---
 
+<!-- kokomade -->
+<!-- kokokara -->
+<!-- 4/4 は lexical cost の復習から -->
+
 ## mct / lexical cost
 
 t2 の lexical cost、 [10,8,7,5] は
@@ -551,9 +555,10 @@ gstep x ts ← MinWith lcost (extend x ts)
 
 p.183 上  図8.1
 
-左 - [t1,t2,...,tn] を rollup したもの
+左 - $[t_1,t_2,...,t_n]$ を rollup したもの
+
 ```
-         c{n}
+        c{n}
         /   \
      c{n-1} t{n}
       /  \
@@ -563,7 +568,7 @@ p.183 上  図8.1
   t1  t2
 ```
 
-右 - 始めの j 要素を rollup したあとに x を葉として加えたもの
+右 - 始めの $j$ 要素を rollup したあとに x を葉として加えたもの
 ```
         c'{n}
         /  \
@@ -578,13 +583,14 @@ p.183 上  図8.1
     t1
 ```
 
-## revised gstep monotonicity
+## monotonicity / before adding leaf
 
-2 ≤ k ≤ n に対して次が成立し、$[c_1, c_2,...c_n]$ は厳密に増加する
+$2 ≤ k ≤ n$ に対して次が成立し、$[c_1, c_2,...c_n]$ は厳密に増加する
 
 $c_1 =$ cost $t_1$
 
 $c_{k} = 1 + (c_{k-1}$ `max` cost $t_{k})$
+
 
 ```
          c{n}
@@ -597,6 +603,9 @@ $c_{k} = 1 + (c_{k-1}$ `max` cost $t_{k})$
   t1  t2
 ```
 
+---
+
+## monotonicity / after adding leaf
 
 また、$j+1 ≤ k ≤ n$ に対して次が成立する
 
@@ -617,3 +626,54 @@ $c'_k = 1 + (c'_{k-1}$ `max` cost $t_{k})$
      /    t{j}
     t1
 ```
+
+新たな葉を加えてもコストを減らすことはできないので、
+$j ≤ k ≤ n$ に対して $c_{k} ≤ c'_{k}$
+
+---
+
+## minimum lcost / example
+
+$[c'_{n}, c'_{n-1},...,c'_{j}, x]$ を最小にするように $j$ を選ぶ
+
+例:
+
+コスト $[5,2,4,9,6]$ を持つ 5つの木 $[t_1,t_2,...,t_5]$ を考えてみる
+
+$[c_1,c_2,...,c_5] = [5,6,7,10,11]$
+
+x = 8 を加えるのに 5通りの方法がある
+
+$[8,5,2,4,9,6] → [8,9,10,11,12,13]$
+
+$[8,6,4,9,6] → [8,9,10,11,12]$
+
+$[8,7,9,6] → [8,9,10,11]$
+
+$[8,10,6] → [8,11,12]$
+
+$[8,11] → [8,12]$
+
+3番目のものが lcost が最小で、その字句順コストは $[8,9,10,11]$ の reverse
+
+---
+
+## minimum lcost / adding leaf
+
+  1+(x `max` c{j}) < c{j+1}   (8.1)
+
+{-
+  (8.1) の導出
+
+  c{j+1} = 1 + (c{j} `max` cost t{j+1})  -- x を挿入する前の木
+    {- ここから cost t{j+1} < c{j+1} -}
+
+  x 挿入後に c'{j+1} が c{j+1} 以下になる(大きくならない)ようにするには
+
+  c'{j} = 1 + (x `max` c{j})
+  c'{j+1} = 1 + (c'{j} `max` cont t{j+1}) ≤ c{j+1}
+
+  (c'{j} `max` cont t{j+1}) < c{j+1}
+  c'{j} < c{j+1} かつ cont t{j+1} < c{j+1} -- こちらは上でもともと成立
+  1 + (x `max` c{j}) < c{j+1}
+ -}
