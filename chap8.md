@@ -74,7 +74,7 @@ fringe (Node u v) = fringe u ++ fringe v
 
 ---
 
-## Minimum-height trees / halving
+## Minimum-height trees / Halving
 
 与えられたリストを fringe とし最小の高さの木を作る問題を考える
 
@@ -89,7 +89,7 @@ mktree xs  = Node (mktree ys) (mktree zs)
 
 ---
 
-## Minimum-height trees / bottom up
+## Minimum-height trees / Bottom up
 
 ```haskell
 mktree :: [a] -> Tree a
@@ -259,7 +259,7 @@ extend x (Node u v) = [Node (Leaf x) (Node u v)] ++
 
 ---
 
-## mktrees / example
+## `mktrees` / example
 
 図 p.179 下
 
@@ -309,7 +309,7 @@ y   t1
 
 ---
 
-## mktrees / foldrn
+## `mktrees` / foldrn
 
 `MinWith` は空リストでは定義されていないので、
 入力を空でないリストに限定する
@@ -329,7 +329,7 @@ wrap x = [x]
 
 ---
 
-## mktrees / with Forest
+## `mktrees` / with Forest
 
 ```haskell
 type Forest a = [Tree a]
@@ -352,7 +352,7 @@ spine (rollup ts) = ts
 
 ---
 
-## mktrees / with Forest
+## `mktrees` / with Forest
 
 ```haskell
 mktrees :: [a] -> [Tree a]
@@ -371,7 +371,7 @@ Forest 版の mktrees はこの後では利用しないが紹介だけされて�
 
 ---
 
-## mct / foldrn fusion
+## `mct` / foldrn fusion
 
 ```haskell
 mct :: [Nat] -> Tree Nat
@@ -403,7 +403,7 @@ g1 = wrap . Leaf
 
 ---
 
-## mct / second fusion condition
+## `mct` / Second fusion condition
 
 ```haskell
 mktrees = foldrn (concatMap . extend) (wrap . Leaf)
@@ -428,7 +428,7 @@ gstep x (MinWith cost (mktrees xs))
 
 ---
 
-## mct / cost monotonicity
+## `mct` / Cost monotonicity
 
 
 ```haskell
@@ -445,7 +445,7 @@ cost t ≤ cost t' ⇒ cost (gstep x t) ≤ cost (gstep x t')
 
 ---
 
-## mct / not monotone for cost
+## `mct` / Not monotone for cost
 
 図 p.181 下 (t1, t2)
 
@@ -488,7 +488,7 @@ cost t1 ≤ cost t2 ⇒ cost (gstep x t1) ≤ cost (gstep x t2)
 <!-- kokokara -->
 <!-- 4/4 は lexical cost の復習から -->
 
-## mct / lexical cost
+## `mct` / Lexical cost
 
 t2 の lexical cost、 [10,8,7,5] は
 t1 の lexical cost、 [10,9,5] より小さい
@@ -517,7 +517,7 @@ t2
 
 ---
 
-## mct / lcost monotonicity
+## `mct` / `lcost` monotonicity
 
 ```
 lcost ::Tree Nat -> [Nat]
@@ -525,7 +525,9 @@ lcost = reverse . scanl1 op . map cost . spine
   where op x y = 1 + (x `max` y)
 ```
 
-lcost を t2 に適用する例: spine のコスト ( [5,6,7,9] ) を累積 ( [5,7,8,10] ) して reverse
+lcost を t2 に適用する例:
+
+spine のコスト ( [5,6,7,9] ) を累積 ( [5,7,8,10] ) して reverse
 
 lcost を最小にすると cost も最小になる (なぜ?)
 - lcost の先頭が cost になるからでは
@@ -549,9 +551,11 @@ gstep x ts ← MinWith lcost (extend x ts)
 
 ---
 
-## revised gstep monotonicity
+## Revised `gstep` construction
 
-新たな gstep の定義では単調性が成立することを確認する
+`gstep` の構成的な定義を考えつつ単調性が成立することを確認していく
+
+次の 2つの木を考える
 
 p.183 上  図8.1
 
@@ -583,7 +587,7 @@ p.183 上  図8.1
     t1
 ```
 
-## monotonicity / before adding leaf
+## Monotonicity / Before adding leaf
 
 $2 ≤ k ≤ n$ に対して次が成立し、$[c_1, c_2,...c_n]$ は厳密に増加する
 
@@ -605,7 +609,7 @@ $c_{k} = 1 + (c_{k-1}$ `max` cost $t_{k})$
 
 ---
 
-## monotonicity / after adding leaf
+## Monotonicity / After adding leaf
 
 また、$j+1 ≤ k ≤ n$ に対して次が成立する
 
@@ -632,7 +636,7 @@ $j ≤ k ≤ n$ に対して $c_{k} ≤ c'_{k}$
 
 ---
 
-## minimum lcost / example
+## Minimum lcost / Example
 
 $[c'_{n}, c'_{n-1},...,c'_{j}, x]$ を最小にするように $j$ を選ぶ
 
@@ -658,7 +662,7 @@ $[8,11] → [8,12]$
 
 ---
 
-## minimum lcost / adding leaf
+## Minimum lcost / Adding leaf
 
 $[c'_{n}, c'_{n-1},...,c'_{j}, x]$ を最小にするように $j$ を選ぶ
 
@@ -666,11 +670,13 @@ $[c'_{n}, c'_{n-1},...,c'_{j}, x]$ を最小にするように $j$ を選ぶ
 
 $1 + (x$ `max` $c_{j}) < c_{j+1}$   (8.1)
 
-テキストにはないが、この式が出てくる理由が非自明だったので次で導出する
+(テキストにはないが、この式が出てくる理由が非自明だったので次で論証する)
+
+このような $j$ が無いときは $j = n$ を選択
 
 ---
 
-## best j for minimum lcost
+## Condition to be $c'_{j+1} ≤ c_{j+1}$
 
 $1 + (x$ `max` $c_{j}) < c_{j+1}$ を導出する
 
@@ -692,13 +698,13 @@ $1 + (c'_{j}$ `max` cost $t_{j+1}) ≤ c_{j+1}$
 
 $(c'_{j}$ `max` cost $t_{j+1}) < c_{j+1}$
 
-⟹ { $p$ `max` $q < r ⟹ p < r ∧ q < r$ }
+⟹ { $p$ `max` $q < r ⟹ p < r ⋀ q < r$ }
 
-$c'_{j} < c_{j+1}$ $∧$ cost $t_{j+1} < c_{j+1}$ -- 右側の成立は後述
+$c'_{j} < c_{j+1}$ $⋀$ cost $t_{j+1} < c_{j+1}$ -- 右側の成立は後述
 
 ⟹ { $c'_{j}$ の定義 }
 
-$1 + (x$ `max` $c_{j}) < c_{j+1}$
+$1 + (x$ `max` $c_{j}) < c_{j+1}$ -- 示したかった主張
 
 x 追加前の木を考えると
 
@@ -711,3 +717,128 @@ $c_{j+1} > c_{j}$ `max` cost $t_{j+1}$
 ⟹ { $p > (q$ `max` $r) ⟹ p > r$ }
 
 cost $t_{j+1} < c_{j+1}$
+
+---
+
+## Minimum lcost / Example again
+
+$[c_1,c_2,c_3,c_4,c_5] = [5,6,7,10,11]$
+
+このケースに $x = 8$ を加えるとき
+(8.1) を満たす最小の $j$ は $j = 3$ で結果は次のようになる
+
+$[x,1+(x$ `max` $c_3),c_4,c_5] = [8,9,10,11]$
+
+同じのケースに代わりに $x = 9$ を加えるとき
+$j = 5$ で結果は次のようになる
+
+$[x,1 + (x$ `max` $c_5)] = [9,12]$
+
+---
+
+## Proof of smallest $j$ property
+
+(8.1) の最小の $j$ の主張を証明する
+
+$1 ≤ j < k < n$ において $j$ と $k$ が両方とも (8.1) を満たすことを仮定
+
+$c'{j} = 1+(x$ `max` $c{j})$ , $c'{k} = 1 + (x$ `max` $c{k})$ とすると
+
+$as = [x,c'_{j},c_{j+1},...,c_{k-1},c_{k},c_{k+1},...,c_{n}]$
+
+$bs = [x,c'_{k},c_{k+1},...,c_{n}]$
+
+において $c_{k} < c'_{k}$ から `reverse as` $<$ `reverse bs` となる。
+
+よって、より小さい $j$ の方が最小のコストとなる。
+
+---
+
+## Monotonicity of `gstep` on lcost / prereq
+
+`lcost` について `gstep x` が単調であることを示すために次を仮定する
+
+lcost $t_1 = [c_{n},c_{n-1},...,c_1]$
+
+lcost $t_2 = [d_{m},d_{m-1},...,d_1]$
+
+where lcost $t_1$ $≤$ lcost $t_2$
+
+lcost $t_1$ $=$ lcost $t_2$ のときには両方に新たな葉を加えてもコストが等しい
+
+lcost $t_1$ $<$ lcost $t_2$ なら共通の接頭辞(長さ$k$)を削除し、2つの木 $t'_1$ $t'_2$ が残る
+
+lcost $t'_1 = [c_{p},...,c_1]$
+
+lcost $t'_2 = [d_{q},...,d_1]$
+
+where $p = n-k ⋀ q = m-k ⋀ c_{p} < d_{q}$
+
+これで lcost (gstep $x$ $t'_1$) $≤$ lcost (gstep $x$ $t'_2$) を示す準備ができた
+
+---
+
+## Monotonicity of `gstep` on lcost
+
+第一に $t'_1$ と $j < p$ について (8.1) を仮定する。このとき
+
+lcost (gstep $x$ $t'_1$) $=$ $[c_{p},...,c_{j+1},1+(x$ `max` $c_{j}),x]$
+
+しかし $c_{p} < d_{q}$ なので、 gstep $x$ $t'_2$ ができるのは $t'_2$ コストを増やすことのみなので、次が成立する
+
+lcost (gstep $x$ $t'_1$) $<$ lcost $t'_2$ $≤$ lcost (gstep $x$ $t'_2$)
+
+第二に (8.1) が $t'_1$ について成り立たないと仮定する。このとき
+
+lcost (gstep $x$ $t'_1$) $=$ $[1 + (x$ `max` $c_{p}),x]$
+
+よって、次の場合のいずれか
+
+$1 + (x$ `max` $c_{p}) < d_{q}$ の場合
+
+lcost (gstep $x$ $t'_1$) $<$ lcost $t'_2$ $≤$ lcost (gstep $x$ $t'_2$)
+
+$1 + (x$ `max` $c_{p}) ≥ d_{q}$ の場合
+
+$x ≥ d_{q} - 1$  $⋀$ $1 + (x$ `max` $d_{q-1}) ≥ d_{q}$
+
+(テキストには無いが $1 + (x$ `max` $d_{q-1}) ≥ d_{q}$ の成立が非自明なので次で論証する)
+
+この意味するところは (8.1) が $t'_2$ についても成り立たないということ
+
+---
+
+## Monotonicity of `gstep` on lcost / Lemma
+
+$x ≥ d_{q} - 1$ から $1 + (x$ `max` $d_{q-1}) ≥ d_{q}$ を示す
+
+{ $d_{q}$ の定義 }
+$d_{q} = 1 + (d_{q-1}$ `max` cost $t_{q})$
+
+$x ≥ d_{q} - 1$
+
+⟺ { 元の式を残す, $d_{q}$ の定義 }
+
+$x ≥ d_{q} - 1$ $⋀$ $x$ $≥$ $d_{q-1}$ `max` cost $t_{q}$
+
+⟹ { $a$ `max` $b$ $≥$ $a$  |  $a$ <- $d_{q-1}$, $b$ <- cost $t_{q}$ }
+
+$x ≥ d_{q} - 1$ $⋀$ $x$ $≥$ $d_{q-1}$ `max` cost $t_{q}$ $≥$ $d_{q-1}$
+
+⟹ { 推移律 $≥$  }
+
+$x ≥ d_{q} - 1$ $⋀$ $x ≥ d_{q-1}$
+
+⟹ { $a ≥ b$ から $a$ $=$ $a$ `max` $b$ | $a$ <- $x$, $b$ <- $d_{q-1}$ }
+
+$x ≥ d_{q} - 1$ $⋀$ $x$ $=$ $x$ `max` $d_{q-1}$
+
+⟹ { rewrite | $x$ $=$ $x$ `max` $d_{q-1}$ }
+
+$x$ `max` $d_{q-1}$ $≥$ $d_{q} - 1$
+
+⟺ { 両辺 $+1$ }
+
+$1 + (x$ `max` $d_{q-1})$ $≥$ $d_{q}$
+
+---
