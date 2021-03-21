@@ -589,17 +589,31 @@ We claim that the best choice of j is the smallest value in the range 1 ≤ j < 
 {-
   (8.1) の導出
 
-  c{j+1} = 1 + (c{j} `max` cost t{j+1})  -- x を挿入する前の木
-    {- ここから cost t{j+1} < c{j+1} -}
-
-  x 挿入後に c'{j+1} が c{j+1} 以下になる(大きくならない)ようにするには
+  x 追加後の木を考えると
 
   c'{j} = 1 + (x `max` c{j})
-  c'{j+1} = 1 + (c'{j} `max` cont t{j+1}) ≤ c{j+1}
 
-  (c'{j} `max` cont t{j+1}) < c{j+1}
-  c'{j} < c{j+1} かつ cont t{j+1} < c{j+1} -- こちらは上でもともと成立
+  c'{j+1} = 1 + (c'{j} `max` cost t{j+1})
+
+  x 追加後に c'{j+1} が c{j+1} 以下になる(大きくならない)ようにするには
+
+  c'{j+1} ≤ c{j+1}
+    ⟹ {- c'{j+1} の定義 -}
+  c'{j+1} = 1 + (c'{j} `max` cost t{j+1}) ≤ c{j+1}
+    ⟹ {- 1 + p ≤ q ⟹ p < q -}
+  (c'{j} `max` cost t{j+1}) < c{j+1}
+    ⟹ {- p `max` q < r ⟹ p < r ⋀ q < r -}
+  c'{j} < c{j+1} ⋀ cost t{j+1} < c{j+1} -- 右側の成立は後述
+    ⟹ {- c'{j} の定義 -}
   1 + (x `max` c{j}) < c{j+1}
+
+  x 追加前の木を考えると
+
+  c{j+1} = 1 + (c{j} `max` cost t{j+1})
+    ⟹ {- p = 1 + q ⟹ p > q -}
+  c{j+1} > c{j} `max` cost t{j+1}
+    ⟹ {- p > q `max` r ⟹ p > r -}
+  c{j+1} > cost t{j+1}
  -}
 
 {- p.184 -}
