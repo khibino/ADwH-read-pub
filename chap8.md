@@ -698,7 +698,7 @@ $1 + (c'_{j}$ `max` cost $t_{j+1}) ≤ c_{j+1}$
 
 $(c'_{j}$ `max` cost $t_{j+1}) < c_{j+1}$
 
-⟹ { $p$ `max` $q < r ⟹ p < r ⋀ q < r$ }
+⟹ { $(p$ `max` $q) < r ⟹ p < r$ $⋀$ $q < r$ }
 
 $c'_{j} < c_{j+1}$ $⋀$ cost $t_{j+1} < c_{j+1}$ -- 右側の成立は後述
 
@@ -712,7 +712,7 @@ $c_{j+1} = 1 + (c_{j}$ `max` cost $t_{j+1})$
 
 ⟹ { $p = 1 + q ⟹ p > q$ }
 
-$c_{j+1} > c_{j}$ `max` cost $t_{j+1}$
+$c_{j+1} > (c_{j}$ `max` cost $t_{j+1})$
 
 ⟹ { $p > (q$ `max` $r) ⟹ p > r$ }
 
@@ -742,7 +742,7 @@ $[x,1 + (x$ `max` $c_5)] = [9,12]$
 
 $1 ≤ j < k < n$ において $j$ と $k$ が両方とも (8.1) を満たすことを仮定
 
-$c'{j} = 1+(x$ `max` $c{j})$ , $c'{k} = 1 + (x$ `max` $c{k})$ とすると
+$c'{j} = 1+(x$ `max` $c_{j})$ , $c'_{k} = 1 + (x$ `max` $c_{k})$ とすると
 
 $as = [x,c'_{j},c_{j+1},...,c_{k-1},c_{k},c_{k+1},...,c_{n}]$
 
@@ -806,6 +806,13 @@ $x ≥ d_{q} - 1$  $⋀$ $1 + (x$ `max` $d_{q-1}) ≥ d_{q}$
 
 この意味するところは (8.1) が $t'_2$ についても成り立たないということ
 
+
+lcost (gstep $x$ $t'_1$) $=$ $[1+ (x$ `max` $c_{p}),x]$ $≤$
+
+$[1+ (x$ `max` $d_{q}),x]$ $=$ lcost (gstep $x$ $t'_2$)
+
+これで単調性の証明が完了した
+
 ---
 
 ## Monotonicity of `gstep` on lcost / Lemma
@@ -819,26 +826,89 @@ $x ≥ d_{q} - 1$
 
 ⟺ { 元の式を残す, $d_{q}$ の定義 }
 
-$x ≥ d_{q} - 1$ $⋀$ $x$ $≥$ $d_{q-1}$ `max` cost $t_{q}$
+$x ≥ d_{q} - 1$ $⋀$ $x$ $≥$ $(d_{q-1}$ `max` cost $t_{q})$
 
-⟹ { $a$ `max` $b$ $≥$ $a$  |  $a$ <- $d_{q-1}$, $b$ <- cost $t_{q}$ }
+⟹ { $(a$ `max` $b)$ $≥$ $a$ | $a$ <- $d_{q-1}$, $b$ <- cost $t_{q}$ }
 
-$x ≥ d_{q} - 1$ $⋀$ $x$ $≥$ $d_{q-1}$ `max` cost $t_{q}$ $≥$ $d_{q-1}$
+$x ≥ d_{q} - 1$ $⋀$ $x$ $≥$ $(d_{q-1}$ `max` cost $t_{q})$ $≥$ $d_{q-1}$
 
 ⟹ { 推移律 $≥$  }
 
 $x ≥ d_{q} - 1$ $⋀$ $x ≥ d_{q-1}$
 
-⟹ { $a ≥ b$ から $a$ $=$ $a$ `max` $b$ | $a$ <- $x$, $b$ <- $d_{q-1}$ }
+⟹ { $a ≥ b$ から $a$ $=$ $(a$ `max` $b)$ | $a$ <- $x$, $b$ <- $d_{q-1}$ }
 
-$x ≥ d_{q} - 1$ $⋀$ $x$ $=$ $x$ `max` $d_{q-1}$
+$x ≥ d_{q} - 1$ $⋀$ $x$ $=$ $(x$ `max` $d_{q-1})$
 
-⟹ { rewrite | $x$ $=$ $x$ `max` $d_{q-1}$ }
+⟹ { rewrite | $x$ $=$ $(x$ `max` $d_{q-1})$ }
 
-$x$ `max` $d_{q-1}$ $≥$ $d_{q} - 1$
+$(x$ `max` $d_{q-1})$ $≥$ $d_{q} - 1$
 
 ⟺ { 両辺 $+1$ }
 
 $1 + (x$ `max` $d_{q-1})$ $≥$ $d_{q}$
+
+---
+
+## Condition of `gstep`
+
+`gstep` の実装が満たすべき条件
+
+(8.1) から
+
+$1 + (x$ `max` $c_{j})$ $<$ $c_{j+1}$ ⟺
+
+$1 + (x$ `max` $c_{j})$ $<$ $1+ (c_{j}$ `max` cost $t_{j+1})$ ⟺
+
+$(x$ `max` $c_{j})$ $<$ cost $t_{j+1}$
+
+この条件を満たすように `gstep` を与える
+
+```
+gstep :: Nat -> Tree Nat -> Tree Nat
+gstep x = rollup . add x . spine
+
+add x ts = Leaf x : join x ts
+join x [u] = [u]
+join x (u:v:ts) = if x `max` cost u < cost v
+                  then u:v:ts else join x (Node u v : ts)
+```
+
+( $(c_{j}$ `max` cost $t_{j+1})$ = cost $t_{j+1}$ が仮定されているが、成立が非自明だったので次で論証する)
+
+---
+
+## Condition of `gstep` / Lemma
+
+{ $(a$ `max` $b)$ $=$ $a$ $⋁$ $(a$ `max` $b)$ $=$ $b$
+| $a$ <- $c_{j}$, $b$ <- cost $t_{j+1}$ }
+
+$(c_{j}$ `max` cost $t_{j+1})$ $=$ cost $t_{j+1}$ $⋁$ $(c_{j}$ `max` cost $t_{j+1})$ $=$ $c_{j}$
+
+   $(c_{j}$ `max` cost $t_{j+1})$ $=$ $c_{j}$ が偽であることを示す
+
+{ (8.1) 書き換えの2行目 }
+
+$1 + (x$ `max` $c_{j})$ $<$ $1 + (c_{j}$ `max` cost $t_{j+1})$
+
+⟺ { 両辺 $- 1$ }
+
+$(x$ `max` $c_{j})$ $<$ $(c_{j}$ `max` cost $t_{j+1})$
+
+⟺ { rewrite | $(c_{j}$ `max` cost $t_{j+1})$ $=$ $c_{j}$ }
+
+$(x$ `max` $c_{j})$ < $c_{j}$
+
+⟺ { $b$ $≤$ $(a$ `max` $b)$ }
+
+$c_{j}$ $≤$ $x$ `max` $c_{j}$ $<$ $c_{j}$
+
+⟹ { $≤$ と $<$ の推移則 }
+
+$c_{j}$ $<$ $c_{j}$
+
+⟹ { $<$ の場合の枯渇 }
+
+$∅$ (False)
 
 ---
