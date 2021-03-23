@@ -748,26 +748,24 @@ We can rewrite (8.1) by arguing
   ⟺  (x `max` c{j}) < cost t{j+1}
 
 {-
-   c{j} `max` cost t{j+1} = c{j} が偽であることから
-   c{j} `max` cost t{j+1} = cost t{j+1} を示す
-
-   1 + (x `max` c{j}) < 1 + (c{j} `max` cost t{j+1}) ⋀ c{j} `max` cost t{j+1} = c{j}
-      ⟹ {- 両辺 - 1 -}
-   x `max` c{j} < c{j} `max` cost t{j+1} ⋀ c{j} `max` cost t{j+1} = c{j}
-      ⟹ {- rewrite - c{j} `max` cost t{j+1} = c{j} -}
-   x `max` c{j} < c{j}
-      ⟹ {- b ≤ a `max` b -}
-   c{j} ≤ x `max` c{j} < c{j}
-      ⟺
-   ∅ (False)
-
-   よって
-
+     { (a `max` b) = a ⋁ (a `max` b) = b }
    c{j} `max` cost t{j+1} = cost t{j+1} ⋁ c{j} `max` cost t{j+1} = c{j}
-      ⟹
-   c{j} `max` cost t{j+1} = cost t{j+1}
 
--}
+   c{j} `max` cost t{j+1} = c{j} が偽であることを示す
+
+          { (8.1) 書き換えの2行目 }
+   1 + (x `max` c{j}) < 1 + (c{j} `max` cost t{j+1})
+      ⟺ {- 両辺 - 1 -}
+   x `max` c{j} < c{j} `max` cost t{j+1}
+      ⟺ {- rewrite | c{j} `max` cost t{j+1} = c{j} -}
+   x `max` c{j} < c{j}
+      ⟺ {- b ≤ a `max` b -}
+   c{j} ≤ x `max` c{j} < c{j}
+      ⟹ { ≤ と < の推移則 }
+   c{j} < c{j}
+      ⟹
+   ∅ (False)
+ -}
 
 Hence mct = foldrn gstep Leaf, where
 
