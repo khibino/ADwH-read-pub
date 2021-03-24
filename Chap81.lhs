@@ -926,7 +926,7 @@ we have hstep applied to a list of length n, and returning a forest of length m 
 長さ n のリストに適用され、長さ m の forest を返すような hstep 操作の任意の列が
 最大でも 2n - m の join の呼び出しを含むことを帰納法によって証明できる。
 ベースケースは、あきらかに n = 1 かつ m = 1 だ。
-帰納法のステップでは、長さ m' のリストに適用され、長さ m のリストを返す join が m'-m 回呼び出されることに注意する。
+帰納法のステップに対して、長さ m' のリストに適用され、長さ m のリストを返す join が m'-m 回呼び出されることに注意する。
 そして、長さ n - 1 のリストに適用され、長さ m' の forest を返す hstep が最大でも 2(n-1)-m' の join の呼び出しを含むという帰納法のステップを利用する。
 長さ n リストのリストに適用され、長さ m の forest を返す hstep は最大でも
 
