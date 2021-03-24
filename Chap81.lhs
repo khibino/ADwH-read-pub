@@ -811,7 +811,7 @@ Secondly, we want
 
 第一に、 rollup . g = Leaf である必要がある。
 {-
-    foldrn gstep Leaf [x] = rollup . foldrn hstep g [x]
+    foldrn gstep Leaf [x] = rollup (foldrn hstep g [x])
 
     foldrn の定義から
       左辺  Leaf x
@@ -862,7 +862,7 @@ That leads to the final algorithm
 > hstep :: Nat ->  [Pair] ->  [Pair]
 > hstep x ts = leaf x : join x ts
 > join :: Nat -> [Pair] -> [Pair]
-> join x [u] =[u]
+> join x [u] = [u]
 > join x (u:v:ts) = if x `max` snd u < snd v
 >                     then u:v:ts else join x (node u v:ts)
 
@@ -885,9 +885,20 @@ For example, the greedy algorithm applied to the list [5,3,1,4,2] produces the f
   [Leaf 3,Leaf 1,Node (Leaf 4) (Leaf 2)]
   [Leaf 5,Node (Node (Leaf 3) (Leaf 1)) (Node (Leaf 4) (Leaf 2))]
 
+{-
+map fst $ wrap . leaf $ 2
+map fst $ hstep 4 $ wrap . leaf $ 2
+...
+map fst $ hstep 5 $ hstep 3 $ hstep 1 $ hstep 4 $ wrap . leaf $ 2
+
+map fst . foldrn hstep (wrap . leaf) $ [5,3,1,4,2]
+ -}
+
 The final forest is then rolled up into the final tree
 
 最後の forest は最終的に次の木に巻き上げられ、
+
+図 p.186 下
 
    /\
   5  \
