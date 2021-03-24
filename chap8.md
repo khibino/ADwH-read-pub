@@ -874,6 +874,8 @@ join x (u:v:ts) = if x `max` cost u < cost v
                   then u:v:ts else join x (Node u v : ts)
 ```
 
+join は x や後続の木のコストと同じくらいのコストになるまで木をまとめる
+
 ※ $(c_{j}$ `max` cost $t_{j+1})$ = cost $t_{j+1}$ が仮定されているが、成立が非自明だったので次で論証する
 
 ---
@@ -912,3 +914,117 @@ $c_{j}$ $<$ $c_{j}$
 $∅$ (False)
 
 ---
+
+## rollup / Fission condition
+
+それぞれの段階で rollup しているのを最後に一度だけにする
+
+```haskell
+foldrn gstep Leaf = rollup . foldrn hstep g
+```
+foldrn の融合法則を分解する方向に使う
+
+このような hstep と g を見つける
+
+```haskell
+foldrn gstep Leaf [x] = rollup (foldrn hstep g [x])
+-- 両辺を展開
+Leaf x = rollup (g x)
+-- ポイントフリー
+Leaf = rollup . g
+```
+rollup [Leaf x] = Leaf x なので g = wrap . Leaf とできる
+
+```haskell
+rollup (foldrn hstep g (x:xs)) = foldrn gstep Leaf (x:xs)
+-- 両辺を展開
+rollup (hstep x (foldrn hstep g xs)) = gstep x (foldrn gstep Leaf xs)
+-- 帰納法の仮定 rollup (foldrn hstep g xs) = foldrn gstep Leaf xs
+rollup (hstep x (foldrn hstep g xs)) = gstep x (rollup (foldrn hstep g xs))
+-- ts = foldrn hstep g xs とすると
+rollup (hstep x ts) = gstep x (rollup ts)
+```
+
+---
+
+## rollup / Fission
+
+任意の `x` と `ts` = foldrn hstep g xs の形をしている任意の `ts` について要求される
+
+```haskell
+-- ts = foldrn hstep g xs とすると
+rollup (hstep x ts) = gstep x (rollup ts)
+```
+
+右辺は、条件付きで次のように変換できる
+
+```haskell
+    gstep x (rollup ts)
+  = { gstep の定義 }
+    rollup (add x (spine (rollup ts)))
+  = { ts の最初の要素が葉なら }
+    rollup (add x ts)
+```
+
+( spine (rollup ts) = ts は以前に出てきたときに言及が無かったが、成立には条件が必要 )
+
+よって、 `ts` の最初の要素が葉であるという条件下で hstep = add を取れる
+
+xs に対して ts = foldrn add (wrap . Leaf) xs だと、add の定義から ts の最初の要素が葉になる
+
+```haskell
+add x ts = Leaf x : join x ts
+```
+
+mct を以下で定義できる
+```haskell
+mct = rollup . foldrn add (wrap . Leaf)
+```
+この融合法則による分解を終えた段階で、 lcost を考えなくともよくなっている
+
+---
+
+## Eliminate repeated evaluation of `cost`
+
+コストを繰り返し評価する部分を forest のそれぞれの木にペアで付加することで削除できる
+
+```haskell
+type Pair = (Tree Nat,Nat)
+mct :: [Nat] ->  Tree Nat
+mct = rollup . map fst . foldrn hstep (wrap . leaf)
+hstep :: Nat ->  [Pair] ->  [Pair]
+hstep x ts = leaf x : join x ts
+join :: Nat -> [Pair] -> [Pair]
+join x [u] = [u]
+join x (u:v:ts) = if x `max` snd u < snd v
+                  then u:v:ts else join x (node u v:ts)
+-- スマートコンストラクタ
+leaf :: Nat -> Pair
+leaf x = (Leaf x,x)
+node :: Pair ->  Pair ->  Pair
+node (u,c) (v,d) = (Node u v, 1 + c `max` d)
+```
+
+## Final version `mct` / example
+
+アルゴリズムをリスト `[5,3,1,4,2]` に適用すると次のような forest を生成する
+
+```haskell
+[Leaf 2]
+[Leaf 4,Leaf 2]
+[Leaf 1,Node (Leaf 4) (Leaf 2)]
+[Leaf 3,Leaf 1,Node (Leaf 4) (Leaf 2)]
+[Leaf 5,Node (Node (Leaf 3) (Leaf 1)) (Node (Leaf 4) (Leaf 2))]
+```
+この forest を `rollup` すると次の木になる
+
+図 p.186 下
+```
+   /\
+  5  \
+     /\
+    /  \
+   /    \
+  /\    /\
+ 3  1  4  2
+```
