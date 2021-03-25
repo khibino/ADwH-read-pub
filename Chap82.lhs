@@ -222,11 +222,11 @@ for all finite nonempty lists of trees ts.
 Problems of this form will arise in the  following chapter too,
 so let us pause for a little more theory on greedy algorithms.
 
-### Another generic greedy algorithm
+ ### Another generic greedy algorithm
 
 Suppose in this section that the list of candidates is given by a function
 
-  candidates:: State  [Candidate]
+  candidates:: State -> [Candidate]
 
 for some type State.
 For Huffman coding, states are lists of trees and candidates are trees:
@@ -332,7 +332,7 @@ This style of reasoning about greedy algorithms is very general.
 However, unlike  greedy algorithms derived by fusion,
 it gives no hint as to what form gstep might take.
 
-### Huffman coding continued
+ ### Huffman coding continued
 
 Returning to Huffman coding,
 in which candidates are trees,
@@ -377,6 +377,133 @@ Hence t <- MCC ts and t <- MCC (gstep ts).
 
 {- p.194 -}
 
+The same tree surgery can be used to show that the stronger greedy condition  holds by a direct argument.
+Suppose t <- MCC (gstep ts) but t is not a value in MCC ts.
+That means there exists a tree t' <- MCC ts with cost t' < cost t.
+We now get a contradiction by applying the surgical procedure to t'
+to produce another tree  t   MCC (gstep ts) with cost t = cost t'' ≤ cost t'.
+Here is the greedy algorithm we have derived:
+
+  huffman es = unwrap (until single gstep (map Leaf es))
+               where gstep (t1 :t2 :ts) = insert (Node t1 t2) ts
+
+However, simple as it is, the algorithm is not quite ready to leave the kitchen.
+There are two sources of inefficiency.
+Firstly, the function insert recomputes weights at  each step,
+an inefficiency that can easily be brushed aside by tupling.
+The more serious issue is that,
+while finding two trees of smallest weights is a constant-time operation,
+inserting the combined tree back into the forest can take linear time in  the worst case.
+That means the greedy algorithm takes quadratic time in the worst case.
+The final step is to show how this can be reduced to linear time.
+
+The key observation behind the linear-time algorithm is the fact that,
+in any  call of gstep, the argument to insert has a weight at least as large as any previous  argument.
+Suppose we combine two trees with weights w1 and w2 and, later on, two trees with weights w3 and w4.
+We have w1 ≤ w2 ≤ w3 ≤ w4, and it follows that w1+w2 ≤ w3+w4.
+This suggests maintaining the non-leaf trees as a simple  queue,
+whereby elements are added to the rear of the queue and removed only from  the front.
+Instead of maintaining a single list we therefore maintain two lists,
+the  first being a list of leaves and the second a queue of node trees.
+Since elements are  never added to the first list, but only removed from the front,
+the first list could  also be a queue.
+But a simple list suffices. We will call the first list a stack simply  to distinguish it from the second one.
+At each step, gstep selects two lightest trees from either the stack or the queue,
+combines them, and adds the result to the end of the queue.
+At the end of the algorithm the queue will contain a single tree, the greedy solution.
+Figure 8.2, which shows the weights only, gives an example of how the method works out.
+The method is viable only if the various queue operations take constant time.
+But we have already met symmetric lists in Chapter 3, which satisfy the requirements exactly.
+
+Here are the details. First we set up the type SQ of Stack-Queues:
+
+> type SQ a = (Stack a,Queue a)
+> type Stack a = [a]
+> type Queue a = SymList a
+
+Now we can define
+
+> huffman :: [Elem] -> Tree Elem
+> huffman = extractSQ . until singleSQ gstep . makeSQ . map leaf
+
+{- p.195 -}
+
+ Stack of weights     Queue of combined weights
+------------------------------------------------
+ 1, 2, 4, 4, 6, 9
+       4, 4, 6, 9     1 + 2
+          4, 6, 9     4 + (1 + 2)
+	        9     4 + (1 + 2), 4 + 6
+		      4 + 6, 9 + (4 + (1 + 2))
+		      (4 + 6) + (9 + (4 + (1 + 2)))
+
+Figure 8.2 Example of the stack and queue operations
+
+The component functions on the right-hand side are defined in terms of the type
+
+> type Pair = (Tree Elem,Weight)
+
+of pairs of trees and weights.
+First of all, the functions leaf and node (needed in the  definition of gstep)
+are smart constructors that install weight information correctly:
+
+> leaf :: Elem -> Pair
+> leaf (c,w) = (Leaf (c,w),w)
+> node :: Pair -> Pair -> Pair
+> node (t1,w1) (t2,w2) = (Node t1 t2,w1+w2)
+
+Next, the function makeSQ initialises a Stack-Queue:
+
+> makeSQ :: [Pair] -> SQ Pair
+> makeSQ xs = (xs,nilSL)
+
+Recall that the function nilSL returns an empty symmetric list.
+
+Next, the function singleSQ determines whether a Stack-Queue is a singleton,
+and extractSQ extracts the tree:
+
+> singleSQ :: SQ a -> Bool
+> singleSQ (xs,ys) = null xs && singleSL ys
+> extractSQ :: SQ Pair -> Tree Elem
+> extractSQ (xs,ys) = fst (headSL ys)
+
+The function singleSL, whose definition is left as an exercise,
+tests for whether a  symmetric list is a singleton.
+
+Finally, we define
+
+> gstep :: SQ Pair -> SQ Pair
+> gstep ps = add (node p1 p2) rs
+>            where (p1,qs) = extractMin ps
+>                  (p2,rs) = extractMin qs
+> add ::Pair -> SQ Pair -> SQ Pair
+> add y (xs, ys) = (xs,snocSL y ys)
+
+{- p.196 -}
+
+It remains to define extractMin for extracting a tree with minimum weight from a Stack-Queue:
+
+> extractMin :: SQ Pair -> (Pair,SQ Pair)
+> extractMin (xs,ys)
+>   | nullSL ys = (head xs,(tail xs, ys))
+>   | null xs = (headSL ys,(xs,tailSL ys))
+>   | snd x <= snd y = (x,(tail xs,ys))
+>   | otherwise = (y,(xs,tailSL ys))
+>   where x = head xs; y = headSL ys
+
+If both the stack and the queue are nonempty,
+then the tree with the smallest weight from either list is selected.
+If one of the stack and the queue is empty,
+the selection is made from the other component.
+
+The linear-time algorithm for Huffman coding depends on the assumption
+that the input is sorted into ascending order of weight.
+If this were not the case, then  O(n log n) steps have to be spent sorting.
+Strictly speaking, that means Huffman coding actually takes O(n log n) steps.
+There is an alternative implementation of the algorithm with this running time,
+and that is to use a priority queue.
+Priority queues  will be needed again, particularly in Part Six, so we will consider them now.
+
 
 ------
 
@@ -399,3 +526,50 @@ Hence t <- MCC ts and t <- MCC (gstep ts).
 > pairWith f [] = []
 > pairWith f [x] = [x]
 > pairWith f (x:y:xs) = f x y : pairWith f xs
+
+> type SymList a = ([a], [a])
+
+> nilSL :: SymList a
+> nilSL = ([],[])
+
+> nullSL :: SymList a -> Bool
+> nullSL ([],[]) = True
+> nullSL  _      = False
+
+> singleSL :: SymList a -> Bool
+> singleSL ([_],[]) = True
+> singleSL ([],[_]) = True
+> singleSL  _       = False
+
+> consSL :: a -> SymList a -> SymList a
+> consSL x (xs,ys) = if null ys then ([x],xs) else (x:xs,ys)
+
+> headSL :: SymList a -> a
+> headSL ([],ys) = case ys of
+>                    []   -> undefined
+>                    y:_  -> y
+> headSL (x:_,_) = x
+
+> tailSL :: SymList a -> SymList a
+> tailSL (xs,ys)
+>   | null xs    = if null ys then undefined else nilSL
+>   | single xs  = (reverse vs, us)
+>   | otherwise  = (tail xs, ys)
+>   where (us,vs) = splitAt (length ys `div` 2) ys
+
+> snocSL :: a -> SymList a -> SymList a
+> snocSL x (xs,ys) = if null xs then (ys,[x]) else (xs,x:ys)
+
+> initSL :: SymList a -> SymList a
+> initSL (xs,ys)
+>   | null ys    = if null xs then undefined else nilSL
+>   | single ys  = (us, reverse vs)
+>   | otherwise  = (xs, tail ys)
+>   where (us,vs) = splitAt (length xs `div` 2) xs
+
+> lastSL :: ([p], [p]) -> p
+> lastSL (xs,ys) = if null ys
+>                  then if null xs
+>                       then error "lastSL of empty list"
+>                       else head xs
+>                  else head ys
