@@ -3,25 +3,48 @@
 -----
 
 Our second example is Huffman coding trees.
-As older computer users know only too well, it is often necessary to store files of information as compactly as possible.
+As older computer users know only too well,
+it is often necessary to store files of information as compactly as possible.
 Suppose the information to be stored is a text consisting of a sequence of characters.
-Haskell uses Unicode internally for its Char data type, but the standard text I/O  functions assume that texts are sequences of 8-bit characters,
-so a text of n characters  contains 8n bits of information.
-Each character is represented by a fixed-length  code, so the characters of a text can be recovered by decoding each successive group  of eight bits.
+Haskell uses Unicode internally for its Char data type,
+but the standard text I/O  functions assume that texts are sequences of 8-bit characters,
+so a text of n characters contains 8n bits of information.
+Each character is represented by a fixed-length code,
+so the characters of a text can be recovered by decoding each successive group of eight bits.
 
-One idea for reducing the total number of bits required to code a text is to abandon  the notion of fixed-length codes,
-and seek instead a coding scheme based on the  relative frequency of occurrence of the characters in the text.
-The basic idea is to  take a sample piece of text, estimate the number of times each character appears,
-and choose short codes for the more frequent characters and longer codes for the  rarer ones.
+二番目の例は Huffman coding tree だ。
+より古くからの計算機の利用者がだけが良く知っているように、
+できるかぎり密にファイル群の情報を保存することがしばしば重要だ。
+保存された情報が文字の列からなるテキストであると考えてみよう。
+Haskell はその Char のデータ型に Unicode を内部的に利用しているが、
+標準のテキスト I/O の関数はテキストが 8-bit の文字の列であることを想定しているので、
+n 文字のテキストは 8n ビットの情報を含む。
+それぞれの文字は固定長のコードで表現されるので、
+テキストの文字はそれぞれの連続したの8ビットのグループをデコードすることで復元できる。
+
+One idea for reducing the total number of bits required to code a text is to abandon the notion of fixed-length codes,
+and seek instead a coding scheme based on the relative frequency of occurrence of the characters in the text.
+The basic idea is to take a sample piece of text, estimate the number of times each character appears,
+and choose short codes for the more frequent characters and longer codes for the rarer ones.
 For example, if we take the codes
+
+テキストを符号化するのに必要なビットの総数をおさえる一つのアイデアは固定長のコードという考えをやめることだ。
+代わりにテキストに現れる文字の相対的な頻度に基づいた符号化の案をさがそう。
+基本的なアイデアはテキストの標本としての一部をとり、それぞれの文字の回数を見積り、
+より頻度の高い文字には短い符号を選び、より稀な文字にはより長い符号を選ぶことだ。
+たとえば、次のコードを採用すると、
 
   't' -->  0
   'e' -->  10
   'x' -->  11
 
 then text can be coded as the bit sequence 010110 of length 6.
-However, it is important that codes are chosen in such a way as to ensure that the coded text can  be deciphered uniquely.
+However, it is important that codes are chosen in such a way as to ensure that the coded text can be deciphered uniquely.
 To illustrate, suppose the codes had been
+
+テキストは長さ 6 のビット列 010110 に符号化できる。
+しかしながら、符号化されたテキストが唯一に解読できることを保証するような方法で符号が選択されることが重要だ。
+たとえば、次のような符号を考えよう
 
   't' -->  0
   'e' -->  10
@@ -31,47 +54,87 @@ Under this scheme, text would be coded as the sequence 01010 of length 5.
 However, the string tee would also be coded by 01010.
 Obviously this is not what is wanted.
 
+この構成では、 text は長さ 5 の列 01010 として符号化されるだろう。
+しかしながら、文字列 tee も 01010 と符号化されるだろう。
+明らかにこれは望んだものではない。
+
 {- p.188 -}
 
-The simplest way to prevent the problem arising is to choose codes so that no code is a proper prefix of any other  a prefix-free code.
+The simplest way to prevent the problem arising is to choose codes so that
+no code is a proper prefix of any other a prefix-free code.
+
+この問題が起こるのを防ぐ最も簡単な方法は、
+どんな符号も他の符号の厳密な接頭辞とならないような prefix-free の符号を選ぶことだ。
 
 As well as requiring unique decipherability, we also want the coding to be optimal.
-An optimal coding scheme is one that minimises the expected length of the coded  text.
-More precisely, if characters c{j}, for 1 ≤ j ≤ n, have frequencies of occurrence  pj,
-then we want to choose codes with lengths lj such that
+An optimal coding scheme is one that minimises the expected length of the coded text.
+More precisely, if characters c_{j}, for 1 ≤ j ≤ n, have frequencies of occurrence p_{j},
+then we want to choose codes with lengths l_{j} such that
 
-Σ_{j=1}^{n} pj・lj
+単一解釈可能性が必要なのと同じくらい、符号化の最適性も求められる。
+最適な符号の構成は、符号化されたテキストの予想される長さを最小化するものだ。
+より正確には、1 ≤ j ≤ n に対して文字 c_{j} の出現頻度が p_{j} なら、
+次のような長さ l_{j} を持ち、
+
+Σ_{j=1}^{n} p_{j}・l_{j}
 
 is as small as possible.
 
-One method for constructing an optimal code satisfying the prefix property is  called Huffman coding.
-Each character is stored in a leaf of a binary tree, the  structure of which is determined by the computed frequencies.
-The code for a  character c is the sequence of binary values describing the path in the tree to the  leaf containing c.
+を可能なかぎり小さくする符号を選択したい。
+
+One method for constructing an optimal code satisfying the prefix property is called Huffman coding.
+Each character is stored in a leaf of a binary tree, the structure of which is determined by the computed frequencies.
+The code for a character c is the sequence of binary values describing the path in the tree to the leaf containing c.
 For instance, with the tree
+
+接頭辞の制約を満たす最適な符号を構成する一つの方法はハフマン符号化と呼ばれる。
+それぞれの文字は二分木の葉に保存され、その木の構造は計算された頻度によって決まる。
+文字 c の符号化は木の中の c を含む葉へのパスを記述するバイナリ値の列だ。
+たとえば、次の木では
 
 Node (Node (Leaf 'b') (Leaf 'e')) (Leaf 't')
 
 the character b is coded by 00, the character e by 01, and the character t by 1.
 Clearly, such a scheme yields a prefix-free code.
 
+文字 b は 00 と符号化され、文字 e は 01 と、文字 t は 1 となる。
+明らかに、このような方法は prefix-free の符号だ。
+
 There are four aspects to the problem of implementing Huffman coding:
-(i) collecting information from a sample;
-(ii) building a binary tree;
+(i)   collecting information from a sample;
+(ii)  building a binary tree;
 (iii) coding a text; and
-(iv) decoding a bit sequence.
+(iv)  decoding a bit sequence.
 We deal only with the problem of building a tree.
 So, having analysed the sample, suppose we are given a list of pairs:
 
-[(c1,w1),(c2,w2),...,(cn,wn)]
+ハフマン符号化を実装する問題には4つの面がある:
+(i)   標本から情報を集めること;
+(ii)  二分木を構築すること;
+(iii) テキストを符号化すること; そして
+(iv)  ビット列を複合すること;
+我々は木を構築する問題だけを扱う。
+よって、分析した標本があり、与えられたペアのリストがあると想定する:
 
-where for 1 ≤ j ≤ n the c{j} are the characters and the wj are positive integers,
+[(c_1,w_1),(c_2,w_2),...,(c_n,w_n)]
+
+where for 1 ≤ j ≤ n the c_{j} are the characters and the w_{j} are positive integers,
 called weights, indicating the frequencies of the characters in the text.
-The relative  frequency of character c{j} occurring is therefore wj/W, where W = wj.
-We will  suppose w1 w2  wn, so that the weights are given in ascending order.
+The relative frequency of character c_{j} occurring is therefore w_{j}/W, where W = Σ w_{j}.
+We will suppose w_1 ≤ w_2 ≤...≤ wn, so that the weights are given in ascending order.
 
-In terms of trees, the cost function we want to minimise can be defined in the  following way.
-By definition, the depth of a leaf is the length of the path from the  root of the tree to the leaf.
+ここで 1 ≤ j ≤ n に対して c_{j} は文字で w_{j} は重みと呼ばれる、
+テキスト内の文字の頻度を表わす正の整数だ。
+よって、文字 c_{j} の出現の相対的な頻度は w_{j}/W となる。ここで  W = Σ w_{j} だ。
+w_1 ≤ w_2 ≤...≤ wn を想定する、つまり重みは昇順で与えられる
+
+In terms of trees, the cost function we want to minimise can be defined in the following way.
+By definition, the depth of a leaf is the length of the path from the root of the tree to the leaf.
 We can define the list of depths of the leaves in a tree by
+
+木の見方から、最小化のために欲しいコスト関数は以下ような方法になる。
+定義によれば、葉の深さは木の根から葉までのパスの長さだ。
+木の葉の深さのリストを次のように定義できる
 
 > depths :: Tree a -> [Nat]
 > depths = from 0
@@ -79,6 +142,8 @@ We can define the list of depths of the leaves in a tree by
 >                from n (Node u v) = from (n+1) u++from (n+1) v
 
 Now introduce the types
+
+次の型を導入する
 
 > type Weight = Nat
 > type Elem = (Char,Weight)
@@ -88,8 +153,10 @@ Now introduce the types
 
 and define cost by
 
-  cost ::Tree Elem -> Cost
-  cost t = sum [wd | ((,w),d)  zip (fringe t) (depths t)]
+そして cost を次で定義する
+
+> cost ::Tree Elem -> Cost
+> cost t = sum [w * d | ((_,w),d) <- zip (fringe t) (depths t)]
 
 It is left as an exercise to derive the following alternative definition of cost:
 
@@ -509,6 +576,10 @@ Priority queues  will be needed again, particularly in Part Six, so we will cons
 
 > data Tree a = Leaf a | Node (Tree a) (Tree a)
 >             deriving (Eq, Show)
+
+> fringe :: Tree a -> [a]
+> fringe (Leaf x) = [x]
+> fringe (Node u v) = fringe u ++ fringe v
 
 > type Nat = Int
 
