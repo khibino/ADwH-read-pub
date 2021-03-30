@@ -8,6 +8,79 @@ Prove by induction that H(n) = ⌈log n⌉.
 帰納法で H(n) = ⌈log n⌉ であることを証明せよ。
 
 
+one  : N(1)
+even : N(k)   -> N(2 * k)        k ≥ 1
+odd  : N(k+1) -> N(2 * k + 1)    k ≥ 1
+
+の構造帰納法で証明する
+
+n = 1 のとき
+
+⌈log n⌉ = 0 で H(1) = 0 が成立。
+
+
+n = 2 * k のとき
+
+H(2 * k) =
+  { H(n)の漸化式 }
+1 + H(⌈(2 * k) / 2⌉) =
+  { / の定義, ceiling の定義 }
+1 + H(⌈(k⌉) =
+  { ceiling の定義 }
+1 + H(k)  =
+  { even の帰納法の仮定: n = k のとき H(k) = ⌈log k⌉ }
+1 + ⌈log k⌉ =
+  { ceiling の性質: 1 + ⌈x⌉ = ⌈1 + x⌉ }
+⌈1 + log k⌉ =
+  { log の性質: 1 + log x = log (2 * x) }
+⌈log (2 * k)⌉
+
+で成立。
+
+
+n = 2 * k + 1 のとき
+
+H(2 * k + 1) =
+  { H(n)の漸化式 }
+1 + H(⌈(2 * k + 1) / 2⌉) =
+  { / の分配, / の定義  }
+1 + H(⌈k + (1/2)⌉) =
+  { ceiling の定義 }
+1 + H(k+1) =
+  { odd  の帰納法の仮定: n = k + 1 のとき H(k+) = ⌈log (k+1)⌉ }
+1 + ⌈log (k+1)⌉ =
+  { ceiling の性質: 1 + ⌈x⌉ = ⌈1 + x⌉ }
+⌈1 + log (k+1)⌉ =
+  { log の性質: 1 + log x = log (2 * x) }
+⌈log (2 * k + 2)⌉ =
+  { 補題 }
+⌈log (2 * k + 1)⌉
+
+
+p = ⌈log (2 * k + 1)⌉ とおく (k ≥ 1 から p ≥ 2)
+
+  { ceiling の性質 x ≤ ⌈x⌉ }
+log (2 * k + 1) ≤ p
+⟺ { 2^ }
+2 * k + 1 ≤ 2^p
+⟺ { 左辺は奇数で右辺は偶数 }
+2 * k + 1 < 2^p
+⟺ { +1 }
+2 * k + 2 < 2^p + 1
+⟺ { 整数の不等式: x < y + 1 ⟹ x ≤ y }
+2 * k + 2 ≤ 2^p
+⟺ { log }
+log (2 * k + 2) ≤ p
+⟺ { p は整数, ceiling }
+⌈log (2 * k + 2)⌉ ≤ p
+⟺ { p の定義 }
+⌈log (2 * k + 2)⌉ ≤ ⌈log (2 * k + 1)⌉
+⟹ { ceiling の性質 x < y ⟹ ⌈x⌉ ≤ ⌈y⌉ }
+⌈log (2 * k + 1)⌉ ≤ ⌈log (2 * k + 2)⌉ ≤ ⌈log (2 * k + 1)⌉
+⟹ { x ≤ y ≤ x ⟹ x = y }
+⌈log (2 * k + 2)⌉ = ⌈log (2 * k + 1)⌉
+
+
 Exercise 8.2
 
 Prove that the bottom-up algorithm
@@ -19,6 +92,9 @@ Prove that the bottom-up algorithm
 of Section 8.1 produces a tree of minimum height.
 
 最小の高さの木を生成することを証明せよ。
+
+
+TBD
 
 
 Exercise 8.3
@@ -162,7 +238,7 @@ n 枚の葉を持つ木の数を数える関数 T(n) の漸進的関係を書き
 
 These values are called the Catalan numbers.
 
-これら値はカタラン数と呼ばれる。
+これらの値はカタラン数と呼ばれる。
 
 > mktrees :: [a] -> [Tree a]
 > mktrees [x] = [Leaf x]
@@ -181,6 +257,26 @@ T(2) = 1 * 1 = 1
 T(3) = T(1) * T(2) + T(2) * T(1) = 2
 T(4) = T(1) * T(3) + T(2) * T(2) + T(3) * T(1) = 5
 T(5) = T(1) * T(4) + T(2) * T(3) + T(3) * T(2) + T(4) * T(1) = 5 + 2 + 2 + 5 = 14
+
+
+Exercise 8.9
+
+Here is another way of defining the function mktrees of Section 8.1, one similar to that used in Huffman coding:
+
+   mktrees :: [a] -> [Tree a]
+   mktrees = map unwrap . until (all single) (concatMap combine) .
+             wrap . map Leaf
+   combine :: Forest a -> [Forest a]
+   combine xs = [ys++ [Node x y] ++zs | (ys,x:y:zs) <- splits xs]
+
+The function combine combines two adjacent trees in a forest in all possible ways.
+The process is repeated until only singleton forests remain,
+forests that consist of  just one tree.
+Finally the trees are extracted to give a list of trees.
+This method  may generate the same tree more than once,
+but all possible trees are nevertheless produced.
+Write down the associated greedy algorithm for this version of mktrees (no justification is required).
+
 
 -----
 
