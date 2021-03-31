@@ -160,6 +160,8 @@ and define cost by
 
 It is left as an exercise to derive the following alternative definition of cost:
 
+cost の次のような代わりの定義の導出を演習問題として残しておく:
+
   cost (Leaf e) = 0
   cost (Node u v) = cost u + cost v + weight u + weight v
   weight :: Tree Elem -> Nat
@@ -168,20 +170,37 @@ It is left as an exercise to derive the following alternative definition of cost
 
 We might now follow the previous section and specify
 
-  huffman:: [Elem] -> Tree Elem
+ここでは前節にならって、次のようにする
+
+  huffman :: [Elem] -> Tree Elem
   huffman <- MinWith cost mktrees
 
 where mktrees builds all the trees with a given list as fringe.
 But this specification is too strong:
-it is not required that the input list be the fringe, only that some  permutation of it is.
-(However, in Chapter 14 we will consider a version of the  problem in which the input is required to be the fringe.)
+it is not required that the input list be the fringe, only that some permutation of it is.
+(However, in Chapter 14 we will consider a version of the problem in which the input is required to be the fringe.)
 One way of correcting the definition is to replace mktrees by concatMap mktrees perms.
 Another way, and  the one we will pursue, is to design a new version of mktrees.
 This version will construct all unordered binary trees.
 In an unordered binary tree the two children of a node are regarded as a set of two trees rather than an ordered pair.
 Thus Node u v is regarded as the same tree as Node v u.
-For example, there are 12 ordered binary trees whose fringe is a permutation of [1,2,3], two trees for each of the six permutations,
+For example, there are 12 ordered binary trees whose fringe is a permutation of [1,2,3],
+two trees for each of the six permutations,
 but only three essentially different unordered trees:
+
+ここで mktrees は fringe として与えられたリストでのすべての木を生成する。
+しかしこの仕様は強すぎる:
+入力のリストが fringe である必要はなく、その順列であることが必要なだけだ。
+(しかし、14章ではこの問題の、入力が fringe である必要があるものを考える)
+この定義を修正する一つの方法は mktrees を concatMap mktrees perms に置き換えることだ。
+このバーションは順序のないすべての二分木を生成するだろう。
+順序のない二分木ではノードの二つの子が順序の対ではなく二つの木の組とみなされる。
+よって、Node u v は Node v u と同じ木と見なされる。
+たとえば、fringe が [1,2,3] の順列である順序のある二分木は 12 あり、
+それぞれの順列に対して 2つの木がある。
+しかし、順序の無い木で本質的に異なるものは三つだけだ。
+
+{- 対が入れ替わっても同じ木と考えればわかる -}
 
   Node (Node (Leaf 1) (Leaf 2)) (Leaf 3)
   Node (Node (Leaf 1) (Leaf 3)) (Leaf 2)
