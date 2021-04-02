@@ -1,5 +1,5 @@
 
-8.2 Huffman coding trees
+8.2 Huffman coding trees -- ハフマン符号化木
 -----
 
 Our second example is Huffman coding trees.
@@ -12,7 +12,7 @@ so a text of n characters contains 8n bits of information.
 Each character is represented by a fixed-length code,
 so the characters of a text can be recovered by decoding each successive group of eight bits.
 
-二番目の例は Huffman coding tree だ。
+二番目の例はハフマン符号化木だ。
 より古くからの計算機の利用者がだけが良く知っているように、
 できるかぎり密にファイル群の情報を保存することがしばしば重要だ。
 保存された情報が文字の列からなるテキストであると考えてみよう。
@@ -193,12 +193,12 @@ but only three essentially different unordered trees:
 入力のリストが fringe である必要はなく、その順列であることが必要なだけだ。
 (しかし、14章ではこの問題の、入力が fringe である必要があるものを考える)
 この定義を修正する一つの方法は mktrees を concatMap mktrees perms に置き換えることだ。
-このバーションは順序のないすべての二分木を生成するだろう。
-順序のない二分木ではノードの二つの子が順序の対ではなく二つの木の組とみなされる。
+このバーションは順序無しのすべての二分木を生成するだろう。
+順序無しの二分木ではノードの二つの子が順序の対ではなく二つの木の組とみなされる。
 よって、Node u v は Node v u と同じ木と見なされる。
-たとえば、fringe が [1,2,3] の順列である順序のある二分木は 12 あり、
+たとえば、fringe が [1,2,3] の順列である順序有りの二分木は 12 あり、
 それぞれの順列に対して 2つの木がある。
-しかし、順序の無い木で本質的に異なるものは三つだけだ。
+しかし、順序無しの木で本質的に異なるものは三つだけだ。
 
 {- 対が入れ替わっても同じ木と考えればわかる -}
 
@@ -207,43 +207,72 @@ but only three essentially different unordered trees:
   Node (Node (Leaf 2) (Leaf 3)) (Leaf 1)
 
 Each tree can be flipped in three ways
-(flipping the children of the top tree, the  children of the left subtree, or both)
+(flipping the children of the top tree, the children of the left subtree, or both)
 to give the 12 different ordered binary trees.
 For Huffman coding it is sufficient to consider unordered trees
-because two sibling characters have the same codes except for the last bit and it does not matter which  sibling is on the left.
+because two sibling characters have the same codes except for the last bit and it does not matter which sibling is on the left.
 To compute all the unordered Huffman trees we can start with a list of leaves in weight order,
-and then repeatedly combine pairs of trees until a  single tree remains.
+and then repeatedly combine pairs of trees until a single tree remains.
 The pairs are chosen in all possible ways and a combined pair can be placed back in the list so as to maintain weight order.
-Thus, in an unordered tree Node u v we can assume cost u  cost v without loss of generality.
+Thus, in an unordered tree Node u v we can assume cost u ≤ cost v without loss of generality.
 
-Here is an example to see the idea at work. Showing only the weights,
-consider the following list of four trees in weight order:
+それぞれの木は 3通りにひっくりかえすことができ、
+(頂点の木の子を入れ換える、左の部分木の子を入れ換える、あるいはその両方)
+12 の異なる順序有りの二分木を与える。
+ハフマン符号化では順序無しの木を考えるのが重要だ。
+なぜなら、二つの兄弟の文字は最後のビットを除いて同じ符号を持ち、どちらの兄弟が左にあるかは重要ではないからだ。
+すべての順序無しのハフマン木を計算するには、重み順の葉のリストから始め、
+一つの木が残るまで繰り返し木の対を結合する。
+対は可能なすべての場合で選ばれ、結合された対は重みの順序を維持するようにリストに置くことができる。
+このように、順序無しの木 Node u v では、一般性を失なうことなく cost u ≤ cost v を仮定できる。
+
+Here is an example to see the idea at work.
+Showing only the weights, consider the following list of four trees in weight order:
+
+このアイデアを動かして見る例だ。
+重みだけを見るようにして、重み順の次の四つの木のリストを考える。
 
 {- p.190 -}
 
   [Leaf 3,Leaf 5,Leaf 8,Leaf 9]
 
-As a first step we can choose to combine the first and third trees (among six possible  choices) to give
+As a first step we can choose to combine the first and third trees (among six possible choices) to give
+
+最初のステップとして次に与えるように、(6つの可能な選択のうち)一番目と三番目の木を結合するのを選ぶことができる
 
   [Leaf 5,Leaf 9,Node (Leaf 3) (Leaf 8)]
 
 The new tree, with weight 11, is placed last in the list to maintain weight order.
-As the next step we can choose to combine the first two trees (among three possible  choices),
+As the next step we can choose to combine the first two trees (among three possible choices),
 giving
+
+重み 11 の新たな木は、重み順を維持したリストの最後に置かれる。
+次のステップとして、(三つの可能な選択肢から)最初の二つの木を結合することを選ぶ。
+すると次が与えられる
 
   [Node (Leaf 3) (Leaf 8),Node (Leaf 5) (Leaf 9)]
 
 The next step is forced as there are only two trees left, and we end up with a singleton tree
 
+次のステップは、二つの木だけ残っているのでそれ以外にはなく、最後に単一の木になる。
+
   [Node (Node (Leaf 3) (Leaf 8)) (Node (Leaf 5) (Leaf 9))]
 
 whose fringe is [3,8,5,9].
-This bottom-up method for building trees will generate  6 × 3 = 18 trees in total,
-more than the total number of unordered trees on four  elements,
-because some trees, such as the one above, are generated twice (see the  exercises).
+This bottom-up method for building trees will generate 6 × 3 = 18 trees in total,
+more than the total number of unordered trees on four elements,
+because some trees, such as the one above, are generated twice (see the exercises).
 However, the list of trees includes all that are needed.
 
+この木の fringe は [3,8,5,9] だ。
+木を生成するこのボトムアップの方法は、総計 6 × 3 = 18 の木を生成するだろう。
+これは四つの要素における順序無しの木の総数より多い。
+なぜなら、上のもののような、いくつかの木が二回生成されるからだ。(演習問題を見よ)
+しかしながら、必要なものは木のリストにすべて含まれている。
+
 Now for the details. We define
+
+それでは詳細を見ていく。次を定義する
 
   mktrees :: [Elem] -> [Tree Elem]
   mktrees = map unwrap . mkforests . map Leaf
