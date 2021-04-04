@@ -280,13 +280,20 @@ Now for the details. We define
 where mkforests builds the list of forests, each forest consisting of a singleton tree.
 On way to define this function uses until:
 
+ここで mkforests は forest のリストを構築し、それぞれの forest は単一の木からなる。
+この関数を定義する一つの方法は until を使うことだ:
+
   mkforests :: [Tree Elem] -> [Forest Elem]
   mkforests = until (all single) (concatMap combine) . wrap
 
-The function mkforests takes a list of trees, turns them into a singleton list of forests  by applying wrap,
-and then repeatedly combines two trees in every possible way  until every forest is reduced to a single tree.
-Each singleton forest is then unwrapped  to give the final list of trees.
+The function mkforests takes a list of trees, turns them into a singleton list of forests by applying wrap,
+and then repeatedly combines two trees in every possible way until every forest is reduced to a single tree.
+Each singleton forest is then unwrapped to give the final list of trees.
 The function combine is defined by
+
+関数 mkforests は木のリストを取り、それらを wrap を適用することで forest の単一のリストへと変える。
+そして、繰り返し二つの木を可能なすべての方法で結合し、すべての forest は単一の木へとまとめられる。
+それぞれの単一の forest は最終的な木のリストを与えるために unwrap される。
 
   combine :: Forest Elem  -> [Forest Elem]
   combine ts = [insert (Node t1 t2) us | ((t1,t2),us) <- pairs ts]
@@ -303,8 +310,6 @@ Another way to define mkforests uses the function apply.
 Recall the answer to  Question 1.13, which gives the following definition of apply:
 
 {- p.191 -}
-
-8.2 Huffman coding trees 191
 
   apply :: Nat -> (a -> a) -> a -> a
   apply n f = if n == 0 then id else f . apply (n - 1) f
