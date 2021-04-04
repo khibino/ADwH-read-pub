@@ -587,6 +587,8 @@ p.183 上  図8.1
     t1
 ```
 
+---
+
 ## Monotonicity / Before adding leaf
 
 $2 ≤ k ≤ n$ に対して次が成立し、$[c_1, c_2,...c_n]$ は厳密に増加する
