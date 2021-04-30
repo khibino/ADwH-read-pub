@@ -274,8 +274,8 @@ Now for the details. We define
 
 それでは詳細を見ていく。次を定義する
 
-  mktrees :: [Elem] -> [Tree Elem]
-  mktrees = map unwrap . mkforests . map Leaf
+> mktrees :: [Elem] -> [Tree Elem]
+> mktrees = map unwrap . mkforests . map Leaf
 
 where mkforests builds the list of forests, each forest consisting of a singleton tree.
 On way to define this function uses until:
@@ -283,8 +283,8 @@ On way to define this function uses until:
 ここで mkforests は forest のリストを構築し、それぞれの forest は単一の木からなる。
 この関数を定義する一つの方法は until を使うことだ:
 
-  mkforests :: [Tree Elem] -> [Forest Elem]
-  mkforests = until (all single) (concatMap combine) . wrap
+> mkforests :: [Tree Elem] -> [Forest Elem]
+> mkforests = until (all single) (concatMap combine) . wrap
 
 The function mkforests takes a list of trees, turns them into a singleton list of forests by applying wrap,
 and then repeatedly combines two trees in every possible way until every forest is reduced to a single tree.
@@ -295,10 +295,10 @@ The function combine is defined by
 そして、繰り返し二つの木を可能なすべての方法で結合し、すべての forest は単一の木へとまとめられる。
 それぞれの単一の forest は最終的な木のリストを与えるために unwrap される。
 
-  combine :: Forest Elem  -> [Forest Elem]
-  combine ts = [insert (Node t1 t2) us | ((t1,t2),us) <- pairs ts]
-  pairs :: [a] -> [((a,a),[a])]
-  pairs xs = [((x,y),zs) | (x,ys) <- picks xs, (y,zs) <- picks ys]
+> combine :: Forest Elem  -> [Forest Elem]
+> combine ts = [insert (Node t1 t2) us | ((t1,t2),us) <- pairs ts]
+> pairs :: [a] -> [((a,a),[a])]
+> pairs xs = [((x,y),zs) | (x,ys) <- picks xs, (y,zs) <- picks ys]
 
 The function picks was defined in Chapter 1.
 The function insert, whose definition is left as an exercise,
@@ -306,61 +306,96 @@ inserts a tree into a list of trees so as to maintain weight order.
 Hence combine selects, in all possible ways, a pair of trees from a forest,
 combines them into a new tree, and inserts the new tree into the remaining trees.
 
+関数 picks は1章で定義された。
+関数 insert の定義は演習問題として残した。
+この関数は重さの順を保つように木を木のリストへと挿入する。
+よって combine は、可能なすべての方法で、木の対を forest から選び、
+木の対を新たな木へと結合し、その新たな木を残りの木々へと挿入する。
+
 Another way to define mkforests uses the function apply.
 Recall the answer to  Question 1.13, which gives the following definition of apply:
 
+mkforests を定義する別の方法では、関数 apply を利用する。
+演習問題 1.13 の答えを思いだそう。これは apply の次の定義を与える:
+
 {- p.191 -}
 
-  apply :: Nat -> (a -> a) -> a -> a
-  apply n f = if n == 0 then id else f . apply (n - 1) f
+> apply :: Nat -> (a -> a) -> a -> a
+> apply n f = if n == 0 then id else f . apply (n - 1) f
 
 Thus apply n applies a function n times to a given value.
-The alternative definition  of mkforests is to write
+The alternative definition of mkforests is to write
 
-  mkforests::[Tree Elem]  [Forest Elem]
-  mkforests ts = apply (length ts1) (concatMap combine) [ts]
+このように、apply n は与えられた値に関数を n 回適用する。
+mkforests の代わりの定義を書くなら次のようになる
+
+> mkforestsA :: [Tree Elem] -> [Forest Elem]
+> mkforestsA ts = apply (length ts - 1) (concatMap combine) [ts]
 
 The two definitions give the same result because at each step the number of trees in each forest is reduced by one,
 so it takes exactly n-1 steps to reduce an initial forest of n trees to a list of singleton forests.
 
+それぞれのステップで  それぞれの forest 内の木の数が一つに畳み込まれるため、二つの定義は同じ結果を与える。
+よって、n 個の木からなる初期の forest を singleton forest のリストへと畳み込むのにちょうど n-1 ステップかかる。
+
 Our problem now takes the form
 
+問題は今や、次の形を取る
+
   huffman :: [Elem] -> Tree Elem
-  huffman  MinWith cost mktrees
+  huffman <- MinWith cost mktrees
 
 Since mktrees is defined in terms of until, we will aim for a constructive definition of huffman of the same form.
 The task is to find a function gstep so that
 
+mktrees は until で定義されるため、同じ形になるような huffman の構成的定義を目標にする。
+やるべきことは次のような関数 gstep を、型 [Elem] のすべての有限の空でないリスト xs に対して見付けることだ。
+
   unwrap (until single gstep (map Leaf xs)) <- MinWith cost (mktrees xs)
 
 for all finite nonempty lists xs of type [Elem].
-More generally, we will seek a  function gstep such that
+More generally, we will seek a function gstep such that
+
+より一般的には、次ような関数 gstep をすべての有限の空でない木のリスト ts に対してさがそう。
 
   unwrap (until single gstep ts) <- MinWith cost (map unwrap (mkforests ts))
 
 for all finite nonempty lists of trees ts.
-Problems of this form will arise in the  following chapter too,
+Problems of this form will arise in the following chapter too,
 so let us pause for a little more theory on greedy algorithms.
 
- ### Another generic greedy algorithm
+この形の問題は以降の章にもある。
+よって、貪欲アルゴリズムの理論のために小休止しよう。
+
+ ### Another generic greedy algorithm -- もう一つの一般的な貪欲アルゴリズム
 
 Suppose in this section that the list of candidates is given by a function
 
-  candidates:: State -> [Candidate]
+この節では、ある種の状態から候補のリストが次のような関数で与えられる状況を考えよう
+
+  candidates :: State -> [Candidate]
 
 for some type State.
 For Huffman coding, states are lists of trees and candidates are trees:
+
+ハフマン符号化では、状態は木のリストで候補は複数の木だ:
 
   candidates ts = map unwrap (mkforests ts)
 
 For the problems in the following chapter, states are combinations of values.
 
+以降の章でのこの問題では、状態は値の組み合わせだ。
+
 The aim of this section is to give conditions for which the refinement
 
-  extract (until final gstep sx) <- MinWith cost (candidates sx) (8.2)
+この節の目的は、次の精緻化がすべての状態 sx に対して保持される条件を与えることだ
+
+  extract (until final gstep sx) <- MinWith cost (candidates sx)   (8.2)
 
 holds for all states sx.
 The functions on the left have the following types:
+
+左辺の関数は次のような型を持つ:
 
   gstep :: State -> State
   final :: State -> Bool
@@ -375,17 +410,32 @@ it is assumed that the left-hand side returns a well-defined value for any initi
 Unlike the formulation of a generic greedy algorithm in Section 7.1,
 nothing is known about how the candidates are constructed.
 
+言ってみれば、 (8.2) は
+任意の初期状態 sx に対して繰り返し貪欲ステップを適用することで、結果として最終状態になり、
+その最終状態から、最小コストを持つ candidates sx の中にある候補であるという性質を持つ x を取り出すことができる、ということだ。
+精緻化を意味のあるものにするために、
+左辺は任意の初期状態に対して一意の値を返すと想定する。
+7.1節の一般化された貪欲アルゴリズムの定式化と異なり、
+候補がどう構成されるのかについて分かっていることはない。
+
 For brevity in what follows, define
+
+続く説明を簡潔にするために、次のように定義する
 
   MCC sx = MinWith cost (candidates sx)
   mincost sx = minimum (map cost (candidates sx))
 
 In particular, for all x in candidates sx we have
 
+とくに、candidates sx 内のすべての x に対して、次が成立する
+
   x <- MCC sx ⟺ cost x = mincost sx
 
 There are two conditions that ensure (8.2).
 The first is
+
+(8.2) を保証する二つの条件がある。
+一つ目は
 
   final sx ⟹ extract sx <- MCC sx   (8.3)
 
@@ -393,32 +443,55 @@ This condition holds for Huffman coding,
 when final = single and extract = unwrap,
 since map unwrap (mkforests [t]) = [t] and MinWith cost [t] = t.
 
+この条件はハフマン符号化を保つ為のもので、
+このとき final = single かつ extract = unwrap となる。
+なぜなら map unwrap (mkforests [t]) = [t] かつ MinWith cost [t] = t であるからだ。
+
 The second condition is the greedy condition.
 We can state it in two ways.
-The  first way is
+The first way is
+
+二つ目の条件は貪欲条件だ。
+それを二通りの方法で述べることができる。
+一通り目は
 
   not (final sx) ⟹ (∃x:x <- MCC (gstep sx) ⋀ x <- MCC sx)   (8.4)
 
 In hillclimbing terms, the greedy condition asserts that,
-from any starting point not  already on top of the hill,
+from any starting point not already on top of the hill,
 there is some path to a highest point that starts out with a greedy step.
 
+hill-climbing の言葉で言えば、貪欲条件は次を想定する。
+まだ丘のてっぺんでない任意の出発点から、貪欲ステップで始まる最も高い点へのパスがある。
+
 The second way of stating the greedy condition appears to be stronger:
+
+貪欲条件を述べる二通り目の方法は、より強いように見える
 
   not (final sx) ⟹ MCC (gstep sx) <- MCC sx   (8.5)
 
 However, with one extra proviso, (8.4) implies (8.5).
 The proviso is that applying gstep to a state may reduce the number of final candidates but will never introduce new ones.
 In symbols,
+
+しかしながら、ひとつ特別な条件があれば、(8.4) は (8.5) を導出する。
+その条件とは、gstep を状態に適用することで最終的な候補の数が減り、新たなものが導入されないことだ。
+
   candidates (gstep sx) ⊆ candidates sx   (8.6)
 
 Suppose x <- MCC (gstep sx) and x <- MCC sx.
 Then, by definition of MCC and mincost, we have
 
+x <- MCC (gstep sx) かつ x <- MCC sx とする。
+すると、MMC と mincost の定義から、次を得る。
+
   mincost (gstep sx) = cost x = mincost sx
 
 Now suppose y <- MCC (gstep sx), so y ∈ candidates sx by (8.6).
 Then
+
+今や y <- MCC (gstep sx) とするなら (8.6) から y ∈ candidates sx となる。
+すると
 
   cost y = mincost (gstep sx) = mincost sx
 
@@ -427,32 +500,52 @@ Although, in general,
 E1 <- E2 is a stronger statement than one that merely asserts there exists some value v such that v <- E1 ⋀ v <- E2,
 that is not the case here.
 
+なので y <- MCC sx となる。
+一般的には、
+単に v <- E1 ⋀ v <- E2 となるような v が存在することを仮定するよりも、E1 <- E2 がより強い主張となる、とはいえ、
+ここではその場合にはあたらない。
+
 To prove (8.2), suppose that k is the smallest integer -- assumed to exist --
 for which apply k gstep sx is a final state.
 That means
+
+(8.2) を証明するには、apply k gstep sx が最終状態であるような
+最小の整数 k (存在すると仮定する)を考える。
 
 {- p.193 -}
 
   until final gstep sx = apply k gstep sx
 
-It follows that apply j gstep sx is not a final state for 0 ≤ j<k, so,
+It follows that apply j gstep sx is not a final state for 0 ≤ j < k, so,
 by the stronger greedy condition, we have
+
+0 ≤ j < k について apply j gstep sx は最終状態ではないので、
+より強い貪欲条件によって、0 ≤ j < k について次を得る。
 
   MCC (apply (j+1) gstep sx) <- MCC (apply j gstep sx)
 
-for 0 ≤ j<k.
+for 0 ≤ j < k.
 Hence MCC (apply k gstep sx) <- MCC sx.
 Furthermore, by (8.3) we have
+
+よって、MCC (apply k gstep sx) <- MCC sx となる。
+さらに、(8.3) から次を得て、
 
   extract (apply k gstep sx) <- MCC (apply k gstep sx)
 
 establishing (8.2).
 
+(8.2) が成立する。
+
 This style of reasoning about greedy algorithms is very general.
-However, unlike  greedy algorithms derived by fusion,
+However, unlike greedy algorithms derived by fusion,
 it gives no hint as to what form gstep might take.
 
- ### Huffman coding continued
+貪欲アルゴリズムについてのこの形式の証明はとても一般的だ。
+しかしながら、融合変換から導出される貪欲アルゴリズムとは違い、
+gstep がどんな形をとるのかについてのヒントはなにも無い。
+
+ ### Huffman coding continued -- ハフマン符号化の続き
 
 Returning to Huffman coding,
 in which candidates are trees,
@@ -630,6 +723,8 @@ Priority queues  will be needed again, particularly in Part Six, so we will cons
 > data Tree a = Leaf a | Node (Tree a) (Tree a)
 >             deriving (Eq, Show)
 
+> type Forest a = [Tree a]
+
 > fringe :: Tree a -> [a]
 > fringe (Leaf x) = [x]
 > fringe (Node u v) = fringe u ++ fringe v
@@ -697,3 +792,10 @@ Priority queues  will be needed again, particularly in Part Six, so we will cons
 >                       then error "lastSL of empty list"
 >                       else head xs
 >                  else head ys
+
+> picks :: [a] -> [(a,[a])]
+> picks []     = []
+> picks (x:xs) = (x,xs) : [(y,x:ys) | (y,ys) <- picks xs]
+
+> insert :: Tree Elem -> Forest Elem -> Forest Elem
+> insert = undefined
