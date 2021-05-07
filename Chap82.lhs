@@ -138,8 +138,8 @@ We can define the list of depths of the leaves in a tree by
 
 > depths :: Tree a -> [Nat]
 > depths = from 0
->          where from n (Leaf x) =[n]
->                from n (Node u v) = from (n+1) u++from (n+1) v
+>          where from n (Leaf x) = [n]
+>                from n (Node u v) = from (n+1) u ++ from (n+1) v
 
 Now introduce the types
 
