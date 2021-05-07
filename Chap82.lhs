@@ -637,25 +637,35 @@ t' に生成手法を適用することで矛盾が得られる。
 
 However, simple as it is, the algorithm is not quite ready to leave the kitchen.
 There are two sources of inefficiency.
-Firstly, the function insert recomputes weights at  each step,
+Firstly, the function insert recomputes weights at each step,
 an inefficiency that can easily be brushed aside by tupling.
 The more serious issue is that,
 while finding two trees of smallest weights is a constant-time operation,
-inserting the combined tree back into the forest can take linear time in  the worst case.
+inserting the combined tree back into the forest can take linear time in the worst case.
 That means the greedy algorithm takes quadratic time in the worst case.
 The final step is to show how this can be reduced to linear time.
 
+しかし、シンプルなだけに、このアルゴリズムはまだキッチンから出ることができない。
+非効率の原因が二つある。
+一つ目は、関数 insert が各ステップで重みを再計算することだが、
+非効率性はタプリングによって容易に払拭される。
+より重大な問題は、
+最小の重みの二つの木を見付けるのは定数時間の操作とはいえ、
+結合した木を forest に挿入しなおすのに最悪ケースで線形時間がかかる。
+最後のステップはこれを線形時間へと減少させる方法を示す。
+
 The key observation behind the linear-time algorithm is the fact that,
-in any  call of gstep, the argument to insert has a weight at least as large as any previous  argument.
+in any call of gstep, the argument to insert has a weight at least as large as any previous argument.
 Suppose we combine two trees with weights w1 and w2 and, later on, two trees with weights w3 and w4.
 We have w1 ≤ w2 ≤ w3 ≤ w4, and it follows that w1+w2 ≤ w3+w4.
-This suggests maintaining the non-leaf trees as a simple  queue,
-whereby elements are added to the rear of the queue and removed only from  the front.
+This suggests maintaining the non-leaf trees as a simple queue,
+whereby elements are added to the rear of the queue and removed only from the front.
 Instead of maintaining a single list we therefore maintain two lists,
-the  first being a list of leaves and the second a queue of node trees.
-Since elements are  never added to the first list, but only removed from the front,
-the first list could  also be a queue.
-But a simple list suffices. We will call the first list a stack simply  to distinguish it from the second one.
+the first being a list of leaves and the second a queue of node trees.
+Since elements are never added to the first list, but only removed from the front,
+the first list could also be a queue.
+But a simple list suffices.
+We will call the first list a stack simply to distinguish it from the second one.
 At each step, gstep selects two lightest trees from either the stack or the queue,
 combines them, and adds the result to the end of the queue.
 At the end of the algorithm the queue will contain a single tree, the greedy solution.
@@ -663,13 +673,38 @@ Figure 8.2, which shows the weights only, gives an example of how the method wor
 The method is viable only if the various queue operations take constant time.
 But we have already met symmetric lists in Chapter 3, which satisfy the requirements exactly.
 
-Here are the details. First we set up the type SQ of Stack-Queues:
+線形時間のアルゴリズムの背景にある観察のポイントは次の事実です、
+gstep のどの呼び出しにおいても、insert への引数が少なくとも以前の引数と同じ大きさの重みを持つということだ。
+重み w1 と w2 を持つ二つの木を結合し、その後で、重み w3 と w4 を持つ二つの木についても考えよう。
+w1 ≤ w2 ≤ w3 ≤ w4 から w1+w2 ≤ w3+w4 が従う。a
+これは、要素がキューの後方に加えられ、前方からの削除のみが行なわれるような、
+葉の無い木を単純なキューとして管理することを意味する。 (???)
+単一のリストを管理する代わりに、二つのリストを管理する。
+一つ目は葉のリストで、二つ目はノードの木のキューだ。
+要素は一つ目のリストに加えられることはないが、前方からの削除のみが行なわれるので、
+一つ目のリストもキューとなる。
+しかし、単純なリストで十分である。
+単に二つ目のリストと区別するために、一つ目のリストをスタックと呼ぶことにする。
+それぞれのステップで、gstep は二つの最右の木をスタックまたはキューから選択し、
+結合し、その結果をキューの最後に加える。
+アルゴリズムの最後では、キューは単一の木を含むことになり、それが貪欲アルゴリズムの解となる。
+図 8.2 (重みのみを見せている) はこの手法がそのように振る舞うかの例を与える。
+この手法はそれぞれのキューの操作が定数時間を取るならば成立する。
+しかし、3章ですでに symmetric list を見ており、これは要求をちょうど満足する。
+
+Here are the details.
+First we set up the type SQ of s:
+
+ここに詳細を示す。
+まず、Stack-Queue の型 SQ を用意する:
 
 > type SQ a = (Stack a,Queue a)
 > type Stack a = [a]
 > type Queue a = SymList a
 
 Now we can define
+
+今や、次が定義できる
 
 > huffman :: [Elem] -> Tree Elem
 > huffman = extractSQ . until singleSQ gstep . makeSQ . map leaf
@@ -689,11 +724,16 @@ Figure 8.2 Example of the stack and queue operations
 
 The component functions on the right-hand side are defined in terms of the type
 
+右辺にある構成関数は木と重みの対の次の型から定義される。
+
 > type Pair = (Tree Elem,Weight)
 
 of pairs of trees and weights.
-First of all, the functions leaf and node (needed in the  definition of gstep)
+First of all, the functions leaf and node (needed in the definition of gstep)
 are smart constructors that install weight information correctly:
+
+まず最初に、関数 leaf と node ( gstep の定義に必要 )
+は重みの情報を正しく保持するようなスマートコンストラクタだ。
 
 > leaf :: Elem -> Pair
 > leaf (c,w) = (Leaf (c,w),w)
@@ -702,13 +742,20 @@ are smart constructors that install weight information correctly:
 
 Next, the function makeSQ initialises a Stack-Queue:
 
+次に、関数 makeSQ は Stack-Queue を初期化する:
+
 > makeSQ :: [Pair] -> SQ Pair
 > makeSQ xs = (xs,nilSL)
 
 Recall that the function nilSL returns an empty symmetric list.
 
+関数 nilSL は空の symmetric list を返すことを思いだそう。
+
 Next, the function singleSQ determines whether a Stack-Queue is a singleton,
 and extractSQ extracts the tree:
+
+さらに、関数 singleSQ は Stack-Queue が singleton かどうかを判定し、
+extractSQ は木を取りだす。
 
 > singleSQ :: SQ a -> Bool
 > singleSQ (xs,ys) = null xs && singleSL ys
@@ -716,9 +763,14 @@ and extractSQ extracts the tree:
 > extractSQ (xs,ys) = fst (headSL ys)
 
 The function singleSL, whose definition is left as an exercise,
-tests for whether a  symmetric list is a singleton.
+tests for whether a symmetric list is a singleton.
+
+関数 singleSL ( この定義は演習問題として残しておく ) は
+symmetric list が singleton かどうかを判定する。
 
 Finally, we define
+
+最後に、次を定義する
 
 > gstep :: SQ Pair -> SQ Pair
 > gstep ps = add (node p1 p2) rs
@@ -730,6 +782,8 @@ Finally, we define
 {- p.196 -}
 
 It remains to define extractMin for extracting a tree with minimum weight from a Stack-Queue:
+
+Stack-Queue から最小の重みの木を取り出す extractMin の定義が残っている:
 
 > extractMin :: SQ Pair -> (Pair,SQ Pair)
 > extractMin (xs,ys)
@@ -744,14 +798,24 @@ then the tree with the smallest weight from either list is selected.
 If one of the stack and the queue is empty,
 the selection is made from the other component.
 
+スタックとキューが両方とも空でないなら、
+最小の重みの木が両方のリストから選択される。
+スタックとキューのうちの片方が空の場合、
+そうでない法から選択が行なわれる。
+
 The linear-time algorithm for Huffman coding depends on the assumption
 that the input is sorted into ascending order of weight.
-If this were not the case, then  O(n log n) steps have to be spent sorting.
+If this were not the case, then O(n log n) steps have to be spent sorting.
 Strictly speaking, that means Huffman coding actually takes O(n log n) steps.
 There is an alternative implementation of the algorithm with this running time,
 and that is to use a priority queue.
-Priority queues  will be needed again, particularly in Part Six, so we will consider them now.
+Priority queues will be needed again, particularly in Part Six, so we will consider them now.
 
+ハフマン符号化の線形時間のアルゴリズムは入力が重みの昇順に整列されている仮定によっている。
+その場合でなければ、O(n log n) ステップが整列に消費される必要がある。
+厳密に言えば、ハフマン符号化は O(n log n) ステップを実際には消費する。
+この実行時間を持つアルゴリズムの代わりの実装があり、それは優先度付きキューを利用する。
+特に第六部で、優先度付きキューが再び必要になるので、今ここでも考えることにする。
 
 ------
 
