@@ -94,7 +94,12 @@ of Section 8.1 produces a tree of minimum height.
 最小の高さの木を生成することを証明せよ。
 
 
-TBD
+Answer 紹介
+
+長さ n のリストについて、ボトムアップアルゴリズムは
+左の子が完全バランスの二分木(2^kの葉を持つ, 2^k < n ≤ 2^{k+1})
+となるような木 t を生成する。
+よって t の高さは k + 1 = ⌈log n⌉ であり、これは最小の高さの木となる。
 
 
 Exercise 8.3
@@ -121,7 +126,7 @@ Why is the claim rollup . spine = id not true for all possible lists of trees?
 rollup . spine = id という主張が、ありうるすべての木のリストについて正しくないのはなぜか?
 
 
-わからなかったので答えを見た
+Answer 紹介
 
 無限の spine を持つような Tree に対して spine は ⊥ を返す。
 すると rollup の結果が ⊥ となるので等しくならない。
@@ -276,6 +281,8 @@ Finally the trees are extracted to give a list of trees.
 This method  may generate the same tree more than once,
 but all possible trees are nevertheless produced.
 Write down the associated greedy algorithm for this version of mktrees (no justification is required).
+
+----- ここから下 Huffman 関連 -----
 
 
 -----
