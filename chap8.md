@@ -1362,7 +1362,7 @@ gstep を適用することで候補の数が減り、新たなものが導入�
   candidates (gstep sx) ⊆ candidates sx   (8.6)
 ```
 
-## derivation
+## derivation for (8.5)
 
 x <- MCC (gstep sx) かつ x <- MCC sx とすると MMC と mincost の定義から、次を得る
 ```
@@ -1375,3 +1375,28 @@ y <- MCC (gstep sx) とするなら (8.6) から y ∈ candidates sx
 ```
 
 よって y <- MCC sx
+
+## proof for (8.2)
+
+(8.2) を証明するために、apply k gstep sx が最終状態であるような
+最小の整数 kを考える。
+```
+  until final gstep sx = apply k gstep sx
+```
+
+$0 ≤ j < k$ について apply j gstep sx は最終状態ではないので、
+より強い貪欲条件によって次を得る。
+```
+  MCC (apply (j+1) gstep sx) <- MCC (apply j gstep sx)
+```
+
+よって `MCC (apply k gstep sx) <- MCC sx` となる
+
+さらに (8.3) から次が得られるので
+```
+  extract (apply k gstep sx) <- MCC (apply k gstep sx)
+```
+
+(8.2) が成立。
+
+## Huffman coding continued
