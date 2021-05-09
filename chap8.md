@@ -1319,7 +1319,7 @@ mkforests ts = apply (length ts - 1) (concatMap combine) [ts]
 ```
 
 (8.2) は、任意の初期状態 sx に対して繰り返し貪欲ステップを適用することで、結果として最終状態になり、
-その最終状態から、最小コストを持つ candidates sx の中にある候補であるという性質を持つ x を取り出すことができるということ
+その最終状態から、最小コストを持つ candidates sx にある候補 x を取り出すことができるということ
 
 ## first condition
 
