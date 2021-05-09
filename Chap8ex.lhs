@@ -4,7 +4,7 @@ Exercise 8.1
 Consider the recurrence H(1) = 0 and H(n) = 1+H(⌈n/2⌉).
 Prove by induction that H(n) = ⌈log n⌉.
 
-漸化式 H(1) = 0 と H(n) = 1+H(⌈n/2⌉) を考える。
+漸化式 H(1) = 0 と H(n) = 1 + H(⌈n/2⌉) を考える。
 帰納法で H(n) = ⌈log n⌉ であることを証明せよ。
 
 
@@ -25,7 +25,7 @@ H(2 * k) =
   { H(n)の漸化式 }
 1 + H(⌈(2 * k) / 2⌉) =
   { / の定義 }
-1 + H(⌈(k⌉) =
+1 + H(⌈k⌉) =
   { ceiling の定義 }
 1 + H(k)  =
   { even の帰納法の仮定: n = k のとき H(k) = ⌈log k⌉ }
@@ -114,7 +114,7 @@ We claimed in Section 8.1 that minimising lcost also minimises cost.  Why is thi
 lcost t1 < lcost t2 ⟹ cost t1 <= cost t2 を示す
 
 lcost t1 < lcost t2
-⟹ { List の <= の定義 }
+⟹ { List の < の定義 }
 head (lcost t1) <= head (lcost t2)
 ⟹ { lcost の性質 head (lcost t) == cost t }
 cost t1 <= cost t2
@@ -173,7 +173,7 @@ xs = x:ys のとき
 
    { 帰納法の仮定 }
 foldrn f2 g2 ys <- M (foldrn f1 g1 ys)
-⟹ { f2 x 適用, f2 x の単調性 }
+⟹ { f2 x 適用 }
 f2 x (foldrn f2 g2 ys) <- f2 x (M (foldrn f1 g1 ys))
 ⟹ { 仮定 ∀ y . f2 x (M y) <- M (f1 x y), <- の 推移律  }
 f2 x (foldrn f2 g2 ys) <- M (f1 x (foldrn f1 g1 ys))
@@ -226,7 +226,8 @@ splits と splitsn の再帰的な定義を与えよ。
 > splits (x:xs) = ([], x:xs) : [ (x:ys, zs) | (ys, zs) <- splits xs ]
 
 > splitsn :: [a] -> [([a], [a])]
-> splitsn [x,y] = [([x],[y])]
+> splitsn []    = []
+> splitsn [x]   = []
 > splitsn (x:xs) = ([x], xs) : [ (x:ys, zs) | (ys, zs) <- splitsn xs ]
 
 ---
