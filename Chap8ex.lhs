@@ -24,7 +24,7 @@ n = 2 * k のとき
 H(2 * k) =
   { H(n)の漸化式 }
 1 + H(⌈(2 * k) / 2⌉) =
-  { / の定義, ceiling の定義 }
+  { / の定義 }
 1 + H(⌈(k⌉) =
   { ceiling の定義 }
 1 + H(k)  =
@@ -47,7 +47,7 @@ H(2 * k + 1) =
 1 + H(⌈k + (1/2)⌉) =
   { ceiling の定義 }
 1 + H(k+1) =
-  { odd  の帰納法の仮定: n = k + 1 のとき H(k+) = ⌈log (k+1)⌉ }
+  { odd  の帰納法の仮定: n = k + 1 のとき H(k+1) = ⌈log (k+1)⌉ }
 1 + ⌈log (k+1)⌉ =
   { ceiling の性質: 1 + ⌈x⌉ = ⌈1 + x⌉ }
 ⌈1 + log (k+1)⌉ =
@@ -80,6 +80,7 @@ log (2 * k + 2) ≤ p
 ⟹ { x ≤ y ≤ x ⟹ x = y }
 ⌈log (2 * k + 2)⌉ = ⌈log (2 * k + 1)⌉
 
+---
 
 Exercise 8.2
 
@@ -101,6 +102,7 @@ Answer 紹介
 となるような木 t を生成する。
 よって t の高さは k + 1 = ⌈log n⌉ であり、これは最小の高さの木となる。
 
+---
 
 Exercise 8.3
 
@@ -117,7 +119,7 @@ head (lcost t1) <= head (lcost t2)
 ⟹ { lcost の性質 head (lcost t) == cost t }
 cost t1 <= cost t2
 
-
+---
 
 Exercise 8.4
 
@@ -134,7 +136,7 @@ Answer 紹介
 > infT :: Tree Nat
 > infT = Node infT (Leaf 1)
 
-
+---
 
 Exercise 8.5
 
@@ -159,20 +161,19 @@ Prove this result.
 foldrn f2 g2 xs <- M (foldrn f1 g1 xs) を
 非空の有限リスト xs に対する帰納法で示す
 
-[x] のとき
+xs = [x] のとき
 
-   { 仮定 g2 x <- M (g1 x) }
+    { 仮定 g2 x <- M (g1 x) }
 g2 x <- M (g1 x)
-⟺ { foldrn の定義 }
-foldrn f2 g2 [x] <- M (g1 x)
 ⟺ { foldrn の定義 }
 foldrn f2 g2 [x] <- M (foldrn f1 g1 [x])
 
-x:ys のとき
+
+xs = x:ys のとき
 
    { 帰納法の仮定 }
 foldrn f2 g2 ys <- M (foldrn f1 g1 ys)
-⟹ { f2 x 適用 }
+⟹ { f2 x 適用, f2 x の単調性 }
 f2 x (foldrn f2 g2 ys) <- f2 x (M (foldrn f1 g1 ys))
 ⟹ { 仮定 ∀ y . f2 x (M y) <- M (f1 x y), <- の 推移律  }
 f2 x (foldrn f2 g2 ys) <- M (f1 x (foldrn f1 g1 ys))
@@ -181,6 +182,7 @@ foldrn f2 g2 (x:ys) <- M (foldrn f1 g1 (x:ys))
 
 証明終わり
 
+---
 
 Exercise 8.6
 
@@ -207,6 +209,7 @@ Specialise the final greedy algorithm of Section 8.1 as suggested to build a min
 > node :: Pair ->  Pair ->  Pair
 > node (u,c) (v,d) = (Node u v, 1 + c `max` d)
 
+---
 
 Exercise 8.7
 
@@ -226,6 +229,7 @@ splits と splitsn の再帰的な定義を与えよ。
 > splitsn [x,y] = [([x],[y])]
 > splitsn (x:xs) = ([x], xs) : [ (x:ys, zs) | (ys, zs) <- splitsn xs ]
 
+---
 
 Exercise 8.8
 
@@ -264,6 +268,9 @@ T(4) = T(1) * T(3) + T(2) * T(2) + T(3) * T(1) = 5
 T(5) = T(1) * T(4) + T(2) * T(3) + T(3) * T(2) + T(4) * T(1) = 5 + 2 + 2 + 5 = 14
 
 
+----- ここから下 Huffman 関連 -----
+
+
 Exercise 8.9
 
 Here is another way of defining the function mktrees of Section 8.1, one similar to that used in Huffman coding:
@@ -272,18 +279,19 @@ Here is another way of defining the function mktrees of Section 8.1, one similar
    mktrees = map unwrap . until (all single) (concatMap combine) .
              wrap . map Leaf
    combine :: Forest a -> [Forest a]
-   combine xs = [ys++ [Node x y] ++zs | (ys,x:y:zs) <- splits xs]
+   combine xs = [ys ++ [Node x y] ++ zs | (ys,x:y:zs) <- splits xs]x
 
 The function combine combines two adjacent trees in a forest in all possible ways.
 The process is repeated until only singleton forests remain,
-forests that consist of  just one tree.
+forests that consist of just one tree.
 Finally the trees are extracted to give a list of trees.
 This method  may generate the same tree more than once,
 but all possible trees are nevertheless produced.
 Write down the associated greedy algorithm for this version of mktrees (no justification is required).
 
------ ここから下 Huffman 関連 -----
+---
 
+Exercise 8.10
 
 -----
 
