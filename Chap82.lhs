@@ -112,7 +112,7 @@ So, having analysed the sample, suppose we are given a list of pairs:
 (i)   標本から情報を集めること;
 (ii)  二分木を構築すること;
 (iii) テキストを符号化すること; そして
-(iv)  ビット列を複合すること;
+(iv)  ビット列を復号化すること;
 我々は木を構築する問題だけを扱う。
 よって、分析した標本があり、与えられたペアのリストがあると想定する:
 
@@ -126,7 +126,7 @@ We will suppose w_1 ≤ w_2 ≤...≤ wn, so that the weights are given in ascen
 ここで 1 ≤ j ≤ n に対して c_{j} は文字で w_{j} は重みと呼ばれる、
 テキスト内の文字の頻度を表わす正の整数だ。
 よって、文字 c_{j} の出現の相対的な頻度は w_{j}/W となる。ここで  W = Σ w_{j} だ。
-w_1 ≤ w_2 ≤...≤ wn を想定する、つまり重みは昇順で与えられる
+w_1 ≤ w_2 ≤...≤ w_n を想定する、つまり重みは昇順で与えられる
 
 In terms of trees, the cost function we want to minimise can be defined in the following way.
 By definition, the depth of a leaf is the length of the path from the root of the tree to the leaf.
