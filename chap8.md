@@ -1111,3 +1111,267 @@ fringe の要素がすべて 0 のリストのとき最小コスト木は最小�
 コストが木の高さであるときにも、(少し変更した)貪欲アルゴリズムがうまく動作する(演習問題)
 
 ---
+
+## 8.2 Huffman coding trees
+
+
+## coding example
+
+```
+  't' ⟼  0
+  'e' ⟼  10
+  'x' ⟼  11
+
+  "text" ⟼ 010110
+```
+
+```
+  't' ⟼  0
+  'e' ⟼  10
+  'x' ⟼  1
+
+   "text" ⟼ 01010
+   "tee"  ⟼ 01010
+```
+
+どの符号も他の符号の接頭辞とならない
+prefix-free coding
+
+---
+
+## prefix-free coding
+
+```
+Node (Node (Leaf 'b') (Leaf 'e')) (Leaf 't')
+```
+
+```
+       @
+     0/ \1
+	 @  't'
+   0/ \1
+  'b' 'e'
+
+   'b' ⟼ 00
+   'e' ⟼ 01
+   't' ⟼ 1
+```
+
+---
+
+## minimised length
+
+$1 ≤ j ≤ n$ に対して文字 $c_{j}$ の出現頻度が $p_{j}$ のときの符号の長さを $l_{j}$ とする
+
+$Σ_{j=1}^{n}\ p_{j}・l_{j}$ を最小にしたい
+
+---
+
+## Huffman coding
+
+ハフマン符号化の4つの要素のうち木を構築する問題だけをあつかう
+
+1. 標本から情報を集める
+1. 二分木を構築する
+1. テキストを符号化する
+1.  ビット列を復号化する
+
+---
+
+## coding tree - weight, depth, cost
+
+$1 ≤ j ≤ n$ に対して $c_{j}$ は文字で $w_{j}$ は重み
+
+$[(c_1,w_1),(c_2,w_2),...,(c_n,w_n)]$
+
+頻度は $w_{j}/W$、 ここで $W = Σ w_{j}$
+
+$w_1 ≤ w_2 ≤...≤ w_n$ を想定
+
+```haskell
+depths :: Tree a -> [Nat]
+depths = from 0
+         where from n (Leaf x) = [n]
+               from n (Node u v) = from (n+1) u ++ from (n+1) v
+
+type Weight = Nat
+type Elem = (Char,Weight)
+type Cost = Nat
+
+cost ::Tree Elem -> Cost
+cost t = sum [w * d | ((_,w),d) <- zip (fringe t) (depths t)]
+```
+
+## coding tree - permutation
+
+```haskell
+  huffman :: [Elem] -> Tree Elem
+  huffman <- MinWith cost mktrees
+```
+
+mktrees は fringe として与えられたリストでのすべての木を生成する
+
+実は fringe の順列が必要
+
+fringe が [1,2,3] の順列である木にうち、順序無しの木で異なるもの
+
+```
+  Node (Node (Leaf 1) (Leaf 2)) (Leaf 3)
+  Node (Node (Leaf 1) (Leaf 3)) (Leaf 2)
+  Node (Node (Leaf 2) (Leaf 3)) (Leaf 1)
+```
+
+## unordered example
+
+重み順の四つの木
+```
+  [Leaf 3,Leaf 5,Leaf 8,Leaf 9]
+```
+
+一番目と三番目を結合、重み順を維持し最後に置かれる
+```
+  [Leaf 5,Leaf 9,Node (Leaf 3) (Leaf 8)]
+```
+
+最初の二つを結合
+```
+  [Node (Leaf 3) (Leaf 8),Node (Leaf 5) (Leaf 9)]
+```
+
+残りの二つの木を結合
+```
+  [Node (Node (Leaf 3) (Leaf 8)) (Node (Leaf 5) (Leaf 9))]
+```
+
+## implementation details
+
+mkforests は forest のリストを構築し、それぞれの forest は単一の木
+```haskell
+mktrees :: [Elem] -> [Tree Elem]
+mktrees = map unwrap . mkforests . map Leaf
+
+mkforests :: [Tree Elem] -> [Forest Elem]
+mkforests = until (all single) (concatMap combine) . wrap
+```
+
+insert は重さの順を保つように木を木のリストへと挿入する。(insert 定義は演習問題)
+picks は一章で定義された。
+combine は可能なすべての方法で木の対を forest から選び、新たな木へと結合し、残りの木々へと挿入する
+```haskell
+combine :: Forest Elem  -> [Forest Elem]
+combine ts = [insert (Node t1 t2) us | ((t1,t2),us) <- pairs ts]
+pairs :: [a] -> [((a,a),[a])]
+pairs xs = [((x,y),zs) | (x,ys) <- picks xs, (y,zs) <- picks ys]
+```
+
+## another implementation of mkforests
+
+apply の定義は演習問題 1.13、
+apply n は与えられた値に関数を n 回適用する
+```
+apply :: Nat -> (a -> a) -> a -> a
+apply n f = if n == 0 then id else f . apply (n - 1) f
+
+mkforests :: [Tree Elem] -> [Forest Elem]
+mkforests ts = apply (length ts - 1) (concatMap combine) [ts]
+```
+
+## huffman coding fusion
+
+```
+  huffman :: [Elem] -> Tree Elem
+  huffman <- MinWith cost mktrees
+```
+
+空でないリスト xs に対して次のような gstep を見つける
+```
+  unwrap (until single gstep (map Leaf xs)) <- MinWith cost (mktrees xs)
+```
+
+より一般的には、次ようなgstep を有限の空でない木のリスト ts に対して見つける
+```
+  unwrap (until single gstep ts) <- MinWith cost (map unwrap (mkforests ts))
+```
+
+## Another generic greedy algorithm
+
+状態から候補のリストが次のような関数で与えられる状況
+```haskell
+  candidates :: State -> [Candidate]
+
+// ハフマン符号化では、状態は木のリストで候補は複数の木
+  candidates ts = map unwrap (mkforests ts)
+```
+
+つぎの精緻化がすべての状態 sx に対して保持される条件とは?
+```
+  extract (until final gstep sx) <- MinWith cost (candidates sx)   (8.2)
+```
+
+```haskell
+  gstep :: State -> State
+  final :: State -> Bool
+  extract :: State -> Candidate
+```
+
+(8.2) は、任意の初期状態 sx に対して繰り返し貪欲ステップを適用することで、結果として最終状態になり、
+その最終状態から、最小コストを持つ candidates sx の中にある候補であるという性質を持つ x を取り出すことができるということ
+
+## first condition
+
+```
+  MCC sx = MinWith cost (candidates sx)
+  mincost sx = minimum (map cost (candidates sx))
+```
+
+candidates sx 内のすべての x に対して、次が成立
+```
+  x <- MCC sx ⟺ cost x = mincost sx
+```
+
+(8.2) を保証する二つの条件の一つ目
+
+```
+  final sx ⟹ extract sx <- MCC sx   (8.3)
+```
+
+この条件はハフマン符号化を保つ為のもの。
+
+このとき final = single かつ extract = unwrap
+
+なぜなら map unwrap (mkforests [t]) = [t] かつ MinWith cost [t] = t
+
+## second condition
+
+(8.2) を保証する二つの条件の二つ目は貪欲条件
+
+記述には二通りの方法がある
+
+```
+  not (final sx) ⟹ (∃x:x <- MCC (gstep sx) ⋀ x <- MCC sx)   (8.4)
+```
+
+```
+  not (final sx) ⟹ MCC (gstep sx) <- MCC sx   (8.5)
+```
+
+特別な条件があれば (8.4) は (8.5) を導出する
+
+gstep を適用することで候補の数が減り、新たなものが導入されない
+```
+  candidates (gstep sx) ⊆ candidates sx   (8.6)
+```
+
+## derivation
+
+x <- MCC (gstep sx) かつ x <- MCC sx とすると MMC と mincost の定義から、次を得る
+```
+  mincost (gstep sx) = cost x = mincost sx
+```
+
+y <- MCC (gstep sx) とするなら (8.6) から y ∈ candidates sx
+```
+  cost y = mincost (gstep sx) = mincost sx
+```
+
+よって y <- MCC sx
