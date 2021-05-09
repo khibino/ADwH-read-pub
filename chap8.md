@@ -1293,6 +1293,10 @@ mkforests ts = apply (length ts - 1) (concatMap combine) [ts]
   unwrap (until single gstep ts) <- MinWith cost (map unwrap (mkforests ts))
 ```
 
+<!-- kokomade -->
+<!-- kokokara -->
+<!-- 5/22 は Another generic greedy algorithm の始めから -->
+
 ## Another generic greedy algorithm
 
 状態から候補のリストが次のような関数で与えられる状況
