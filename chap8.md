@@ -1403,4 +1403,165 @@ $0 ≤ j < k$ について apply j gstep sx は最終状態ではないので、
 
 (8.2) が成立。
 
+
+融合変換から導出される貪欲アルゴリズムとは違い、
+gstep がどんな形をとるのかについてのヒントは無い
+
 ## Huffman coding continued
+
+ハフマン符号化の場合は候補は木
+
+残りは gstep を定義することと貪欲条件の保存を示すこと
+
+```
+  MCC ts = MinWith cost (map unwrap (mkforests ts))
+```
+
+最小の重みを持つ forest 内の二つの木を結合する関数を gstep としてとる
+
+```
+  gstep (t1 :t2 :ts) = insert (Node t1 t2) ts
+```
+
+貪欲条件に対して、
+重み $[w_1,w_2,...,w_n]$ であるような重み順の木のリスト $ts = [t_1,t_2,...,t_n]$ をとる
+
+次のような木 t を構築する
+```
+  t <- MCC (gstep ts) ⋀ t <- MCC ts
+```
+
+## Huffman / greedy condition
+
+```
+  t <- MCC (gstep ts) ⋀ t <- MCC ts
+```
+
+`t' <- MCC ts` を考える
+
+ts 内のすべての木は `t'` の部分木としてどこかに出現
+
+$1 ≤ i ≤ n$ に対して $t_{i}$ が $t'$ 内の深さ $d_{i}$ に出現したと考える
+
+`t'` の部分木の中の最大の深さの兄弟の木の対を $t_{i}, t_{j}$ とし、$d = d_{i} = d_{j}$ とする
+
+すると $d_{1} ≤ d$ かつ $d_{2} ≤ d$ となる
+
+さらに $t_{i}$ と t_{j}$ は `t'` を構成する最初のステップとして選ぶことができ、
+一般性を失うことなく $w_{1} ≤ w_{i}$ かつ $w_{2} ≤ w_{j}$ とできる
+
+$t_{i}$ と $t_{1}$、$t_{j}$ と $t_{2}$ を交換することで `t` を構成する
+
+すると `t` は貪欲の最初のステップで構成できる
+
+`t'` と `t` のコストの差を考えると
+```
+  cost t' - cost t = d{1}w{1} + d{2}w{2} + d (w{i} + w{j}) - (d{1}w{i} + d{2}w{j} + d (w{1} + w{2}))
+                   = (d - d{1})(w{i} - w{1}) + (d - d{2}) (w{j} - w{2})
+                   ≥ 0
+```
+
+`cost t'` をできるかぎり小さくすると `cost t' = cost t`
+
+よって `t <- MCC ts` かつ `t <- MCC (gstep ts)`
+
+## Huffman / greedy condition preservation
+
+$∃$ t . $¬$ ( `t <- MCC ts` ) $∧$ `t <- MCC (gstep ts)` を仮定(最小コストでないような t が、貪欲ステップには最小コストとなる)すると、
+
+よりコストが小さい t' の存在が導かれる
+
+$∃$ `t' . cost t'` $<$ `cost t` $∧$ `t' <- MCC ts`
+
+さらに貪欲ステップを適用した t'' を考える
+
+$∃$ `t'' .  t'' <- MCC (gstep ts)` $∧$ `cost t''` $≤$ `cost t'` $∧$ `cost t'' = cost t`
+
+ここで `cost t'` $<$ `cost t` $∧$ `cost t` $≤$ `cost t'` となり、矛盾
+
+## Huffman / greedy algorithm
+
+```
+  huffman es = unwrap (until single gstep (map Leaf es))
+               where gstep (t1 :t2 :ts) = insert (Node t1 t2) ts
+```
+
+非効率の原因が二つある
+
+- 関数 insert が各ステップで重みを再計算する (タプリングで解決)
+- 最小の重みの二つの木を結合した結果を forest に挿入しなおすのに最悪ケースで二乗の時間 (線形時間にしたい)
+
+## Huffman / algorithm improvement
+
+まず重み $w_1$ と $w_2$ を持つ木を結合され、次に重み $w_3$ と $w_4$ を持つ木を結合されることを考える
+
+$w_1 ≤ w_2 ≤ w_3 ≤ w_4$ から $w_1 + w_2 ≤ w_3 + w_4$
+
+gstep のどの呼び出しにおいても、insert への引数が少なくとも以前の引数と同じ大きさの重みを持つ
+
+葉のリスト(Stack)と、ノードの木のキュー(Queue)を用意する
+
+それぞれのステップで、
+gstep は木のうち最も重みの少ない二つの木を Stack または Queue から選択し、
+結合した木を Queue に追加する
+
+
+```
+ Stack of weights     Queue of combined weights
+------------------------------------------------
+ 1, 2, 4, 4, 6, 9
+       4, 4, 6, 9     1 + 2
+          4, 6, 9     4 + (1 + 2)
+                9     4 + (1 + 2), 4 + 6
+                      4 + 6, 9 + (4 + (1 + 2))
+                      (4 + 6) + (9 + (4 + (1 + 2)))
+```
+
+Figure 8.2 Example of the stack and queue operations
+
+## Huffman / implementation
+
+```haskell
+type SQ a = (Stack a,Queue a)
+type Stack a = [a]
+type Queue a = SymList a
+
+huffman :: [Elem] -> Tree Elem
+huffman = extractSQ . until singleSQ gstep . makeSQ . map leaf
+
+-- 木と重みの対
+type Pair = (Tree Elem,Weight)
+
+-- スマートコンストラクタ
+leaf :: Elem -> Pair
+leaf (c,w) = (Leaf (c,w),w)
+node :: Pair -> Pair -> Pair
+node (t1,w1) (t2,w2) = (Node t1 t2,w1+w2)
+
+-- Stack-Queue の初期化
+makeSQ :: [Pair] -> SQ Pair
+makeSQ xs = (xs,nilSL)
+
+-- singleton 判定, 木の取り出し
+singleSQ :: SQ a -> Bool
+singleSQ (xs,ys) = null xs && singleSL ys
+extractSQ :: SQ Pair -> Tree Elem
+extractSQ (xs,ys) = fst (headSL ys)
+
+-- greedy step
+gstep :: SQ Pair -> SQ Pair
+gstep ps = add (node p1 p2) rs
+           where (p1,qs) = extractMin ps
+                 (p2,rs) = extractMin qs
+add ::Pair -> SQ Pair -> SQ Pair
+add y (xs, ys) = (xs,snocSL y ys)
+
+-- Stack-Queue から最小の重みの木を取り出す
+extractMin :: SQ Pair -> (Pair,SQ Pair)
+extractMin (xs,ys)
+  | nullSL ys = (head xs,(tail xs, ys))
+  | null xs = (headSL ys,(xs,tailSL ys))
+  | snd x <= snd y = (x,(tail xs,ys))
+  | otherwise = (y,(xs,tailSL ys))
+  where x = head xs; y = headSL ys
+```
