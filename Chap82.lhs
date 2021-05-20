@@ -570,7 +570,7 @@ For the greedy condition, let ts = [t1,t2,...,tn] be a list of trees in weight o
 with weights [w1,w2,...,wn].
 The task is to construct a tree t for which
 
-貪欲条件に対して、重み [w1,w2,...,wn] であるような重み順の木のリスト ts = [t1,t2,...,tn] をとる。
+貪欲条件に対して、重み [w_1,w_2,...,w_n] であるような重み順の木のリスト ts = [t_1,t_2,...,t_n] をとる。
 やるべきことは次のような木 t を構築することだ
 
   t <- MCC (gstep ts) ⋀ t <- MCC ts
@@ -593,27 +593,29 @@ Furthermore
 t' <- MCC ts を考える。
 木の手法を t' に適用することで t を構成する。
 ts 内のすべての木は t' の部分木としてどこかに出現するので、
-1 ≤ i ≤ n に対して t{i} が t' 内の深さ d{i} に出現したと考える。
+1 ≤ i ≤ n に対して t_{i} が t' 内の深さ d_{i} に出現したと考える。
 今や、t' の部分木の中では
 最大の深さの兄弟の木の対があるだろう。
 そのような対は複数あるかもしれないが、少なくとも一つはあるだろう。
-そのような 2つの木 t{i} と t{j} を考え、 d = d{i} = d{j} とする。
-すると d{1} ≤ d かる d{2} ≤ d である。
+そのような 2つの木 t_{i} と t_{j} を考え、 d = d_{i} = d_{j} とする。
+すると d_{1} ≤ d かつ d_{2} ≤ d である。
 さらに、 t{i} と t{j} は t' を構成する最初のステップとして選ぶことができた。
-一般性を失うことなく、 w{1} ≤ w{i} かつ w{2} ≤ w{j} とできる。
-t{i} と t{1}、t{j} と t{2} を交換することで t を構成する。
+一般性を失うことなく、 w_{1} ≤ w_{i} かつ w_{2} ≤ w_{j} とできる。
+t_{i} と t_{1}、t_{j} と t_{2} を交換することで t を構成する。
 すると t は貪欲の最初のステップで構成できる。
 さらに次のようになる
+
+※ t_{1}, t_{2} は最も小さい重み w_{1}, w_{2} を持つので、一番深い位置へと持っていく
 
   cost t' - cost t = d{1}w{1} + d{2}w{2} + d (w{i} + w{j}) - (d{1}w{i} + d{2}w{j} + d (w{1} + w{2}))
                    = (d - d{1})(w{i} - w{1}) + (d - d{2}) (w{j} - w{2})
                    ≥ 0
 
-But cost t is as small as possible,
+But cost t' is as small as possible,
 so cost t' = cost t.
 Hence t <- MCC ts and t <- MCC (gstep ts).
 
-しかし cost t はできるかぎり小さくするので cost t' = cost t である。
+しかし cost t' はできるかぎり小さくするので cost t' = cost t である。
 よって t <- MCC ts かつ t <- MCC (gstep ts) となる。
 
 {- p.194 -}
@@ -628,7 +630,7 @@ Here is the greedy algorithm we have derived:
 直接的により強い貪欲条件が保持されることを示すのに、同様の木の手法が利用できる。
 t が MCC ts にある値ではないような t <- MCC (gstep ts) を考える。
 これは cost t' < cost t となるような木 t' <- MCC ts が存在することを意味する。
-今や cost t = cost t'' ≤ cost t' となるようなもう一つの別の木 tree t'' <- MCC (gstep ts) を生成するために
+今や cost t = cost t'' ≤ cost t' となるようなもう一つの別の木 t'' <- MCC (gstep ts) を生成するために
 t' に生成手法を適用することで矛盾が得られる。
 ここで導出される貪欲アルゴリズムは次のようになる:
 
@@ -651,7 +653,7 @@ The final step is to show how this can be reduced to linear time.
 非効率性はタプリングによって容易に払拭される。
 より重大な問題は、
 最小の重みの二つの木を見付けるのは定数時間の操作とはいえ、
-結合した木を forest に挿入しなおすのに最悪ケースで線形時間がかかる。
+結合した木を forest に挿入しなおすのに最悪ケースで二乗の時間がかかる。
 最後のステップはこれを線形時間へと減少させる方法を示す。
 
 The key observation behind the linear-time algorithm is the fact that,
@@ -673,19 +675,19 @@ Figure 8.2, which shows the weights only, gives an example of how the method wor
 The method is viable only if the various queue operations take constant time.
 But we have already met symmetric lists in Chapter 3, which satisfy the requirements exactly.
 
-線形時間のアルゴリズムの背景にある観察のポイントは次の事実です、
+線形時間のアルゴリズムの背景にある観察のポイントは次の事実だ。
 gstep のどの呼び出しにおいても、insert への引数が少なくとも以前の引数と同じ大きさの重みを持つということだ。
 重み w1 と w2 を持つ二つの木を結合し、その後で、重み w3 と w4 を持つ二つの木についても考えよう。
-w1 ≤ w2 ≤ w3 ≤ w4 から w1+w2 ≤ w3+w4 が従う。a
+w1 ≤ w2 ≤ w3 ≤ w4 から w1+w2 ≤ w3+w4 が従う。
 これは、要素がキューの後方に加えられ、前方からの削除のみが行なわれるような、
-葉の無い木を単純なキューとして管理することを意味する。 (???)
+葉ではない木を単純なキューとして管理することを意味する。
 単一のリストを管理する代わりに、二つのリストを管理する。
 一つ目は葉のリストで、二つ目はノードの木のキューだ。
 要素は一つ目のリストに加えられることはないが、前方からの削除のみが行なわれるので、
 一つ目のリストもキューとなる。
 しかし、単純なリストで十分である。
 単に二つ目のリストと区別するために、一つ目のリストをスタックと呼ぶことにする。
-それぞれのステップで、gstep は二つの最右の木をスタックまたはキューから選択し、
+それぞれのステップで、gstep は二つの最も軽い木をスタックまたはキューから選択し、
 結合し、その結果をキューの最後に加える。
 アルゴリズムの最後では、キューは単一の木を含むことになり、それが貪欲アルゴリズムの解となる。
 図 8.2 (重みのみを見せている) はこの手法がそのように振る舞うかの例を与える。
@@ -716,9 +718,9 @@ Now we can define
  1, 2, 4, 4, 6, 9
        4, 4, 6, 9     1 + 2
           4, 6, 9     4 + (1 + 2)
-	        9     4 + (1 + 2), 4 + 6
-		      4 + 6, 9 + (4 + (1 + 2))
-		      (4 + 6) + (9 + (4 + (1 + 2)))
+                9     4 + (1 + 2), 4 + 6
+                      4 + 6, 9 + (4 + (1 + 2))
+                      (4 + 6) + (9 + (4 + (1 + 2)))
 
 Figure 8.2 Example of the stack and queue operations
 
