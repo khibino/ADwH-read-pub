@@ -276,6 +276,8 @@ Exercise 8.9
 
 Here is another way of defining the function mktrees of Section 8.1, one similar to that used in Huffman coding:
 
+以下は 8.1節の関数 mktrees を定義するもう一つの別の方法で、これはハフマン符号化で使われたものに似ている:
+
    mktrees :: [a] -> [Tree a]
    mktrees = map unwrap . until (all single) (concatMap combine) .
              wrap . map Leaf
@@ -286,17 +288,294 @@ The function combine combines two adjacent trees in a forest in all possible way
 The process is repeated until only singleton forests remain,
 forests that consist of just one tree.
 Finally the trees are extracted to give a list of trees.
-This method  may generate the same tree more than once,
+This method may generate the same tree more than once,
 but all possible trees are nevertheless produced.
 Write down the associated greedy algorithm for this version of mktrees (no justification is required).
+
+関数 combine は forest の中の、二つの隣接した木を可能なすべての方法で結合する。
+この処理は singleton の forest (ただ一つだけの木を含む forest) が残るまで繰り返される。
+最後に木々は木のリストへと展開される。
+この方法は同じ木を一度より多く生成するかもしれないが、
+それでもすべての可能なかぎりの木々が生成される。
+このバージョンの mktrees に対して連想される貪欲アルゴリズムを書き下せ(根拠付けは必要なし)
+
+
+TBD
+
+
+until p f x | p x       = x
+            | otherwise = until p f (f x)
+
+until (all single) (concatMap combine) xss
+
+a xss | all single xss = xss
+      | otherwise      = a (concatMap combine xss)
 
 ---
 
 Exercise 8.10
 
+In Huffman coding, why does the second, recursive definition of cost follow from the first?
+
+ハフマン符号化において、 cost の再帰的定義の二つ目が一つ目に従うのはなぜか?
+
+```
+  cost ::Tree Elem -> Cost
+  cost t = sum [w * d | ((_,w),d) <- zip (fringe t) (depths t)]
+```
+
+```
+  cost (Leaf e) = 0
+  cost (Node u v) = cost u + cost v + weight u + weight v
+  weight :: Tree Elem -> Nat
+  weight (Leaf (c,w)) = w
+  weight (Node u v) = weight u + weight v
+```
+
+    fringe (Node u v)
+ == fringe u ++ fringe v
+
+    depths (Node u v)
+ == from 0 (Node u v)
+ == from 1 u ++ from 1 v
+
+    from 1 u
+ == [x + 1 | x <- from 0 u]
+ == [x + 1 | x <- depths u]
+
+
+    cost (Node u v)
+
+ == sum [w * d | ((_,w),d) <- zip (fringe (Node u v)) (depths (Node u v))]
+
+ == sum [w * d | ((_,w),d) <- zip (fringe u ++ fringe v) (from 1 u ++ from 1 v)]
+
+ == sum [w * d | ((_,w),d) <- zip (fringe u) (from 1 u) ++ zip (fringe v) (from 1 v)]
+
+ == sum ([w * d | ((_,w),d) <- zip (fringe u) (from 1 u)] ++ [w * d | ((_,w),d) <- zip (fringe v) (from 1 v)])
+
+ == sum [w * d | ((_,w),d) <- zip (fringe u) (from 1 u)] + sum [w * d | ((_,w),d) <- zip (fringe v) (from 1 v)]
+
+ == sum [w * (x + 1) | ((_,w),x) <- zip (fringe u) (depths u)] + sum [w * (x + 1) | ((_,w),x) <- zip (fringe v) (depths v)]
+
+ == sum [w * x + w | ((_,w),x) <- zip (fringe u) (depths u)] + sum [w * x + w | ((_,w),x) <- zip (fringe v) (depths v)]
+
+ == sum [w * x | ((_,w),x) <- zip (fringe u) (depths u)] + sum [w | ((_,w),_) <- zip (fringe u) (depths u)]
+  + sum [w * x | ((_,w),x) <- zip (fringe v) (depths v)] + sum [w | ((_,w),_) <- zip (fringe v) (depths v)]
+
+ == cost u + weight u + cost v + weight v
+
+---
+
+Exercise 8.11
+
+Define the function insert used in Huffmans algorithm.
+
+ハフマンアルゴリズムで利用されている関数 insert を定義せよ。
+
+
+
+> insert :: Tree Elem -> Forest Elem -> Forest Elem
+> insert s = ins where
+>   w = weight s
+>   ins []             =  [s]
+>   ins tts@(t:ts)
+>     | w <= weight t  =  s : tts
+>     | otherwise      =  t : ins ts
+
+> weight :: Tree Elem -> Nat
+> weight (Leaf (c,w)) = w
+> weight (Node u v) = weight u + weight v
+
+
+---
+
+Exercise 8.12
+
+Give the two ways that the tree
+
+木
+
+  [Node (Node (Leaf 3) (Leaf 8)) (Node (Leaf 5) (Leaf 9))]
+
+can be generated from [Leaf 3,Leaf 5,Leaf 8,Leaf 9].
+
+が [Leaf 3,Leaf 5,Leaf 8,Leaf 9] から生成される方法を二つ与えよ。
+
+
+
+  [Leaf 3,Leaf 5,Leaf 8,Leaf 9]
+  [Leaf 5,Leaf 9,Node (Leaf 3) (Leaf 8)]
+  [Node (Leaf 3) (Leaf 8),Node (Leaf 5) (Leaf 9)]
+  [Node (Node (Leaf 3) (Leaf 8)) (Node (Leaf 5) (Leaf 9))]
+
+  [Leaf 3,Leaf 5,Leaf 8,Leaf 9]
+  [Leaf 3,Leaf 8,Node (Leaf 5) (Leaf 9)]
+  [Node (Leaf 3) (Leaf 8), Node (Leaf 5) (Leaf 9)]
+  [Node (Node (Leaf 3) (Leaf 8)) (Node (Leaf 5) (Leaf 9))]
+
+
+---
+
+Exercise 8.13
+
+The number of trees generated in the specification of Huffmans algorithm is given for n ≥ 2 by
+
+ハフマンアルゴリズムの仕様で生成される木の数は n ≥ 2 に対して次で与えられる
+
+    n    n-1        2
+  (   ) (   ) ... (   )
+    2     2         2
+
+Show that this number equals
+
+この数が次に等しいことを示せ
+
+   n!(n-1)!
+  ----------
+   2^{n-1}
+
+
+
+自然数 n ≥ 2 についての帰納法で示す
+
+n = 2 のとき、
+
+   2
+ (   ) = 1
+   2
+
+  2! 1!
+ ------ = 1
+   2^1
+
+で成立。
+
+
+n = k+1 のとき
+
+    k    k-1        2      k!(k-1)!
+  (   ) (   ) ... (   ) = ----------
+    2     2         2      2^{k-1}
+
+が成立しているとする。
+
+このとき、
+
+    k+1    k    k-1        2
+   (   ) (   ) (   ) ... (   )
+     2     2     2         2
+
+    k+1     k!(k-1)!
+ = (   ) · ----------
+     2      2^{k-1}
+
+   (k+1)k    k!(k-1)!
+ = ------ · ----------
+     2       2^{k-1}
+
+    (k+1)!k!
+ = ----------
+      2^k
+
+となり成立。 //
+
+
+---
+
+Exercise 8.14
+
+Define MCC k xs = MinWith cost (apply k fstep [xs]). Show that
+
+MCC k xs = MinWith cost (apply k fstep [xs]) とおく。
+
+MCC k (gstep xs) <- MCC (k+1) xs という条件のもと、次を示せ
+
+  apply k gstep xs <- MCC k xs
+
+provided MCC k (gstep xs) <- MCC (k+1) xs.
+
+
+
+MinWith cost (apply k fstep [gstep xs]) <- MinWith cost (apply (k+1) fstep [xs]) の条件のもと、
+
+apply k gstep xs <- MinWith cost (apply k fstep [xs]) を示す。
+
+自然数 k についての帰納法で証明する。
+
+k = 0 のとき
+
+    apply 0 gstep xs
+    {- apply の定義 -}
+ == xs
+    {- singleton 集合 -}
+ <- MinWith cost [xs]
+    {- apply の定義 -}
+ == MinWith cost (apply 0 fstep [xs])
+    {- MCC の定義 -}
+ == MCC 0 xs
+
+で成立。
+
+k = n+1 のとき
+
+    apply (n+1) gstep xs
+    {- apply の最内ステップを展開 -}
+ == apply n gstep (gstep xs)
+    {- induction hypothesis -}
+ <- MCC n (gstep xs)
+    {- 条件 -}
+ <- MCC (n+1) xs
+
+となり、成立。 //
+
+
+---
+
+Exercise 8.15
+
+Define the function singleSL :: SymList a -> Bool for determining whether a symmetric list is a singleton.
+
+symmetric list が singleton かどうかを判定する関数 singleSL :: SymList a -> Bool を定義せよ。
+
+
+
+> singleSL :: SymList a -> Bool
+> singleSL ([_],[]) = True
+> singleSL ([],[_]) = True
+> singleSL  _       = False
+
+---
+
+Exercise 8.16
+
+Define addListQ in terms of insertQ.
+
+---
+
+Exercise 8.17
+
+Define mergeOn.
+
+---
+
+Exercise 8.18
+
+Show that, for the trees considered in Section 8.3, a tree of size n  has rank at most ⌊log(n+1)⌋.
+
+---
+
+Exercise 8.19
+
+Define emptyQ and nullQ.
+
 -----
 
 > type Nat = Int
+
+> type Weight = Nat
+> type Elem = (Char,Weight)
+> type Cost = Nat
 
 > data Tree a = Leaf a | Node (Tree a) (Tree a)
 >             deriving (Eq, Show)
