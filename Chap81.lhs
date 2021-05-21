@@ -122,7 +122,7 @@ can we find a linear-time algorithm for building a tree with minimum cost and th
 
 The function cost has the same definition as height except that the height of a leaf  is the label value rather than 0.
 In fact, if each leaf is replaced by a tree whose height  is given by the label value, the problem is really of the following form:
-given a list  of trees together with their heights, can we find a linear-time algorithm to combine  them into a single tree of minimum height without changing the shape or order of  the component trees? To appreciate the problem consider the two trees with the  same fringe in which each node is labelled with its cost.
+given a list  of trees together with their heights, can we find a linear-time algorithm to combine them into a single tree of minimum height without changing the shape or order of  the component trees? To appreciate the problem consider the two trees with the  same fringe in which each node is labelled with its cost.
 
 関数 cost は葉の高さが0ではなくラベル値であることを除いて高さと同じ定義を持っている。
 実際各葉がラベル値で与えられた高さを持つ木で置き換えられた場合問題は次のような形になる。
