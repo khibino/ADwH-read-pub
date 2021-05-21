@@ -899,4 +899,13 @@ Priority queues will be needed again, particularly in Part Six, so we will consi
 > picks (x:xs) = (x,xs) : [(y,x:ys) | (y,ys) <- picks xs]
 
 > insert :: Tree Elem -> Forest Elem -> Forest Elem
-> insert = undefined
+> insert s = ins where
+>   w = weight s
+>   ins []             =  [s]
+>   ins tts@(t:ts)
+>     | w <= weight t  =  s : tts
+>     | otherwise      =  t : ins ts
+
+> weight :: Tree Elem -> Nat
+> weight (Leaf (c,w)) = w
+> weight (Node u v) = weight u + weight v
