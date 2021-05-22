@@ -1202,6 +1202,8 @@ cost ::Tree Elem -> Cost
 cost t = sum [w * d | ((_,w),d) <- zip (fringe t) (depths t)]
 ```
 
+---
+
 ## coding tree - permutation
 
 ```haskell
@@ -1220,6 +1222,8 @@ fringe が [1,2,3] の順列である木にうち、順序無しの木で異な�
   Node (Node (Leaf 1) (Leaf 3)) (Leaf 2)
   Node (Node (Leaf 2) (Leaf 3)) (Leaf 1)
 ```
+
+---
 
 ## unordered example
 
@@ -1243,6 +1247,8 @@ fringe が [1,2,3] の順列である木にうち、順序無しの木で異な�
   [Node (Node (Leaf 3) (Leaf 8)) (Node (Leaf 5) (Leaf 9))]
 ```
 
+---
+
 ## implementation details
 
 mkforests は forest のリストを構築し、それぞれの forest は単一の木
@@ -1264,9 +1270,11 @@ pairs :: [a] -> [((a,a),[a])]
 pairs xs = [((x,y),zs) | (x,ys) <- picks xs, (y,zs) <- picks ys]
 ```
 
+---
+
 ## another implementation of mkforests
 
-apply の定義は演習問題 1.13、
+apply の定義は演習問題 1.13 でやった。
 apply n は与えられた値に関数を n 回適用する
 ```
 apply :: Nat -> (a -> a) -> a -> a
@@ -1275,6 +1283,8 @@ apply n f = if n == 0 then id else f . apply (n - 1) f
 mkforests :: [Tree Elem] -> [Forest Elem]
 mkforests ts = apply (length ts - 1) (concatMap combine) [ts]
 ```
+
+---
 
 ## huffman coding fusion
 
@@ -1292,6 +1302,8 @@ mkforests ts = apply (length ts - 1) (concatMap combine) [ts]
 ```
   unwrap (until single gstep ts) <- MinWith cost (map unwrap (mkforests ts))
 ```
+
+---
 
 <!-- kokomade -->
 <!-- kokokara -->
@@ -1321,6 +1333,8 @@ mkforests ts = apply (length ts - 1) (concatMap combine) [ts]
 (8.2) は、任意の初期状態 sx に対して繰り返し貪欲ステップを適用することで、結果として最終状態になり、
 その最終状態から、最小コストを持つ candidates sx にある候補 x を取り出すことができるということ
 
+---
+
 ## first condition
 
 ```
@@ -1345,6 +1359,8 @@ candidates sx 内のすべての x に対して、次が成立
 
 なぜなら map unwrap (mkforests [t]) = [t] かつ MinWith cost [t] = t
 
+---
+
 ## second condition
 
 (8.2) を保証する二つの条件の二つ目は貪欲条件
@@ -1366,6 +1382,8 @@ gstep を適用することで候補の数が減り、新たなものが導入�
   candidates (gstep sx) ⊆ candidates sx   (8.6)
 ```
 
+---
+
 ## derivation for (8.5)
 
 x <- MCC (gstep sx) かつ x <- MCC sx とすると MMC と mincost の定義から、次を得る
@@ -1379,6 +1397,8 @@ y <- MCC (gstep sx) とするなら (8.6) から y ∈ candidates sx
 ```
 
 よって y <- MCC sx
+
+---
 
 ## proof for (8.2)
 
@@ -1407,6 +1427,8 @@ $0 ≤ j < k$ について apply j gstep sx は最終状態ではないので、
 融合変換から導出される貪欲アルゴリズムとは違い、
 gstep がどんな形をとるのかについてのヒントは無い
 
+---
+
 ## Huffman coding continued
 
 ハフマン符号化の場合は候補は木
@@ -1430,6 +1452,8 @@ gstep がどんな形をとるのかについてのヒントは無い
 ```
   t <- MCC (gstep ts) ⋀ t <- MCC ts
 ```
+
+---
 
 ## Huffman / greedy condition
 
@@ -1465,6 +1489,8 @@ $t_{i}$ と $t_{1}$、$t_{j}$ と $t_{2}$ を交換することで `t` を構成
 
 よって `t <- MCC ts` かつ `t <- MCC (gstep ts)`
 
+---
+
 ## Huffman / greedy condition preservation
 
 $∃$ t . $¬$ ( `t <- MCC ts` ) $∧$ `t <- MCC (gstep ts)` を仮定(最小コストでないような t が、貪欲ステップには最小コストとなる)すると、
@@ -1479,6 +1505,8 @@ $∃$ `t'' .  t'' <- MCC (gstep ts)` $∧$ `cost t''` $≤$ `cost t'` $∧$ `cos
 
 ここで `cost t'` $<$ `cost t` $∧$ `cost t` $≤$ `cost t'` となり、矛盾
 
+---
+
 ## Huffman / greedy algorithm
 
 ```
@@ -1490,6 +1518,8 @@ $∃$ `t'' .  t'' <- MCC (gstep ts)` $∧$ `cost t''` $≤$ `cost t'` $∧$ `cos
 
 - 関数 insert が各ステップで重みを再計算する (タプリングで解決)
 - 最小の重みの二つの木を結合した結果を forest に挿入しなおすのに最悪ケースで二乗の時間 (線形時間にしたい)
+
+---
 
 ## Huffman / algorithm improvement
 
@@ -1518,6 +1548,8 @@ gstep は木のうち最も重みの少ない二つの木を Stack または Que
 ```
 
 Figure 8.2 Example of the stack and queue operations
+
+---
 
 ## Huffman / implementation
 
