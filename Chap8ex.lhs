@@ -421,7 +421,7 @@ Exercise 8.12
 
 Give the two ways that the tree
 
-木
+次の木
 
   [Node (Node (Leaf 3) (Leaf 8)) (Node (Leaf 5) (Leaf 9))]
 
@@ -523,10 +523,6 @@ MCC k (gstep xs) <- MCC (k+1) xs という条件のもと、次を示せ
 provided MCC k (gstep xs) <- MCC (k+1) xs.
 
 
-
-MinWith cost (apply k fstep [gstep xs]) <- MinWith cost (apply (k+1) fstep [xs]) の条件のもと、
-
-apply k gstep xs <- MinWith cost (apply k fstep [xs]) を示す。
 
 自然数 k についての帰納法で証明する。
 
