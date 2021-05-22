@@ -311,17 +311,6 @@ Write down the associated greedy algorithm for this version of mktrees (no justi
 > combine ts = us ++ [Node u v] ++ vs
 >   where (us,u:v:vs) = bestjoin ts
 
-> bestjoin :: Forest Nat -> (Forest Nat, Forest Nat)
-> bestjoin ts =
->     fst $ minimumBy (comparing snd) $
->     [ ((xs, ys), c)
->     | (xs, ys@(u:v:vs)) <- splits ts
->     , let c = cost (Node u v) ]
->   where
->     cost :: Tree Nat -> Nat
->     cost (Leaf x) = x
->     cost (Node u v) = 1 + cost u `max` cost v
-
 bestjoin は 2つ目の forest の
 最初の 2つの木の combine 後のコストが最小になるように
 forest を 2つに分ける関数
@@ -337,6 +326,16 @@ forest を 2つに分ける関数
 [Node (Leaf 5) (Node (Node (Leaf 3) (Leaf 1)) (Leaf 4)), Node (Leaf 2) (Leaf 2)]
 
 [Node (Node (Leaf 5) (Node (Node (Leaf 3) (Leaf 1)) (Leaf 4))) (Node (Leaf 2) (Leaf 2))]
+
+> bestjoin :: Forest Nat -> (Forest Nat, Forest Nat)
+> bestjoin ts =
+>     fst $ minimumBy (comparing snd) $
+>     [ ((xs, ys), cost (Node u v))
+>     | (xs, ys@(u:v:vs)) <- splits ts ]
+>   where
+>     cost :: Tree Nat -> Nat
+>     cost (Leaf x) = x
+>     cost (Node u v) = 1 + cost u `max` cost v
 
 
 ---
