@@ -1,3 +1,5 @@
+> import Data.Ord (comparing)
+> import Data.List (minimumBy)
 
 Exercise 8.1
 
@@ -300,16 +302,42 @@ Write down the associated greedy algorithm for this version of mktrees (no justi
 このバージョンの mktrees に対して連想される貪欲アルゴリズムを書き下せ(根拠付けは必要なし)
 
 
-TBD
+解答の紹介
 
+> mct :: [Nat] -> Tree Nat
+> mct = unwrap . until single combine . map Leaf
 
-until p f x | p x       = x
-            | otherwise = until p f (f x)
+> combine :: Forest Nat -> Forest Nat
+> combine ts = us ++ [Node u v] ++ vs
+>   where (us,u:v:vs) = bestjoin ts
 
-until (all single) (concatMap combine) xss
+> bestjoin :: Forest Nat -> (Forest Nat, Forest Nat)
+> bestjoin ts =
+>     fst $ minimumBy (comparing snd) $
+>     [ ((xs, ys), c)
+>     | (xs, ys@(u:v:vs)) <- splits ts
+>     , let c = cost (Node u v) ]
+>   where
+>     cost :: Tree Nat -> Nat
+>     cost (Leaf x) = x
+>     cost (Node u v) = 1 + cost u `max` cost v
 
-a xss | all single xss = xss
-      | otherwise      = a (concatMap combine xss)
+bestjoin は 2つ目の forest の
+最初の 2つの木の combine 後のコストが最小になるように
+forest を 2つに分ける関数
+
+[Leaf 5, Leaf 3, Leaf 1, Leaf 4, Leaf 2, Leaf 2]
+
+[Leaf 5, Leaf 3, Leaf 1, Leaf 4, Node (Leaf 2) (Leaf 2)]
+
+[Leaf 5, Node (Leaf 3) (Leaf 1), Leaf 4, Node (Leaf 2) (Leaf 2)]
+
+[Leaf 5, Node (Node (Leaf 3) (Leaf 1)) (Leaf 4), Node (Leaf 2) (Leaf 2)]
+
+[Node (Leaf 5) (Node (Node (Leaf 3) (Leaf 1)) (Leaf 4)), Node (Leaf 2) (Leaf 2)]
+
+[Node (Node (Leaf 5) (Node (Node (Leaf 3) (Leaf 1)) (Leaf 4))) (Node (Leaf 2) (Leaf 2))]
+
 
 ---
 
@@ -607,3 +635,5 @@ Define emptyQ and nullQ.
 > spine :: Tree a -> [Tree a]
 > spine (Leaf x)   = [Leaf x]
 > spine (Node u v) = spine u ++ [v]
+
+> type SymList a = ([a], [a])
