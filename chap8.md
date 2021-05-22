@@ -1423,6 +1423,11 @@ $0 ≤ j < k$ について apply j gstep sx は最終状態ではないので、
 
 (8.2) が成立。
 
+```
+  extract (until final gstep sx) = extract (apply k gstep sx)
+    <- MCC (apply k gstep sx) <- MCC sx
+```
+
 
 融合変換から導出される貪欲アルゴリズムとは違い、
 gstep がどんな形をとるのかについてのヒントは無い
