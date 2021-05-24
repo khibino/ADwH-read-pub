@@ -284,7 +284,7 @@ Here is another way of defining the function mktrees of Section 8.1, one similar
    mktrees = map unwrap . until (all single) (concatMap combine) .
              wrap . map Leaf
    combine :: Forest a -> [Forest a]
-   combine xs = [ys ++ [Node x y] ++ zs | (ys,x:y:zs) <- splits xs]x
+   combine xs = [ys ++ [Node x y] ++ zs | (ys,x:y:zs) <- splits xs]
 
 The function combine combines two adjacent trees in a forest in all possible ways.
 The process is repeated until only singleton forests remain,
