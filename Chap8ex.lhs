@@ -574,23 +574,43 @@ Exercise 8.16
 
 Define addListQ in terms of insertQ.
 
+
+> addListQ :: Ord p => [(a,p)] -> PQ a p -> PQ a p
+> addListQ ps q = foldr (uncurry insertQ) q ps
+
 ---
 
 Exercise 8.17
 
 Define mergeOn.
 
+> mergeOn :: Ord b => (a -> b) -> [a] -> [a] -> [a]
+> mergeOn f = disp
+>   where
+>     disp []        ys   = ys
+>     disp xs@(_:_)  []   = xs
+>     disp xxs@(x:xs) yys@(y:ys)
+>       | f x <= f y      = x : disp xs yys
+>       | otherwise       = y : disp xxs ys
+
 ---
 
 Exercise 8.18
 
-Show that, for the trees considered in Section 8.3, a tree of size n  has rank at most ⌊log(n+1)⌋.
+Show that, for the trees considered in Section 8.3, a tree of size n has rank at most ⌊log(n+1)⌋.
 
 ---
 
 Exercise 8.19
 
 Define emptyQ and nullQ.
+
+> emptyQ :: PQ a p
+> emptyQ = Null
+
+> nullQ :: PQ a p -> Bool
+> nullQ Null      = True
+> nullQ (Fork {}) = False
 
 -----
 
@@ -632,3 +652,31 @@ Define emptyQ and nullQ.
 > spine (Node u v) = spine u ++ [v]
 
 > type SymList a = ([a], [a])
+
+> data PQ a p = Null | Fork Rank a p (PQ a p) (PQ a p)
+> type Rank = Nat
+
+> toListQ :: Ord p => PQ a p -> [(a,p)]
+> toListQ Null = []
+> toListQ (Fork _ x p t1 t2) = (x,p):mergeOn snd (toListQ t1) (toListQ t2)
+
+> fork :: a -> p -> PQ a p -> PQ a p -> PQ a p
+> fork x p t1 t2
+>   | r2 <= r1 = Fork (r2 + 1) x p t1 t2
+>   | otherwise = Fork (r1 + 1) x p t2 t1
+>   where r1 = rank t1; r2 = rank t2
+> rank ::PQ a p -> Rank
+> rank Null = 0
+> rank (Fork r _ _ _ _) = r
+
+> combineQ :: Ord p => PQ a p -> PQ a p -> PQ a p
+> combineQ Null t = t
+> combineQ t Null = t
+> combineQ (Fork k1 x1 p1 l1 r1) (Fork k2 x2 p2 l2 r2)
+>   | p1 <= p2  = fork x1 p1 l1 (combineQ r1 (Fork k2 x2 p2 l2 r2))
+>   | otherwise = fork x2 p2 l2 (combineQ (Fork k1 x1 p1 l1 r1) r2)
+
+> insertQ :: Ord p => a -> p -> PQ a p -> PQ a p
+> insertQ x p t = combineQ (fork x p Null Null) t
+> deleteQ :: Ord p => PQ a p -> ((a,p),PQ a p)
+> deleteQ (Fork _ x p t1 t2) = ((x,p), combineQ t1 t2)
