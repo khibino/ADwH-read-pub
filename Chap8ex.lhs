@@ -575,6 +575,7 @@ Exercise 8.16
 Define addListQ in terms of insertQ.
 
 
+
 > addListQ :: Ord p => [(a,p)] -> PQ a p -> PQ a p
 > addListQ ps q = foldr (uncurry insertQ) q ps
 
@@ -583,6 +584,8 @@ Define addListQ in terms of insertQ.
 Exercise 8.17
 
 Define mergeOn.
+
+
 
 > mergeOn :: Ord b => (a -> b) -> [a] -> [a] -> [a]
 > mergeOn f = disp
@@ -599,11 +602,46 @@ Exercise 8.18
 
 Show that, for the trees considered in Section 8.3, a tree of size n has rank at most ⌊log(n+1)⌋.
 
+
+
+PQ の構造帰納法で示す。
+
+Null の場合
+サイズは 0、ランクは 0 で 0 = ⌊log (0 + 1)⌋ なので成立
+
+Fork の場合
+t1 のサイズを n1 ランク r1 とし、t2 のサイズを n2 ランクを r2 とする。
+帰納法の仮定から r1 ≤ ⌊log n1⌋ ⋀ r2 ≤ ⌊log n2⌋
+
+t1 と t2 を fork に渡すと、
+サイズは n1 + n2 + 1
+ランクは min r1 r2 + 1
+
+   min r1 r2 + 1
+   {- induction hypothesis -}
+ ≤ min ⌊log n1⌋ ⌊log n2⌋ + 1
+   {- min ⌊x⌋ ⌊y⌋ = ⌊min x y⌋ -}
+ = ⌊min (log n1) (log n2)⌋ + 1
+   {- ⌊x⌋ + 1 = ⌊x + 1⌋ -}
+ = ⌊min (log n1) (log n2) + 1⌋
+   {- 自然数 x y に対して、 min (log x) (log y) = log (min x y) -}
+ = ⌊log (min n1 n2) + 1⌋
+   {- log -}
+ = ⌊log (2 * min n1 n2)⌋
+   {- min n1 n2 + min n1 n2 ≤ n1 + n2 -}
+ ≤ ⌊log (n1 + n2)⌋
+
+ ≤ ⌊log ((n1 + n2 + 1) + 1)⌋
+
+となり、t1 と t2 から作った fork でも成立。 //
+
 ---
 
 Exercise 8.19
 
 Define emptyQ and nullQ.
+
+
 
 > emptyQ :: PQ a p
 > emptyQ = Null
