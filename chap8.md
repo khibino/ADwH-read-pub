@@ -1602,3 +1602,126 @@ extractMin (xs,ys)
   | otherwise = (y,(xs,tailSL ys))
   where x = head xs; y = headSL ys
 ```
+
+<!-- kokomade -->
+<!-- kokokara -->
+<!-- 6/6 は 8.3 Priority queues から -->
+
+---
+
+## 8.3 Priority queues
+
+次の二つの操作が最大でもリストの長さの対数時間となるよう値のリストを管理する
+
+```haskell
+-- 値と優先度を取り、与えられた優先度で値をキューへと挿入
+insertQ :: Ord p => a -> p -> PQ a p -> PQ a p
+
+-- 空でないキューを取り、優先度が最小(あるいは最大)の値を取り出し、
+-- 割り当てられた優先度とその値を、残りのキューと一緒に返す
+deleteQ :: Ord p => PQ a p -> ((a,p),PQ a p)
+```
+
+その他の操作
+
+```haskell
+-- 空のキュー
+emptyQ :: PQ a p
+
+-- 空のキューかどうか判定
+nullQ :: PQ a p -> Bool
+
+-- 値と優先度の対のリストをすべて追加
+-- insertQ を利用して実装できる (演習問題)
+addListQ :: Ord p => [(a,p)] -> PQ a p -> PQ a p
+
+-- 値と優先度の対のリストを優先度順に返す
+toListQ :: Ord p => PQ a p -> [(a,p)]
+```
+
+## Queue implementation / data type
+
+優先度の昇順のリストとしてキューを管理する実装は単純だが、挿入操作に線形時間が必要になる
+
+ここではヒープを利用する
+
+```haskell
+-- ヒープの表現は二分木
+data PQ a p = Null | Fork Rank a p (PQ a p) (PQ a p)
+type Rank = Nat
+
+-- ヒープを平坦化して優先度順のリストを返す
+toListQ :: Ord p => PQ a p -> [(a,p)]
+toListQ Null = []
+toListQ (Fork _ x p t1 t2) = (x,p):mergeOn snd (toListQ t1) (toListQ t2)
+```
+
+## Queue implementation / Rank
+
+Rank はルートから末端の Null までの最短パスの長さ
+
+左の部分木の Rank が右の部分木の Rank より小さくない(leftist ヒープ)
+
+```haskell
+-- スマートコンストラクタで Rank の情報を管理する
+-- 左のランクが小さくならないように交換する(leftist にする)
+fork :: a -> p -> PQ a p -> PQ a p -> PQ a p
+fork x p t1 t2
+  | r2 <= r1 = Fork (r2 + 1) x p t1 t2
+  | otherwise = Fork (r1 + 1) x p t2 t1
+  where r1 = rank t1; r2 = rank t2
+rank ::PQ a p -> Rank
+rank Null = 0
+rank (Fork r _ _ _ _) = r
+```
+
+fork の引数が leftist なら fork も leftist
+
+## Queue implementation / combine, insert, delete
+
+2つの leftist ヒープの結合
+
+```haskell
+-- 最悪ケースで二つの木の右のスパインを辿る。 O(log n)
+combineQ :: Ord p => PQ a p -> PQ a p -> PQ a p
+combineQ Null t = t
+combineQ t Null = t
+combineQ (Fork k1 x1 p1 l1 r1) (Fork k2 x2 p2 l2 r2)
+  | p1 <= p2  = fork x1 p1 l1 (combineQ r1 (Fork k2 x2 p2 l2 r2))
+  | otherwise = fork x2 p2 l2 (combineQ (Fork k1 x1 p1 l1 r1) r2)
+```
+
+combineQ の引数が leftist なら、結果も leftist
+
+挿入、削除
+
+```haskell
+insertQ :: Ord p => a -> p -> PQ a p -> PQ a p
+insertQ x p t = combineQ (fork x p Null Null) t
+deleteQ :: Ord p => PQ a p -> ((a,p),PQ a p)
+deleteQ (Fork _ x p t1 t2) = ((x,p), combineQ t1 t2)
+```
+
+n要素の順序付きのリストではなく、優先度付きキューを利用することで、
+挿入の実行時間を O(n) から O(log n) へと減らすことができた。
+代わりに削除の実行時間が O(1) から O(log n) になっている。
+
+## final huffman implementation
+
+```haskell
+huffman :: [Elem] -> Tree Elem
+huffman = extract . until singleQ gstep . makeQ . map leaf
+extract :: PQ (Tree Elem) Weight -> Tree Elem
+extract = fst . fst . deleteQ
+gstep :: PQ (Tree Elem) Weight -> PQ (Tree Elem) Int
+gstep ps = insertQ t w rs
+           where (t,w) = node p1 p2
+                 (p1,qs) = deleteQ ps
+                 (p2,rs) = deleteQ qs
+makeQ :: Ord p => [(a,p)] -> PQ a p
+makeQ xs = addListQ xs emptyQ
+singleQ :: Ord p => PQ a p -> Bool
+singleQ = nullQ . snd . deleteQ
+```
+
+入力が重み順に整列していなくても、 O(n log n) ステップで動作する
