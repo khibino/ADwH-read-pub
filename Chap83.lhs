@@ -6,7 +6,7 @@ A priority queue is a data structure PQ for maintaining a list of values so that
 the following two operations take at most logarithmic time in the length of the list:
 
 優先度付きキューは以下の二つの操作が最大でもリストの長さの対数時間となるよう
-値のリストを管理するデータ構造 PQ です:
+値のリストを管理するデータ構造 PQ だ:
 
   insertQ :: Ord p => a -> p -> PQ a p -> PQ a p
   deleteQ :: Ord p => PQ a p -> ((a,p),PQ a p)
@@ -49,7 +49,7 @@ Using a heap guarantees logarithmic time for an insertion or deletion, as we wil
 
 優先度付きキューのとても単純な実装は、優先度の昇順のリストとしてキューを管理することだ。
 しかし、ハフマンアルゴリズムで見てきたように、これは挿入が線形時間の操作となることを意味する。
-よりよい方法はヒープを使うことで、5.3節で述べたヒープと類似している。
+よりよい方法は、5.3節で述べたヒープと同じようなヒープを利用することだ。
 ヒープの挿入および削除の対数時間の保証を利用して、見てみよう。
 
 The relevant data type for heaps is the following:
@@ -132,7 +132,7 @@ Hence the running time of combineQ on two leftist heaps of rank at most r is O(l
 Now we can define the insertion and deletion operations (the functions emptyQ and  nullQ are left as exercises):
 
 最悪のケースで、combineQ は二つの木の右のスパインを辿る。
-よって、最大で r のランクを持つ二つの leftist ヒープでの combineQ の実行時間は O(log r) ステップだ。
+よって、最大で r のランクを持つ二つの leftist ヒープでの combineQ の実行時間は O(log r) ステップだ。 (サイズ n のキューに対して O(log n) のまちがい? )
 今や、挿入と削除の操作を定義できる(関数 emptyQ と nullQ は演習問題として残す):
 
 > insertQ :: Ord p => a -> p -> PQ a p -> PQ a p
@@ -143,12 +143,12 @@ Now we can define the insertion and deletion operations (the functions emptyQ an
 Both operations take logarithmic time in the size of the queue.
 Summarising, by using a priority queue of n elements rather than an ordered list
 we can reduce the time for an insertion to O(log n) steps rather than O(n) steps.
-The price paid for this reduction is that the time to find a smallest value goes up from O(1) steps to O(log n) steps.
+The price paid for this reduction is that the time to find and delete a smallest value goes up from O(1) steps to O(log n) steps.
 
 操作は両方ともキューのサイズの対数時間を取る。
 まとめると、順序付きのリストではなく n 要素の優先度付きキューを利用することで、
 挿入の時間を O(n) ステップから O(lon n) ステップへと減らすことができる。
-この削減のために払った代償は、最小の値を見つける時間が O(1) ステップから O(log n) ステップになることだ。
+この削減のために払った代償は、最小の値を見つけて削除する時間が O(1) ステップから O(log n) ステップになることだ。
 
 Finally, here is the implementation of Huffmans algorithm using a priority queue:
 
