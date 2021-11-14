@@ -416,6 +416,7 @@ add x (s:p) = if safe (x:s) then (x:s):p else [x]:s:p
 
 ## 貪欲条件
 
+同じリストを分割した partition、
 p1 および p2 が安全であるときに次の貪欲条件が成立することを確かめる
 
 ```haskell
@@ -425,11 +426,37 @@ cost p1 ≤ cost p2 ⇒ cost (add x p1) ≤ cost (add x p2)
 次の 4つの場合に分けて考える
 
 ```haskell
-q1 = cons x p1 q2 = cons x p2 (12.1)
-q1 = cons x p1 q2 = glue x p2 (12.2)
-q1 = glue x p1 q2 = cons x p2 (12.3)
-q1 = glue x p1 q2 = glue x p2 (12.4)
+q1 = cons x p1, q2 = cons x p2 (12.1)
+q1 = cons x p1, q2 = glue x p2 (12.2)
+q1 = glue x p1, q2 = cons x p2 (12.3)
+q1 = glue x p1, q2 = glue x p2 (12.4)
 ```
+
+-----
+
+## 貪欲条件2
+
+ここからは `length p` を `|p|` と書く
+
+まず `|p1| < |p2|` とする。
+
+(12.2) 以外の場合は `|q1| < |q2|`。
+(12.2) の場合も `|q1| ≤ |q2|` (cons は長さを 1つ伸ばす) かつ `|head q1| ≤ |head q2|` (cons の先頭より glue の先頭の方が長い)。
+
+よって `|p1| < |p2|` のとき `cost q1 ≤ cost q2`。
+
+次に `|p1| = |p2|` かつ `|s1| ≤ |s2|` (`s1 = head p1`, `s2 = head p2`) とする。
+`p1` と `p2` は同じリストから生成したものなので `s1` は `s2` の接頭辞になっている。
+
+```
+add x (s:p) = if safe (x:s) then (x:s):p else [x]:s:p
+``
+
+add の定義から考えると (12.2) の場合が発生するには
+`not (safe (x:s1)) ⋀ safe (x:s2)` となる必要があるが、
+!! s1 と s2 の差分部分の和が 0 以上(負の場合は本当に考慮されているのか) !! ならばそうはならない。
+
+
 
 <!---
  Local Variables:
