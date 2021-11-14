@@ -8,13 +8,13 @@
 * 12.1 Ways of generating partitions
     - partition の生成方法
 * 12.2 Managing two bank accounts
-    - 口座の転送回数の最適化
+    - スケジューリングの最適化
 * 12.3 The paragraph problem
     - 段落のテキストの整形
 
 空でないリストの partition: リストを空でない複数のリストに分割すること
 
-12.1 は partition 生成方法について、12.2 と 12.3 はその応用例
+12.1 は partition 生成方法について、12.2 と 12.3 は partition の応用例
 
 ---
 
@@ -221,6 +221,7 @@ filter (all ok)· parts = foldr (concatMap · okextendl) [[]]
 の証明の詳細を与えよ(ヒント: おそらくは融合条件をリスト内包表記で表現するのがベスト)
 
 ```haskell
+-- 融合条件が成立することを示す
 filter (all ok) (concatMap (extendl x) ps) =
   concatMap (okextendl x) (filter (all ok) ps)
 
@@ -229,6 +230,7 @@ extendl x [] =[cons x []]
 extendl x p = [cons x p,glue x p]
 cons x p = [x]:p
 glue x (s:p) = (x:s):p
+-- 定義にしたがって融合条件の左辺、右辺をそれぞれ展開する
 
 lhs = [ ep
       | p  <- ps
@@ -243,7 +245,7 @@ rhs = [ ep
       , ok (head ep)                                                                   -- okextendl
       ]
 
-p == []
+p == [] の場合
 
 lhs = [ ep
       | p  <- ps
@@ -258,7 +260,7 @@ rhs = [ ep
       , ok [x]                       -- okextendl
       ]
 
-p /= []
+p /= [] の場合
 
 lhs = [ ep
       | p  <- ps
@@ -271,7 +273,7 @@ lhs = [ ep
       ]
 
 rhs = [ ep
-      | p <- ps
+      | p  <- ps
       , all ok p
       , ep <- [ [x]:p, (x:head p):tail p ]
       , ep <- [ [x]:p | ok [x] ] ++
@@ -307,6 +309,127 @@ leftmin, ordered, nomatch
 rightmax, ordered
 
 どの述語もシングルトンリストで成立する
+
+-----
+
+# 12.2 Managing two bank accounts
+
+-----
+
+## 問題の定義1
+
+入出金を行なう当座預金口座の金額上限を $C$ に保つ
+
+正負の整数のリストを最短の安全な partition(セグメントのリスト) に分割する問題
+
+安全なセグメント $[x_1, x_2,...,x_k]$
+$r, r+x_1, r+x_1+x_2,..., r+x_1+x_2+···+x_k$ がすべて $0$ と $C$ の間にある
+
+$C = 100$ のもとで
+$r = 20$ を取れば $[−20,40,60,−30]$ は安全であることがわかるが、
+$[40,−50,10,80,20]$ は安全ではない。
+少なくとも $r=10$ としなければならないが、$10+40−50+10+80+20 = 110$ で $C$ より大きくなってしまう。
+
+-----
+
+## 問題の定義2
+
+安全の条件を簡単にする
+
+$x_1, x_1+x_2,..., x_1+x_2+···+x_k$ のうちの最小値を $n$ 最大値を $m$ としたとき、$n ≤ 0 ≤ m$ となっている。
+
+ここで $0 ≤ r+n ≤ C ⋀ 0 ≤ r+m ≤ C$ となる $r$ が存在する必要がある。
+この条件は $m ≤ C+n$ と等価となる(演習問題)。
+
+```haskell
+-- 安全なセグメント
+-- C をグローバル値 c で与える
+safe :: Segment Int → Bool
+safe xs = maximum sums ≤ c +minimum sums
+          where sums = scanl (+) 0 xs
+```
+
+```haskell
+-- 最小の安全な partition
+msp:: [Int] → Partition Int
+msp ← MinWith length · filter (all safe)· parts
+```
+
+-----
+
+## 問題の定義3
+
+```haskell
+-- foldr での定義
+msp ← MinWith length · safeParts
+
+safeParts     = foldr (concatMap ·safeExtendl) [[]]
+safeExtendl x = filter (safe · head)· extendl x
+-- cons で追加されたシングルトンのセグメントは safe
+-- glue で拡張されたセグメントが safe の場合に結果が残る
+
+extendl :: a → Partition a → [Partition a]
+extendl x [] =[cons x []]
+extendl x p = [cons x p,glue x p]
+```
+
+-----
+
+## 貪欲アルゴリズム
+
+セグメント $[4,4,3,-3,5]$ を考える
+
+$C = 10$ とすると
+$[[4],[4,3,-3,5]]$ と $[[4,4],[3,-3,5]]$ の2つが最短の安全な partition
+
+$[[4],[4,3,-3,5]]$ は $5$ を加えることで安全な partition $[[5,4],[4,3,-3,5]]$ に拡張できる
+
+$[[4,4],[3,-3,5]]$ は $[5,4,4]$ が安全なセグメントではないので拡張できない
+
+そのままでは最短の安全な partition を維持することができない
+
+しかし、先頭のセグメントを最短にするようにコスト関数を修正することでまだ可能性がある
+
+-----
+
+## 貪欲アルゴリズム2
+
+貪欲アルゴリズムの導出
+
+```
+  MinWith cost · concatMap (safeExtendl x)
+= {distributing MinWith cost}
+  MinWith cost · map (MinWith cost ·safeExtendl x)
+→ {with add x ← MinWith cost · safeExtendl x}
+  MinWith cost · map (add x)
+→ {貪欲条件(後述)}
+  add x · MinWith cost
+```
+
+```haskell
+-- 安全な場合は先頭のセグメントを拡張する
+add x [] = [[x]]
+add x (s:p) = if safe (x:s) then (x:s):p else [x]:s:p
+```
+
+-----
+
+## 貪欲条件
+
+p1 および p2 が安全であるときに次の貪欲条件が成立することを確かめる
+
+```haskell
+cost p1 ≤ cost p2 ⇒ cost (add x p1) ≤ cost (add x p2)
+```
+
+次の 4つの場合に分けて考える
+
+```haskell
+q1 = cons x p1 q2 = cons x p2 (12.1)
+q1 = cons x p1 q2 = glue x p2 (12.2)
+q1 = glue x p1 q2 = cons x p2 (12.3)
+q1 = glue x p1 q2 = glue x p2 (12.4)
+```
 
 <!---
  Local Variables:
