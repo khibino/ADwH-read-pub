@@ -388,11 +388,23 @@ $[[4,4],[3,-3,5]]$ は $[5,4,4]$ が安全なセグメントではないので�
 
 そのままでは最短の安全な partition を維持することができない
 
-しかし、先頭のセグメントを最短にするようにコスト関数を修正することでまだ可能性がある
+しかし、先頭のセグメントを最短にするようにコスト関数を修正するとうまくいく
+
+```
+cost p = (length p,length (head p))
+```
 
 -----
 
 ## 貪欲アルゴリズム2
+
+先頭のセグメントを最短にするようにコスト関数を修正するとうまくいく
+
+コストが最小なら長さも最小になる性質も保たれている
+
+```
+cost p = (length p,length (head p))
+```
 
 貪欲アルゴリズムの導出
 
@@ -423,13 +435,19 @@ p1 および p2 が安全であるときに次の貪欲条件が成立するこ�
 cost p1 ≤ cost p2 ⇒ cost (add x p1) ≤ cost (add x p2)
 ```
 
-次の 4つの場合に分けて考える
+次の 4つの場合に分けて考える。 `p1`、`p2` それぞれに `add` を適用し、`add` の分岐が 2通りなので全部で 4通り。
 
 ```haskell
-q1 = cons x p1, q2 = cons x p2 (12.1)
-q1 = cons x p1, q2 = glue x p2 (12.2)
-q1 = glue x p1, q2 = cons x p2 (12.3)
-q1 = glue x p1, q2 = glue x p2 (12.4)
+q1 = cons x p1 ; q2 = cons x p2 (12.1)
+q1 = cons x p1 ; q2 = glue x p2 (12.2)
+q1 = glue x p1 ; q2 = cons x p2 (12.3)
+q1 = glue x p1 ; q2 = glue x p2 (12.4)
+```
+
+```
+add x (s:p) = if safe (x:s) then (x:s):p else [x]:s:p
+
+add x p@(s:_) = if safe (x:s) then glue x p else cons x p
 ```
 
 -----
@@ -438,6 +456,15 @@ q1 = glue x p1, q2 = glue x p2 (12.4)
 
 ここからは `length p` を `|p|` と書く
 
+`cost p = (|p|,|head p|)`
+
+```haskell
+q1 = cons x p1 ; q2 = cons x p2 (12.1)
+q1 = cons x p1 ; q2 = glue x p2 (12.2)
+q1 = glue x p1 ; q2 = cons x p2 (12.3)
+q1 = glue x p1 ; q2 = glue x p2 (12.4)
+```
+
 まず `|p1| < |p2|` とする。
 
 (12.2) 以外の場合は `|q1| < |q2|`。
@@ -445,18 +472,142 @@ q1 = glue x p1, q2 = glue x p2 (12.4)
 
 よって `|p1| < |p2|` のとき `cost q1 ≤ cost q2`。
 
+-----
+
+## 貪欲条件3
+
+```haskell
+q1 = cons x p1 ; q2 = cons x p2 (12.1)
+q1 = cons x p1 ; q2 = glue x p2 (12.2)
+q1 = glue x p1 ; q2 = cons x p2 (12.3)
+q1 = glue x p1 ; q2 = glue x p2 (12.4)
+```
+
 次に `|p1| = |p2|` かつ `|s1| ≤ |s2|` (`s1 = head p1`, `s2 = head p2`) とする。
 `p1` と `p2` は同じリストから生成したものなので `s1` は `s2` の接頭辞になっている。
 
 ```
 add x (s:p) = if safe (x:s) then (x:s):p else [x]:s:p
-``
+
+add x p@(s:_) = if safe (x:s) then glue x p else cons x p
+```
 
 add の定義から考えると (12.2) の場合が発生するには
-`not (safe (x:s1)) ⋀ safe (x:s2)` となる必要があるが、
-!! s1 と s2 の差分部分の和が 0 以上(負の場合は本当に考慮されているのか) !! ならばそうはならない。
+`not (safe (x:s1)) ⋀ safe (x:s2)` となる必要があるが、`x:s1` は `x:s2` の接頭辞なのでそうはならず、(12.2) の場合は起こらない。
 
+残りの 3つの場合は、自明だが一応確認すると、
 
+(12.1) `|q1| = |q2| ⋀ |head q1| = |head q2| = 1`
+(12.3) `|q1| < |q2|`
+(12.4) `|q1| = |q2| ⋀ |head q1| = |s1| + 1 ≤ |s2| + 1 = |head q2|`
+
+となり、どの場合も `cont q1 ≤ cost q2` が成立し、貪欲条件が成立することがわかる
+
+-----
+
+## 貪欲アルゴリズム3
+
+結論として次の貪欲アルゴリズムが得られる
+
+```
+msp :: [Int] → Partition Int
+msp = foldr add []
+      where add x [] = [[x]]
+            add x (s: p) = if safe (x:s) then (x:s):p else [x]:s:p
+```
+
+`safe` の計算コストを定数時間にすれば、これは線形時間アルゴリズムになる
+
+タプリングによって `safe` の計算コストを定数時間にするのは演習問題
+
+-----
+
+## Thining
+
+Thining を考える前に貪欲アルゴリズムが成立するかを確認するのは良い方法
+
+それはともかく Thining もやってみる
+
+```
+msp ← MinWith length · ThinBy (≼) · safeParts
+```
+
+次を満たすように ≼ を選ぶ必要がある
+
+```
+p1 ≼ p2 ⇒ length p1 ≤ length p2
+```
+
+次の半順序を ≼ として選ぶ
+
+```
+p1 ≼ p2 = length p1 ≤ length p2 ∧ length (head p1) ≤ length (head p2)
+```
+
+このとき、次の融合条件が成立する
+
+```
+ThinBy (≼) · step x → ThinBy (≼) · step x · ThinBy (≼)  where step x = concatMap (safeExtendl x)
+```
+
+次のアルゴリズムは各ステップで thining を行なう。
+
+```
+msp = minWith length · foldr tstep [[]]
+      where tstep x = thinBy (≼) · concatMap (safeExtendl x)
+```
+
+<!--- TODO: thining の融合条件と thining アルゴリズムの関係を調べる -->
+
+thinByの定義から、各段階で高々 2つのパーティションが保持されることを帰納法で証明できる
+
+≼ にもとづく thining アルゴリズムは貪欲アルゴリズムとほぼ同じ効率となる
+
+-----
+
+## 興味深い例
+
+`C = 100` の場合
+
+```
+msp [50,20,30,−10,40,−90,−20,60,70,−40,80]
+  = [[50],[20,30,−10,40,−90],[−20,60],[70],[−40,80]]
+```
+
+次の partition も長さは 5 で解としてもよいはず
+
+```
+[[50,20,30,−10],[40,−90],[−20,60],[70,−40],[80]]
+```
+
+この例は演習問題12.12で扱う
+
+-----
+
+# 12.3 The paragraph problem
+
+-----
+
+## 段落問題
+
+段落を、すべての行を特定の幅に収めるように整形する
+
+テキストは、空ではない単語の列で構成され、各単語は空ではない空白でない文字の列であると仮定
+
+```
+type Text = [Word]
+type Word = [Char]
+type Para = [Line]
+type Line = [Word]
+```
+
+```
+-- 関数fitsは、ある行が必要な幅に収まるかどうかを判断
+para :: Text → Para
+para ← MinWith cost · filter (all fits)· parts
+```
+
+-----
 
 <!---
  Local Variables:
