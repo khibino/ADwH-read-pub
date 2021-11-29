@@ -429,19 +429,19 @@ add x (s:p) = if safe (x:s) then (x:s):p else [x]:s:p
 ## 貪欲条件
 
 同じリストを分割した partition、
-p1 および p2 が安全であるときに次の貪欲条件が成立することを確かめる
+`p₁` および `p₂` が安全であるときに次の貪欲条件が成立することを確かめる
 
 ```haskell
-cost p1 ≤ cost p2 ⇒ cost (add x p1) ≤ cost (add x p2)
+cost p₁ ≤ cost p₂ ⇒ cost (add x p₁) ≤ cost (add x p₂)
 ```
 
-次の 4つの場合に分けて考える。 `p1`、`p2` それぞれに `add` を適用し、`add` の分岐が 2通りなので全部で 4通り。
+次の 4つの場合に分けて考える。 `p₁`、`p₂` それぞれに `add` を適用し、`add` の分岐が 2通りなので全部で 4通り。
 
 ```haskell
-q1 = cons x p1 ; q2 = cons x p2 (12.1)
-q1 = cons x p1 ; q2 = glue x p2 (12.2)
-q1 = glue x p1 ; q2 = cons x p2 (12.3)
-q1 = glue x p1 ; q2 = glue x p2 (12.4)
+q₁ = cons x p₁ ; q₂ = cons x p₂ (12.1)
+q₁ = cons x p₁ ; q₂ = glue x p₂ (12.2)
+q₁ = glue x p₁ ; q₂ = cons x p₂ (12.3)
+q₁ = glue x p₁ ; q₂ = glue x p₂ (12.4)
 ```
 
 ```
@@ -459,32 +459,32 @@ add x p@(s:_) = if safe (x:s) then glue x p else cons x p
 `cost p = (|p|,|head p|)`
 
 ```haskell
-q1 = cons x p1 ; q2 = cons x p2 (12.1)
-q1 = cons x p1 ; q2 = glue x p2 (12.2)
-q1 = glue x p1 ; q2 = cons x p2 (12.3)
-q1 = glue x p1 ; q2 = glue x p2 (12.4)
+q₁ = cons x p₁ ; q₂ = cons x p₂ (12.1)
+q₁ = cons x p₁ ; q₂ = glue x p₂ (12.2)
+q₁ = glue x p₁ ; q₂ = cons x p₂ (12.3)
+q₁ = glue x p₁ ; q₂ = glue x p₂ (12.4)
 ```
 
-まず `|p1| < |p2|` とする。
+まず `|p₁| < |p₂|` とする。
 
-(12.2) 以外の場合は `|q1| < |q2|`。
-(12.2) の場合も `|q1| ≤ |q2|` (cons は長さを 1つ伸ばす) かつ `|head q1| ≤ |head q2|` (cons の先頭より glue の先頭の方が長い)。
+(12.2) 以外の場合は `|q₁| < |q₂|`。
+(12.2) の場合も `|q₁| ≤ |q₂|` (cons は長さを 1つ伸ばす) かつ `|head q₁| ≤ |head q₂|` (cons の先頭より glue の先頭の方が長い)。
 
-よって `|p1| < |p2|` のとき `cost q1 ≤ cost q2`。
+よって `|p₁| < |p₂|` のとき `cost q₁ ≤ cost q₂`。
 
 -----
 
 ## 貪欲条件3
 
 ```haskell
-q1 = cons x p1 ; q2 = cons x p2 (12.1)
-q1 = cons x p1 ; q2 = glue x p2 (12.2)
-q1 = glue x p1 ; q2 = cons x p2 (12.3)
-q1 = glue x p1 ; q2 = glue x p2 (12.4)
+q₁ = cons x p₁ ; q₂ = cons x p₂ (12.1)
+q₁ = cons x p₁ ; q₂ = glue x p₂ (12.2)
+q₁ = glue x p₁ ; q₂ = cons x p₂ (12.3)
+q₁ = glue x p₁ ; q₂ = glue x p₂ (12.4)
 ```
 
-次に `|p1| = |p2|` かつ `|s1| ≤ |s2|` (`s1 = head p1`, `s2 = head p2`) とする。
-`p1` と `p2` は同じリストから生成したものなので `s1` は `s2` の接頭辞になっている。
+次に `|p₁| = |p₂|` かつ `|s1| ≤ |s2|` (`s1 = head p₁`, `s2 = head p₂`) とする。
+`p₁` と `p₂` は同じリストから生成したものなので `s1` は `s2` の接頭辞になっている。
 
 ```
 add x (s:p) = if safe (x:s) then (x:s):p else [x]:s:p
@@ -497,11 +497,11 @@ add の定義から考えると (12.2) の場合が発生するには
 
 残りの 3つの場合は、自明だが一応確認すると、
 
-(12.1) `|q1| = |q2| ⋀ |head q1| = |head q2| = 1`
-(12.3) `|q1| < |q2|`
-(12.4) `|q1| = |q2| ⋀ |head q1| = |s1| + 1 ≤ |s2| + 1 = |head q2|`
+(12.1) `|q₁| = |q₂| ⋀ |head q₁| = |head q₂| = 1`
+(12.3) `|q₁| < |q₂|`
+(12.4) `|q₁| = |q₂| ⋀ |head q₁| = |s1| + 1 ≤ |s2| + 1 = |head q₂|`
 
-となり、どの場合も `cont q1 ≤ cost q2` が成立し、貪欲条件が成立することがわかる
+となり、どの場合も `cont q₁ ≤ cost q₂` が成立し、貪欲条件が成立することがわかる
 
 -----
 
@@ -535,13 +535,13 @@ msp ← MinWith length · ThinBy (≼) · safeParts
 次を満たすように ≼ を選ぶ必要がある
 
 ```
-p1 ≼ p2 ⇒ length p1 ≤ length p2
+p₁ ≼ p₂ ⇒ length p₁ ≤ length p₂
 ```
 
 次の半順序を ≼ として選ぶ
 
 ```
-p1 ≼ p2 = length p1 ≤ length p2 ∧ length (head p1) ≤ length (head p2)
+p₁ ≼ p₂ = length p₁ ≤ length p₂ ∧ length (head p₁) ≤ length (head p₂)
 ```
 
 このとき、次の融合条件が成立する
@@ -602,12 +602,185 @@ type Line = [Word]
 ```
 
 ```
--- 関数fitsは、ある行が必要な幅に収まるかどうかを判断
 para :: Text → Para
 para ← MinWith cost · filter (all fits)· parts
+
+-- 関数fitsは、ある行が必要な幅に収まるかどうかを判断
+fits :: Line → Bool
+fits line = width line ≤ maxWidth  -- maxWidthはグローバル値
+width :: Line → Nat
+width = foldrn add length  where add w n = length w+1+n
+```
+
+関数foldrn（空ではないリストに対する一般的な畳み込み）の定義は第8章
+
+-----
+
+## 段落問題2
+
+foldr,  foldl どちらを採用するか?
+
+fits は接頭辞においても接尾辞においても閉じているので、その点ではどちらでもよい
+
+foldr で考えると、先頭の行を短かくして後続の行を長くするように cost が定義されるが、それは不自然なので foldl を採用する
+
+
+各ステップでは、行が最大幅に収まる partition のみが生成される
+
+```
+para ← MinWith cost · fitParts
+
+fitParts = foldl (flip (concatMap · fitExtend)) [[]]
+                 where fitExtend x = filter (fits · last) · extendr x
 ```
 
 -----
+
+## コスト関数
+
+5種類のコスト関数が考えられる
+
+段落の行数が最も少なくなる
+
+```
+cost₁ = length
+```
+
+最終行以外の幅に満たない空白の合計
+
+```
+cost₂ = sum · map waste · init  where waste line = maxWidth - width line
+```
+
+最終行以外の各行の optWidth との差の2乗の合計
+
+```
+cost₃ = sum·map waste · init  where waste line = (optWidth - width line)²
+```
+
+最終行以外の幅に満たない空白の数のうちの最大
+
+```
+cost₄ = foldr max 0 · map waste · init  where waste line = maxWidth - width line
+```
+
+最終行以外の各行の optWidth との差の2乗のうちの最大
+
+```
+cost₅ = foldr max 0 · map waste · init  where waste line = (optWidth - width line)²
+```
+
+-----
+
+## 貪欲アルゴリズム
+
+自明な貪欲アルゴリズム
+
+段落の最終行の末尾に単語が入らなくなるまで追加していき、入らなくなったら新しい行を開始する
+
+```
+greedy = foldl add []
+  where add [] w = snoc w []
+        add p w = head (filter (fits · last) [bind w p,snoc w p])
+```
+
+cost がどのような定義だったら貪欲アルゴリズムが有効か?
+
+次の2つの条件が必要
+
+```
+-- fits が結果を通すなら、単語を行末に追加する方は新しい行を開始するより悪くはならない
+fits (last (bind w p)) ⇒ cost (bind w p) ≤ cost (snoc w p)
+-- 貪欲条件
+cost p₁ ≤ cost p₂ ⇒ cost (add p₁ w) ≤ cost (add p₂ w)
+```
+
+cost が単に行数の場合は貪欲条件は成立しない(演習問題)
+
+cost₁ を次のように再定義すると貪欲条件が成立する
+
+```
+-- 行数が最小で最後の行が最も短い
+cost₁ p = (length p, width (last p))
+```
+
+-----
+
+## 貪欲条件の証明
+
+bank account の問題と似た流れで証明する
+
+`q₁ = add p₁ w, q₂ = add p₂ w` とすると次の4つの場合が考えられる
+
+```
+q₁ = bind w p₁ ; q₂ = bind w p₂ (12.5)
+q₁ = bind w p₁ ; q₂ = snoc w p₂ (12.6)
+q₁ = snoc w p₁ ; q₂ = bind w p₂ (12.7)
+q₁ = snoc w p₁ ; q₂ = snoc w p₂ (12.8)
+```
+
+`cost₁ p₁ ≤ cost₁ p₂` を前提とし、ここでも `length p` を `|p|` と書くことにする.
+
+まず `|p₁| < |p₂|` のとき
+
+(12.7) の場合を除いて `|q₁| < |q₂|` となる.
+
+(1.27) の場合は
+
+```
+|q₁| ≤ |q₂| ∧ width (last q1) < width (last q2)
+```
+
+となる.
+
+よってどの場合も `cost₁ q₁ < cost₁ q₂`.
+
+## 貪欲条件の証明2
+
+```
+q₁ = bind w p₁ ; q₂ = bind w p₂ (12.5)
+q₁ = bind w p₁ ; q₂ = snoc w p₂ (12.6)
+q₁ = snoc w p₁ ; q₂ = bind w p₂ (12.7)
+q₁ = snoc w p₁ ; q₂ = snoc w p₂ (12.8)
+```
+
+```
+add [] w = snoc w []
+add p w = head (filter (fits · last) [bind w p,snoc w p])
+```
+
+次に `|p₁| = |p₂| ∧ width (last p₁) ≤ width (last p₂)` のとき
+
+add の定義と `width (last p₁) ≤ width (last p₂)` から
+
+```
+width (last (bind w p₁)) = width (last p₁ ++ [w]) =
+width (last p₁) + 1 + width ([w]) ≤ width (last p₂) + 1 + width ([w]) =
+width (last p₂ ++ [w]) = width (last (bind w p₂))
+```
+
+つまり `width (last (bind w p₁)) ≤ width (last (bind w p₂))` となって、
+`not (fits (last (bind w p₁))) ∧ fits (last (bind w p₂))` は成立せず、(1.27) の場合は起こらないことがわかる。
+
+(12.5) と (12.8) では `|q₁| = |q₂| ∧ width (last q₁) = width (last q₂)`
+
+(12.6) では `|q₁| < |q₂|`
+
+なのですべての場合で `cost q₁ ≤ cost q₂` となる.
+
+よって、貪欲アルゴリズムは、1つの段落の行数を最小にすることがわかる.
+
+-----
+
+## 貪欲アルゴリズム2
+
+貪欲アルゴリズムは、cost₂ に対しても有効
+
+次を主張する
+
+```
+cost1 p₁ ≤ cost1 p₂ ⇒ cost₂ p₁ ≤ cost₂ p₂
+```
 
 <!---
  Local Variables:
