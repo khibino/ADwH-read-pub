@@ -153,10 +153,15 @@ ok が接頭辞で閉じている
 Exercise 12.1
 
 How many partitions of a list of length n > 0 are there?
+
 長さ n > 0 のリストには partition がいくつあるか?
 
-リストの要素と要素の間を「分割する」あるいは「分割しない」の2通りが考えられて、要素と要素の間は n-1。
-よって 2^(n-1)
+---
+
+Answer
+
+リストの要素と要素の間を「分割する」あるいは「分割しない」の2通りが考えられて、要素と要素の間は $n-1$。
+よって $2^(n-1)$
 
 
 -----
@@ -164,6 +169,7 @@ How many partitions of a list of length n > 0 are there?
 Exercise 12.2
 
 Why is the clause parts [] = [[]] necessary in the first definition of parts?
+
 parts の最初の定義には parts [] = [[]] の節がなぜ必要か?
 
 ```
@@ -176,6 +182,10 @@ splits [] = []
 splits (x:xs) = ([x],xs):[(x:ys,zs)|(ys,zs) <- splits xs]
 ```
 
+---
+
+Answer
+
 parts [] = [[]] の節が無い場合、 parts [] = [] となってしまって、すべての parts xs が [] になってしまう。
 
 -----
@@ -183,6 +193,7 @@ parts [] = [[]] の節が無い場合、 parts [] = [] となってしまって�
 Exercise 12.3
 
 Give another definition of parts in terms of foldr, one that at each step does all the cons operations before the glue operations.
+
 foldr のやり方で parts のもう一つの定義を与えよ。
 その定義ではそれぞれのステップですべての cons が glue より先に来るものとする。
 
@@ -195,6 +206,8 @@ parts = foldr step [[]]
       where cglue [] = []
             cglue p  = [glue x p]
 ```
+
+---
 
 Answer
 
@@ -219,6 +232,10 @@ provided ok is suffix-closed.
 ok が接尾辞で閉じているもとでの
 filter (all ok)· parts = foldr (concatMap · okextendl) [[]]
 の証明の詳細を与えよ(ヒント: おそらくは融合条件をリスト内包表記で表現するのがベスト)
+
+---
+
+Answer
 
 ```haskell
 -- 融合条件が成立することを示す
@@ -300,12 +317,16 @@ nomatch xs = and (zipWith (≠) xs [0..])
 Do each of these predicates hold for singleton lists?
 これらの述語は、それぞれシングルトンリストでも成立するか?
 
+---
 
+Answer
 
 接頭辞において閉じているもの
+
 leftmin, ordered, nomatch
 
 接尾辞において閉じているもの
+
 rightmax, ordered
 
 どの述語もシングルトンリストで成立する
