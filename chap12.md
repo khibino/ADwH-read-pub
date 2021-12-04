@@ -519,7 +519,9 @@ add の定義から考えると (12.2) の場合が発生するには
 残りの 3つの場合は、自明だが一応確認すると、
 
 (12.1) `|q₁| = |q₂| ⋀ |head q₁| = |head q₂| = 1`
+
 (12.3) `|q₁| < |q₂|`
+
 (12.4) `|q₁| = |q₂| ⋀ |head q₁| = |s1| + 1 ≤ |s2| + 1 = |head q₂|`
 
 となり、どの場合も `cont q₁ ≤ cost q₂` が成立し、貪欲条件が成立することがわかる
@@ -880,6 +882,68 @@ cost₅ p₂ = maximum [8−6,8−7,8−8] = 2
 
 ## Thinning
 
+admissible cost function
+
+```
+cost p₁ ≤ cost p₂ ∧ width (last p₁) = width (last p₂)
+```
+
+が成立するとき次が成立する
+
+```
+cost (bind w p₁) ≤ cost (bind w p₂) ∧ cost (snoc w p₁) ≤ cost (snoc w p₂)
+```
+
+このような cost を admissible cost function と言う
+
+部分段落 `p₁` および `p₂` についてこの条件が満たされているとする
+
+このとき段落の残り `l₀, l₁, ··· ,lₖ` に対して
+
+```
+q₂ = init p₂ ++ [last p₂ ++ l₀] ++ [l₁] ++···++ [lₖ]
+
+q₁ = init p₁ ++ [last p₁ ++ l₀] ++ [l₁] ++···++ [lₖ]
+```
+
+を考えると `cost q₁ ≤ cost q₂` となり、
+部分段落 `p₂` は `p₁` よりもよい解を導くことはない
+
+よって thinning のための ≼ として次を考える
+
+```
+p1 ≼ p2 = cost p1 ≤ cost p2 ∧ width (last p1) == width (last p2)
+```
+
+-----
+
+## Thinning 2
+
+```
+p1 ≼ p2 = cost p1 ≤ cost p2 ∧ width (last p1) == width (last p2)
+```
+
+さらにパーティションのリスト `ps` を最後の行の幅の大きい順に保つようにすることを考えると
+
+`map (bind w) ps` も最後の行の幅の大きい順となる
+
+`map (snoc w) ps` はすべて同じ最終行を持ち、その最終行が可能な限り短いものとなる.
+このリストを thinning すると `minWith cost (map (snoc w) ps)` だけが残る
+
+```
+para = minWith cost · foldl tstep [[]]
+  where tstep [[]] w = [[[w]]]
+        tstep ps w = minWith cost (map (snoc w) ps) :
+                     filter (fits · last) (map (bind w) ps)
+```
+
+各ステップ最大でもで M = maxWidth のパーティションが維持される
+
+tstepが Ο(`M`)ステップで済むように cost と幅をメモ化する、snoc と bind を効率化するのは練習問題
+
+結果として `n` 個の単語の段落問題は Ο(`M n`) ステップかかる
+
+-----
 
 <!---
  Local Variables:
