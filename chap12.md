@@ -366,7 +366,7 @@ $x_1, x_1+x_2,..., x_1+x_2+···+x_k$ のうちの最小値を $n$ 最大値を
 -- 安全なセグメント
 -- C をグローバル値 c で与える
 safe :: Segment Int → Bool
-safe xs = maximum sums ≤ c +minimum sums
+safe xs = maximum sums ≤ c + minimum sums
           where sums = scanl (+) 0 xs
 ```
 
@@ -604,6 +604,186 @@ msp [50,20,30,−10,40,−90,−20,60,70,−40,80]
 ```
 
 この例は演習問題12.12で扱う
+
+-----
+
+# 12.2 関連の Exercise
+
+-----
+
+Exercise 12.6
+
+Suppose that n ≤ 0 ≤ m.
+Show that  (∃ r : 0 ≤ r + n ≤ C ∧ 0 ≤ r + m ≤ C) ⇔ m ≤ C + n
+
+n ≤ 0 ≤ m とする.
+(∃ r : 0 ≤ r + n ≤ C ∧ 0 ≤ r + m ≤ C) ⇔ m ≤ C + n を示せ.
+
+---
+
+Answer
+
+(∃ r : 0 ≤ r + n ≤ C ∧ 0 ≤ r + m ≤ C) ⟹ m ≤ C + n
+
+∃ r : 0 ≤ r + n ≤ C ∧ 0 ≤ r + m ≤ C
+
+⟹ {- 0 ≤ r + n の r を左辺へ -}
+
+∃ r :-r ≤ n ∧ r + m ≤ C
+
+⟹ {- 不等式の両辺を加算する -}
+
+m ≤ C + n  //
+
+
+(∃ r : 0 ≤ r + n ≤ C ∧ 0 ≤ r + m ≤ C) ⟸ m ≤ C + n
+
+m ≤ C + n
+
+⟹ {- -n ≤ r ≤ C - m となる r を導入 -}
+
+E r : 0 ≤ r + n ≤ r ≤ r + m ≤ C
+
+⟹ {- a ≤ b ≤ c ⟹ a ≤ c -}
+
+E r : 0 ≤ r + n ≤ C ∧ 0 ≤ r + m ≤ C  //
+
+
+-----
+
+Exercise 12.7
+
+Show that the predicate safe in the bank accounts problem is both prefix-closed and suffix-closed.
+
+銀行口座の問題での述語 `safe` が接頭辞で閉じているかつ接尾辞で閉じているをこと示せ.
+
+---
+
+Answer
+
+
+```haskell
+safe :: Segment Int → Bool
+safe xs = maximum sums ≤ c + minimum sums
+          where sums = scanl (+) 0 xs
+```
+
+sums' = scanl (+) 0 とする
+
+
+接頭辞で閉じている
+
+safe (xs++ys) ⟹ safe xs
+
+safe (xs++ys)
+
+⟹ {- safe の定義 -}
+
+(maximum . sums') (xs++ys) ≤ c + (minimum . sums') (xs++ys)
+
+⟹ {- (maximum . sums') xs ≤ (maximum . sums') (xs++ys) -}
+
+(maximum . sums') xs ≤ c + minimum (xs++ys)
+
+⟹ {- (minimum . sums') (xs++ys) ≤ (minimum . sums') xs -}
+
+(maximum . sums') xs ≤ c + (minimum . sums') xs
+
+⟹ {- safe の定義 -}
+
+safe xs
+
+
+接尾辞で閉じている
+
+safe (xs++ys) ⟹ safe ys
+
+safe (xs++ys)
+
+⟹ {- safe の定義 -}
+
+(maximum . sums') (xs++ys) ≤ c + (minimum . sums') (xs++ys)
+
+⟹ {- (maximum . sums') ys ≤ (maximum . sums') (xs++ys) -}
+
+(maximum . sums') ys ≤ c + minimum (xs++ys)
+
+⟹ {- (minimum . sums') (xs++ys) ≤ (minimum . sums') ys -}
+
+(maximum . sums') ys ≤ c + (minimum . sums') ys
+
+⟹ {- safe の定義 -}
+
+safe ys
+
+-----
+
+Exercise 12.8
+
+Suppose C = 10.
+What is the value of msp [2,4,50,3] when msp is  the greedy algorithm for the bank accounts problem and when msp is defined by the  original specification?
+
+---
+
+Answer
+
+-----
+
+Exercise 12.9
+
+The function add in the bank accounts problem does not take con stant time because the safety test can take linear time.
+But we can represent a  partition p by a triple  (p,minimum (sums (head p)),maximum (sums (head p)))  where sums = scanl (+) 0.
+Write down a new definition of msp that does take linear  time.
+
+---
+
+Answer
+
+-----
+
+Exercise 12.10
+
+The function msp returns a partition, not the transfers that have to  be made to keep the current account in balance.
+Show how to define  transfers::Partition Int → [Int]  by computing a pair (n,r) of nonnegative numbers for each segment, where n is the  minimum that has to be in the current account to ensure the segment is safe and r is  the residue after the transactions in the segment.
+
+---
+
+Answer
+
+-----
+
+Exercise 12.11
+
+Consider the thinning algorithm for the bank accounts problem.
+ Suppose that at some point in the computation there are two partitions of the form  [y]: ys:p and (y: ys):p.
+This could happen as early as the second step, producing the  partitions [[y],[z]] and [[y,z]].
+Show that adding in a new element x and thinning  the result will produce either a single partition, or two partitions of the above form.
+
+---
+
+Answer
+
+-----
+
+Exercise 12.12
+
+How can Zakia address the suspicious feature of the given solution  to the bank accounts problem, namely that transfers can occur before they are  absolutely necessary?
+
+---
+
+Answer
+
+-----
+
+Exercise 12.13
+
+The function runs used in Mergesort is specified by  runs::Ord a ⇒ [a] → Partition a  runs ← MinWith length · filter (all ordered)· parts  Without looking back to the section on Mergesort, write down a greedy algorithm  for computing runs.
+Why does the greedy algorithm work?
+
+---
+
+Answer
+
 
 -----
 
