@@ -885,7 +885,9 @@ Answer
 
 Exercise 12.12
 
-How can Zakia address the suspicious feature of the given solution  to the bank accounts problem, namely that transfers can occur before they are  absolutely necessary?
+How can Zakia address the suspicious feature of the given solution to the bank accounts problem, namely that transfers can occur before they are absolutely necessary?
+
+銀行口座の問題に対する提示された解決策では「必要になるまえに送金が行なわれる」という疑わしい性質についてどのようにザキアは対処できるか?
 
 ---
 
@@ -895,13 +897,45 @@ Answer
 
 Exercise 12.13
 
-The function runs used in Mergesort is specified by  runs::Ord a ⇒ [a] → Partition a  runs ← MinWith length · filter (all ordered)· parts  Without looking back to the section on Mergesort, write down a greedy algorithm  for computing runs.
+The function runs used in Mergesort is specified by
+
+```
+runs::Ord a ⇒ [a] → Partition a
+runs ← MinWith length · filter (all ordered) · parts
+```
+
+Without looking back to the section on Mergesort, write down a greedy algorithm for computing runs.
 Why does the greedy algorithm work?
+
+
+マージソートで使用される関数 `runs` は次で記述される.
+
+```
+runs::Ord a ⇒ [a] → Partition a
+runs ← MinWith length · filter (all ordered) · parts
+```
+
+マージソートの節を振り返らず、`runs` を計算する貪欲アルゴリズムを書き下せ.
+この貪欲アルゴリズムはなぜ動作するか?
 
 ---
 
 Answer
 
+
+```
+ordered :: Ord a => [a] -> Bool
+ordered xs = all asc $ zip xs (tail xs)  where asc (x, y) = x <= y
+
+runs :: Ord a => [a] -> Partition a
+runs = foldr add []
+  where
+    add x [] = [[x]]
+    add x (s:p) = if x <= head s then (x:s):p else [x]:s:p
+```
+
+ordered が保たれているセグメント s に対して x が先頭の要素以下のときだけ x を先頭に加えれば x:s も orderd が保たれる。
+そうでないときは s を伸ばすことはできないため。
 
 -----
 
