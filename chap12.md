@@ -873,13 +873,39 @@ transfers p = zipWith transfer (ns ++ [0]) (0 : rs) -- 最初は残りが 0, 最
 Exercise 12.11
 
 Consider the thinning algorithm for the bank accounts problem.
- Suppose that at some point in the computation there are two partitions of the form  [y]: ys:p and (y: ys):p.
-This could happen as early as the second step, producing the  partitions [[y],[z]] and [[y,z]].
-Show that adding in a new element x and thinning  the result will produce either a single partition, or two partitions of the above form.
+Suppose that at some point in the computation there are two partitions of the form `[y]:ys:p` and `(y:ys):p`.
+This could happen as early as the second step, producing the  partitions `[[y],[z]]` and `[[y,z]]`.
+Show that adding in a new element `x` and thinning  the result will produce either a single partition, or two partitions of the above form.
+
+銀行口座の問題の thinning アルゴリズムを考えてみよう.
+計算のある時点で、`[y]:ys:p`と`(y:ys):p`という形の2つのパーティションがあったとする.
+これは早ければ第2段階で起こる可能性があり、パーティション `[[y],[z]]` と `[[y,z]]` が生成される.
+新しい要素 `x` を追加してその結果を間引くと、1つのパーティションか、上の形式の2つのパーティションのどちらかになることを示せ.
 
 ---
 
 Answer
+
+```
+[[x]:[y]:ys:p, [x,y]:ys:p, [x]:(y: ys):p, (x: y: ys):p]
+[[x]:[y]:ys:p, [x,y]:ys:p, [x]:(y: ys):p]
+[[x]:[y]:ys:p, [x]:(y: ys):p]
+```
+
+
+
+```
+[x]:(y: ys):p ≼ [x] :[y]:ys:p
+[x]:(y: ys):p ≼ [x,y]:ys:p
+```
+
+
+
+```
+[[x]:(y:ys):p, (x:y:ys):p]
+[[x]:(y:ys):p]
+[[x]:(y:ys):p]
+```
 
 -----
 
@@ -892,6 +918,15 @@ How can Zakia address the suspicious feature of the given solution to the bank a
 ---
 
 Answer
+
+```
+mspLR :: [Int] -> Partition Int
+mspLR = foldl add []
+  where
+    add :: Partition Int -> Int -> Partition Int
+    add [] x = [[x]]
+    add p  x = head (filter (safe . last) [bind x p, snoc x p])
+```
 
 -----
 
