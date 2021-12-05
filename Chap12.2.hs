@@ -121,9 +121,34 @@ transfers p = zipWith transfer (ns ++ [0]) (0 : rs) -- 最初は残りが 0, 最
         sums = scanl (+) 0 xs
 
 exercise1210 :: IO ()
-exercise1210 = do
+exercise1210 = printTransfers msp [40,-85,55,-32,79,80,-21,80]
+
+printTransfers :: ([Int] -> Partition Int) -> [Int] -> IO ()
+printTransfers mspF input = do
     print   input
-    print $ msp input
-    print $ transfers $ msp input
+    print $ mspF input
+    print $ transfers $ mspF input
+
+---
+
+-- Exercise 12.12
+
+mspLR :: [Int] -> Partition Int
+mspLR = foldl add []
   where
-    input = [40,-85,55,-32,79,80,-21,80]
+    add :: Partition Int -> Int -> Partition Int
+    add [] x = [[x]]
+    add p  x = head (filter (safe . last) [bind x p, snoc x p])
+
+---
+
+-- Exercise 12.13
+
+ordered :: Ord a => [a] -> Bool
+ordered xs = all asc $ zip xs (tail xs)  where asc (x, y) = x <= y
+
+runs :: Ord a => [a] -> Partition a
+runs = foldr add []
+  where
+    add x [] = [[x]]
+    add x (s:p) = if x <= head s then (x:s):p else [x]:s:p
