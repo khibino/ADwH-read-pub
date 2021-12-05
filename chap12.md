@@ -357,7 +357,7 @@ $[40,−50,10,80,20]$ は安全ではない。
 
 安全の条件を簡単にする
 
-$x_1, x_1+x_2,..., x_1+x_2+···+x_k$ のうちの最小値を $n$ 最大値を $m$ としたとき、$n ≤ 0 ≤ m$ となっている。
+$0, x_1, x_1+x_2,..., x_1+x_2+···+x_k$ のうちの最小値を $n$ 最大値を $m$ としたとき、$n ≤ 0 ≤ m$ となっている。
 
 ここで $0 ≤ r+n ≤ C ⋀ 0 ≤ r+m ≤ C$ となる $r$ が存在する必要がある。
 この条件は $m ≤ C+n$ と等価となる(演習問題)。
@@ -384,7 +384,7 @@ msp ← MinWith length · filter (all safe) · parts
 -- foldr での定義
 msp ← MinWith length · safeParts
 
-safeParts     = foldr (concatMap ·safeExtendl) [[]]
+safeParts     = foldr (concatMap · safeExtendl) [[]]
 safeExtendl x = filter (safe · head)· extendl x
 -- cons で追加されたシングルトンのセグメントは safe
 -- glue で拡張されたセグメントが safe の場合に結果が残る
@@ -524,7 +524,7 @@ add の定義から考えると (12.2) の場合が発生するには
 
 (12.4) `|q₁| = |q₂| ⋀ |head q₁| = |s1| + 1 ≤ |s2| + 1 = |head q₂|`
 
-となり、どの場合も `cont q₁ ≤ cost q₂` が成立し、貪欲条件が成立することがわかる
+となり、どの場合も `cost q₁ ≤ cost q₂` が成立し、貪欲条件が成立することがわかる
 
 -----
 
@@ -815,11 +815,11 @@ scanl (+) 0 (x:s) =
 
 minimum $ scanl (+) 0 (x:s) =
 minimum $ 0 : map (x +) (scanl (+) 0 s) =
-min 0 ( minimum (scanl (+) 0 s) )
+min 0 ( x + minimum (scanl (+) 0 s) )
 
 maximum $ scanl (+) 0 (x:s) =
 maximum $ 0 : map (x +) (scanl (+) 0 s) =
-max 0 ( maximum (scanl (+) 0 s) )
+max 0 ( x + maximum (scanl (+) 0 s) )
 ```
 
 -----
@@ -885,6 +885,11 @@ Show that adding in a new element `x` and thinning  the result will produce eith
 ---
 
 Answer
+
+```
+p₁ ≼ p₂ = length p₁ ≤ length p₂ ∧ length (head p₁) ≤ length (head p₂)
+```
+
 
 ```
 [[x]:[y]:ys:p, [x,y]:ys:p, [x]:(y: ys):p, (x: y: ys):p]
