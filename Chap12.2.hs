@@ -60,5 +60,43 @@ msp = foldr add []
     add x [] = [[x]]
     add x (s:p) = if safe (x:s) then (x:s):p else [x]:s:p
 
-exampleBank :: Partition Int
-exampleBank = msp [50,20,30,-10,40,-90,-20,60,70,-40,80]
+exampleBank :: [Int]
+exampleBank = [50,20,30,-10,40,-90,-20,60,70,-40,80]
+
+exampleBankMsp :: Partition Int
+exampleBankMsp = msp exampleBank
+
+--
+
+{- C = 10 on exercise 12.8 -}
+safe128 :: Segment Int -> Bool
+safe128 xs = maximum sums <= 10 + minimum sums
+  where sums = scanl (+) 0 xs
+
+
+msp128 :: [Int] -> Partition Int
+msp128 = foldr add []
+  where
+    add :: Int -> Partition Int -> Partition Int
+    add x [] = [[x]]
+    add x (s:p) = if safe128 (x:s) then (x:s):p else [x]:s:p
+
+--
+
+-- triplePart :: Partition Int -> (Partition Int, Int, Int)
+-- triplePart p = (p, minimum (sums (head p)), maximum (sums (head p)))  where sums = scanl (+) 0
+
+type TrPartition a = (Partition a, a, a)
+
+msp129 :: [Int] -> Partition Int
+msp129 = fst3 . foldr add ([], 0, 0)
+  where
+    fst3 (x, _, _) = x
+    c129 :: Int
+    c129 = 100
+    add :: Int -> TrPartition Int -> TrPartition Int
+    add x ([], _, _) = ([[x]], min 0 x, max 0 x)
+    add x (s:p, mn, mx) =  if mx2 <= c129 + mn2 then ((x:s):p, mn2, mx2) else ([x]:s:p, min 0 x, max 0 x)
+      where
+        mn2 = min 0 (mn + x)
+        mx2 = max 0 (mx + x)
