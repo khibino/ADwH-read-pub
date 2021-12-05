@@ -66,7 +66,9 @@ exampleBank = [50,20,30,-10,40,-90,-20,60,70,-40,80]
 exampleBankMsp :: Partition Int
 exampleBankMsp = msp exampleBank
 
---
+---
+
+-- Exercise 12.8
 
 {- C = 10 on exercise 12.8 -}
 safe128 :: Segment Int -> Bool
@@ -81,7 +83,8 @@ msp128 = foldr add []
     add x [] = [[x]]
     add x (s:p) = if safe128 (x:s) then (x:s):p else [x]:s:p
 
---
+
+-- Exercise 12.9
 
 -- triplePart :: Partition Int -> (Partition Int, Int, Int)
 -- triplePart p = (p, minimum (sums (head p)), maximum (sums (head p)))  where sums = scanl (+) 0
@@ -100,3 +103,27 @@ msp129 = fst3 . foldr add ([], 0, 0)
       where
         mn2 = min 0 (mn + x)
         mx2 = max 0 (mx + x)
+
+
+-- Exercise 12.10
+
+transfers :: Partition Int -> [Int]
+transfers p = zipWith transfer (ns ++ [0]) (0 : rs) -- 最初は残りが 0, 最後は残しておく必要が 0
+  where
+    transfer n pr = n - pr
+    (ns, rs) = unzip $ map transaction p
+    -- (n, r) を計算
+    transaction :: Segment Int -> (Int, Int)
+    transaction xs = (n, last sums + n)
+      where
+        n = - minimum sums
+        -- min 0 sums と書くところだが、scanl の結果の先頭は 0 なので省いている
+        sums = scanl (+) 0 xs
+
+exercise1210 :: IO ()
+exercise1210 = do
+    print   input
+    print $ msp input
+    print $ transfers $ msp input
+  where
+    input = [40,-85,55,-32,79,80,-21,80]
