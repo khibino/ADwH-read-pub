@@ -826,12 +826,47 @@ max 0 ( maximum (scanl (+) 0 s) )
 
 Exercise 12.10
 
-The function msp returns a partition, not the transfers that have to  be made to keep the current account in balance.
-Show how to define  transfers::Partition Int → [Int]  by computing a pair (n,r) of nonnegative numbers for each segment, where n is the  minimum that has to be in the current account to ensure the segment is safe and r is  the residue after the transactions in the segment.
+The function msp returns a partition, not the transfers that have to be made to keep the current account in balance.
+Show how to define
+
+```
+transfers :: Partition Int → [Int]
+```
+
+by computing a pair `(n,r)` of nonnegative numbers for each segment, where n is the minimum that has to be in the current account to ensure the segment is safe and r is the residue after the transactions in the segment.
+
+関数 `msp` はパーティションを返すが当座預金の収支を保つための資金移動の情報を返さない.
+
+
+それぞれのセグメントについての負でない数の対 `(n,r)` を計算することで
+
+```
+transfers :: Partition Int → [Int]
+```
+
+を定義する方法を示せ.
+ここで
+`n` はセグメントを安全にするための当座預金の最小値で、
+`r` はセグメントの取引後の残りである.
 
 ---
 
 Answer
+
+```
+transfers :: Partition Int -> [Int]
+transfers p = zipWith transfer (ns ++ [0]) (0 : rs) -- 最初は残りが 0, 最後は残しておく必要が 0
+  where
+    transfer n pr = n - pr
+    (ns, rs) = unzip $ map transaction p
+    -- (n, r) を計算
+    transaction :: Segment Int -> (Int, Int)
+    transaction xs = (n, last sums + n)
+      where
+        n = - minimum sums
+        -- min 0 sums と書くところだが、scanl の結果の先頭は 0 なので省いている
+        sums = scanl (+) 0 xs
+```
 
 -----
 
