@@ -373,7 +373,7 @@ safe xs = maximum sums ≤ c + minimum sums
 ```haskell
 -- 最小の安全な partition
 msp:: [Int] → Partition Int
-msp ← MinWith length · filter (all safe)· parts
+msp ← MinWith length · filter (all safe) · parts
 ```
 
 -----
@@ -724,23 +724,103 @@ Suppose C = 10.
 What is the value of msp [2,4,50,3] when msp is the greedy algorithm for the bank accounts problem and when msp is defined by the original specification?
 
 C = 10 とする.
-msp が銀行口座の問題の貪欲アルゴリズムでかつ元の仕様で定義されているとき、msp [2,4,50,3] の値は何か?
+msp が銀行口座の問題の貪欲アルゴリズムで定義されているときの msp [2,4,50,3] の値は何か? また元の仕様で定義されているときの値は何か?
 
 ---
 
 Answer
+
+貪欲アルゴリズムの場合
+
+```
+safe128 :: Segment Int -> Bool
+safe128 xs = maximum sums <= 10  + minimum sums
+  where sums = scanl (+) 0 xs
+
+
+msp128 :: [Int] -> Partition Int
+msp128 = foldr add []
+  where
+    add :: Int -> Partition Int -> Partition Int
+    add x [] = [[x]]
+    add x (s:p) = if safe128 (x:s) then (x:s):p else [x]:s:p
+```
+
+[[2,4],[50],[3]]
+
+
+元の仕様の場合
+
+```haskell
+msp:: [Int] → Partition Int
+msp ← MinWith length · filter (all safe) · parts
+```
+
+`50` を含むセグメントが `C = 10` を越えてしまうため、解無し
 
 -----
 
 Exercise 12.9
 
-The function add in the bank accounts problem does not take con stant time because the safety test can take linear time.
-But we can represent a  partition p by a triple  (p,minimum (sums (head p)),maximum (sums (head p)))  where sums = scanl (+) 0.
-Write down a new definition of msp that does take linear  time.
+The function `add` in the bank accounts problem does not take constant time because the safety test can take linear time.
+But we can represent a partition p by a triple
+
+```
+(p,minimum (sums (head p)),maximum (sums (head p)))
+```
+
+where `sums = scanl (+) 0.`
+
+Write down a new definition of msp that does take linear time.
+
+
+安全かどうかの検証が線形時間をとるため、銀行口座の問題における `add` 関数は定数時間をとらない.
+
+しかし
+`sums = scanl (+) 0.` のもとで
+
+三つ組によってパーティション p を表現することができる.
+
+```
+(p,minimum (sums (head p)),maximum (sums (head p)))
+```
+
+線形時間をとる msp の新たな定義を書き下せ.
+
 
 ---
 
 Answer
+
+```
+type TrPartition a = (Partition a, a, a)
+
+msp129 :: [Int] -> Partition Int
+msp129 = fst3 . foldr add ([], 0, 0)
+  where
+    fst3 (x, _, _) = x
+    c129 :: Int
+    c129 = 100
+    add :: Int -> TrPartition Int -> TrPartition Int
+    add x ([], _, _) = ([[x]], min 0 x, max 0 x)
+    add x (s:p, mn, mx) =  if mx2 <= c129 + mn2 then ((x:s):p, mn2, mx2) else ([x]:s:p, min 0 x, max 0 x)
+      where
+        mn2 = min 0 (mn + x)
+        mx2 = max 0 (mx + x)
+```
+
+```
+scanl (+) 0 (x:s) =
+0 : map (x +) (scanl (+) 0 s)
+
+minimum $ scanl (+) 0 (x:s) =
+minimum $ 0 : map (x +) (scanl (+) 0 s) =
+min 0 ( minimum (scanl (+) 0 s) )
+
+maximum $ scanl (+) 0 (x:s) =
+maximum $ 0 : map (x +) (scanl (+) 0 s) =
+max 0 ( maximum (scanl (+) 0 s) )
+```
 
 -----
 
