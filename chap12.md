@@ -721,7 +721,10 @@ safe ys
 Exercise 12.8
 
 Suppose C = 10.
-What is the value of msp [2,4,50,3] when msp is  the greedy algorithm for the bank accounts problem and when msp is defined by the  original specification?
+What is the value of msp [2,4,50,3] when msp is the greedy algorithm for the bank accounts problem and when msp is defined by the original specification?
+
+C = 10 とする.
+msp が銀行口座の問題の貪欲アルゴリズムでかつ元の仕様で定義されているとき、msp [2,4,50,3] の値は何か?
 
 ---
 
