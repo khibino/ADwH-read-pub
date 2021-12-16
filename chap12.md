@@ -1321,6 +1321,158 @@ tstepが Ο(`M`)ステップで済むように cost と幅をメモ化する、s
 
 -----
 
+# 12.3 関連の Exercise
+
+-----
+
+Exercise 12.14
+
+Show that the greedy condition fails when the cost of a paragraph is simply the number of lines.
+
+---
+
+Answer
+
+-----
+
+Exercise 12.15
+
+The greedy algorithm for the paragraph problem can be made more  efficient in two steps.
+This exercise deals with the first step and the following  exercise with the second step.
+Consider the function help specified by
+
+```
+p ++ help l ws = foldl add (p ++ [l]) ws
+```
+
+Prove that
+
+```
+greedy (w:ws) = help [w] ws
+  where help l [] = [l]
+        help l (w:ws) = if width l ≤ maxWidth
+                        then help l ws  else l : help [w] ws
+                        where l  = l++ [w]
+```
+
+---
+
+Answer
+
+-----
+
+Exercise 12.16
+
+For the second step, memoise width and eliminate the concatenation  with the help of an accumulating function parameter.
+
+---
+
+Answer
+
+-----
+
+Exercise 12.17
+
+In the thinning version of the paragraph problem, can we replace  filter by takeWhile?
+
+---
+
+Answer
+
+-----
+
+Exercise 12.18
+
+Show that the cost functions described in the text for the paragraph problem are all admissible.
+
+---
+
+Answer
+
+-----
+
+Exercise 12.19
+
+With some admissible cost functions, the thinning algorithm may  select a paragraph with minimum cost but whose length is not as short as possible.
+How can this deficiency be overcome?
+
+---
+
+Answer
+
+-----
+
+Exercise 12.20
+
+The refinement
+
+```
+snoc w · MinWith cost ← MinWith cost ·map (snoc w)
+```
+
+follows from the condition
+
+```
+cost p₁ ≤ cost p₂ ⇒ cost (snoc w p₁) ≤ cost (snoc w p₂)
+```
+
+Does this condition hold for `cost₃`?
+
+---
+
+Answer
+
+-----
+
+Exercise 12.21
+
+Suppose we had gone for a right-to-left thinning algorithm for the  paragraph problem, using a definition of parts based on foldr.
+This time a cost  function is admissible if
+
+```
+cost (glue w p₁) ≤ cost (glue w p₂) ∧ cost (cons w p₁) ≤ cost (cons w p₂)
+```
+
+provided that
+
+```
+cost p₁ ≤ cost p₂ ∧ width (head p₁) = width (head p₂)
+```
+
+As can be checked, all five cost functions introduced in the text are admissible in  this sense.
+Write down the associated thinning algorithm.
+Give an example to show  that the two different thinning algorithms produce different results for `cost₃`.
+
+---
+
+Answer
+
+-----
+
+Exercise 12.22
+
+The final exercise is to make the thinning algorithm for the para graph problem more efficient.
+Setting `rmr = reverse · map reverse`, we can represent  a paragraph p by a triple
+
+```
+(rmr p, cost p,width (last p))
+```
+
+The last two components memoise cost and width, while the first component means  that snoc and bind can be implemented in terms of cons and glue.
+More precisely, we have
+
+```
+snoc w · rmr = rmr · cons w
+bind w · rmr = rmr · glue w
+```
+
+Write down the resulting algorithm, assuming the cost function is `cost₃`.
+
+---
+
+Answer
+
+
 <!---
  Local Variables:
  indent-tabs-mode: nil
