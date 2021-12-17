@@ -59,3 +59,16 @@ example = "666666 1 55555 333 4444 7777777"
 
 exampleL :: String
 exampleL = "The algorithm works by adding each word to the end of the last line of the current  paragraph until no more words will fit, in which case a new line is started. A more  efficient version is discussed in the exercises. This algorithm is essentially the one  used by Microsoft Word and many other word processors.  So, for which definition of cost does the greedy algorithm work?"
+
+greedyH :: Text -> Para
+greedyH (w:ws) = help (length w, (w:)) ws
+greedyH _ = error "greedyH"
+
+help :: (Int, Line -> Line) -> Text -> Para
+help ( _, l) [] = [l []]
+help (sz, l) (w:ws) =
+  if sz2 <= maxWidthH
+  then help (sz2, l . (w:)) ws  else l [] : help (wlen, (w:)) ws
+  where wlen = length w
+        sz2 = sz + 1 + wlen
+        maxWidthH = 80
