@@ -1041,7 +1041,7 @@ fitParts = foldl (flip (concatMap · fitExtend)) [[]]
 cost₁ = length
 ```
 
-最終行以外の幅に満たない空白の合計
+最終行以外の行の、最大幅に満たない数の合計
 
 ```
 cost₂ = sum · map waste · init  where waste line = maxWidth - width line
@@ -1053,7 +1053,7 @@ cost₂ = sum · map waste · init  where waste line = maxWidth - width line
 cost₃ = sum·map waste · init  where waste line = (optWidth - width line)²
 ```
 
-最終行以外の幅に満たない空白の数のうちの最大
+最終行以外の行の、最大幅に満たない数のうちの最大
 
 ```
 cost₄ = foldr max 0 · map waste · init  where waste line = maxWidth - width line
@@ -1299,9 +1299,9 @@ p1 ≼ p2 = cost p1 ≤ cost p2 ∧ width (last p1) == width (last p2)
 p1 ≼ p2 = cost p1 ≤ cost p2 ∧ width (last p1) == width (last p2)
 ```
 
-さらにパーティションのリスト `ps` を最後の行の幅の大きい順に保つようにすることを考えると
+さらにパーティションのリスト `ps` を最後の行の幅が増加する順に保つようにすることを考えると
 
-`map (bind w) ps` も最後の行の幅の大きい順となる
+`map (bind w) ps` も最後の行が増加する順となる
 
 `map (snoc w) ps` はすべて同じ最終行を持ち、その最終行が可能な限り短いものとなる.
 このリストを thinning すると `minWith cost (map (snoc w) ps)` だけが残る
@@ -1505,11 +1505,20 @@ help (sz, l) (w:ws) = if sz2 <= maxWidth
 
 Exercise 12.17
 
-In the thinning version of the paragraph problem, can we replace  filter by takeWhile?
+In the thinning version of the paragraph problem, can we replace filter by takeWhile?
 
 ---
 
 Answer
+
+```
+para = minWith cost · foldl tstep [[]]
+  where tstep [[]] w = [[[w]]]
+        tstep ps w = minWith cost (map (snoc w) ps) :
+                     filter (fits · last) (map (bind w) ps)
+```
+
+`map (bind w) ps` は最後の行が増加する順となっているので filter を takeWhile に置き換えても良い
 
 -----
 
@@ -1521,11 +1530,113 @@ Show that the cost functions described in the text for the paragraph problem are
 
 Answer
 
+```haskell
+-- admissible
+cost p₁ ≤ cost p₂ ∧ width (last p₁) = width (last p₂)
+⇒
+cost (bind w p₁) ≤ cost (bind w p₂) ∧ cost (snoc w p₁) ≤ cost (snoc w p₂)
+```
+
+```haskell
+cost₁ = length なので
+length p₁ ≤ length p₂ ∧ width (last p₁) = width (last p₂) のもとで
+
+cost₁ (bind w p₁) =
+  {- bind は行数を変えない -}
+length p₁ ≤ length p₂ =
+  {- bind は行数を変えない -}
+cost₁ (bind w p₂)
+
+cost₁ (snoc w p₁) =
+  {- snoc は行数を1増やす -}
+length p₁ + 1 ≤ length p₂ + 1 =
+  {- snoc は行数を1増やす -}
+cost₁ (snoc w p₂)
+```
+
+```haskell
+-- 最終行以外の行の、最大幅に満たない数の合計
+cost₂ = sum · map waste · init  where waste line = maxWidth - width line
+
+cost₂ p₁ ≤ cost₂ p₂ ∧ width (last p₁) = width (last p₂) のもとで
+
+  {- 最終行が変化しても cost₂ は保存される -}
+cost₂ (bind w p₁) = cost₂ p₁ ≤ cost₂ p₂ = cost₂ (bind w p₂)
+
+cost₂ (snoc w p₁) =
+  {- cost₂ の差分は p₁ の最終行の分 -}
+cost₂ p₁ + maxWidth - width (last p₁) ≤
+  {- cost₂ p₁ ≤ cost₂ p₂ -}
+cost₂ p₂ + maxWidth - width (last p₁) =
+  {- width (last p₁) = width (last p₂) -}
+cost₂ p₂ + maxWidth - width (last p₂) =
+  {- cost₂ の差分は p₂ の最終行の分 -}
+cost₂ (snoc w p₂)
+```
+
+```haskell
+-- 最終行以外の各行の optWidth との差の2乗の合計
+cost₃ = sum·map waste · init  where waste line = (optWidth - width line)²
+
+cost₃ p₁ ≤ cost₃ p₂ ∧ width (last p₁) = width (last p₂) のもとで
+
+  {- 最終行が変化しても cost₃ は保存される -}
+cost₃ (bind w p₁) = cost₃ p₁ ≤ cost₃ p₂ = cost₃ (bind w p₂)
+
+cost₃ (snoc w p₁) =
+  {- cost₃ の差分は p₁ の最終行の分 -}
+cost₃ p₁ + (optWidth - width (last p₁))² ≤
+  {- cost₃ p₁ ≤ cost₃ p₂ -}
+cost₃ p₂ + (optWidth - width (last p₁))² =
+  {- width (last p₁) = width (last p₂) -}
+cost₃ p₂ + (optWidth - width (last p₂))² =
+  {- cost₃ の差分は p₂ の最終行の分 -}
+cost₃ (snoc w p₂)
+```
+
+```haskell
+-- 最終行以外の行の、最大幅に満たない数のうちの最大
+cost₄ = foldr max 0 · map waste · init  where waste line = maxWidth - width line
+
+cost₄ p₁ ≤ cost₄ p₂ ∧ width (last p₁) = width (last p₂) のもとで
+
+  {- 最終行が変化しても cost₄ は保存される -}
+cost₄ (bind w p₁) = cost₄ p₁ ≤ cost₄ p₂ = cost₄ (bind w p₂)
+
+cost₄ (snoc w p₁) =
+  {- p₁ の最終行以外のうちの最大と p₁ の最終行との大きい方 -}
+max (cost₄ p₁) (maxWidth - width (last p₁)) ≤
+  {- cost₄ p₁ ≤ cost₄ p₂ -}
+max (cost₄ p₂) (maxWidth - width (last p₁)) =
+  {- width (last p₁) = width (last p₂) -}
+max (cost₄ p₂) (maxWidth - width (last p₂)) =
+  {- p₂ の最終行以外のうちの最大と p₂ の最終行との大きい方 -}
+cost₄ (snoc w p₂)
+```
+
+```haskell
+-- 最終行以外の各行の optWidth との差の2乗のうちの最大
+cost₅ = foldr max 0 · map waste · init  where waste line = (optWidth - width line)²
+
+  {- 最終行が変化しても cost₅ は保存される -}
+cost₅ (bind w p₁) = cost₅ p₁ ≤ cost₅ p₂ = cost₅ (bind w p₂)
+
+cost₅ (snoc w p₁) =
+  {- p₁ の最終行以外のうちの最大と p₁ の最終行との大きい方 -}
+max (cost₅ p₁) (optWidth - width (last p₁))² ≤
+  {- cost₅ p₁ ≤ cost₅ p₂ -}
+max (cost₅ p₂) (optWidth - width (last p₁))² =
+  {- width (last p₁) = width (last p₂) -}
+max (cost₅ p₂) (optWidth - width (last p₂))² =
+  {- p₂ の最終行以外のうちの最大と p₂ の最終行との大きい方 -}
+cost₅ (snoc w p₂)
+```
+
 -----
 
 Exercise 12.19
 
-With some admissible cost functions, the thinning algorithm may  select a paragraph with minimum cost but whose length is not as short as possible.
+With some admissible cost functions, the thinning algorithm may select a paragraph with minimum cost but whose length is not as short as possible.
 How can this deficiency be overcome?
 
 ---
@@ -1539,7 +1650,7 @@ Exercise 12.20
 The refinement
 
 ```
-snoc w · MinWith cost ← MinWith cost ·map (snoc w)
+snoc w · MinWith cost ← MinWith cost · map (snoc w)
 ```
 
 follows from the condition
@@ -1553,6 +1664,22 @@ Does this condition hold for `cost₃`?
 ---
 
 Answer
+
+```
+optWidth = 6
+p₁ = [["This", "is"], ["a"]]
+p₂ = [["This"], ["is", "a"]]
+w = "pen"
+
+cost₃ p₁ = 1
+cost₃ p₂ = 4
+
+cost₃ (snoc w p₁) = 26
+cost₃ (snoc w p₂) = 8
+```
+
+で成立しない。
+
 
 -----
 
