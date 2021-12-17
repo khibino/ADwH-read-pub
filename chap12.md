@@ -1333,12 +1333,40 @@ Show that the greedy condition fails when the cost of a paragraph is simply the 
 
 Answer
 
+```
+-- 貪欲条件
+cost p₁ ≤ cost p₂ ⇒ cost (add p₁ w) ≤ cost (add p₂ w)
+
+add [] w = snoc w []
+add p w = head (filter (fits · last) [bind w p,snoc w p])
+```
+
+```
+maxWidth = 7
+p₁ = [["This"], ["is", "a"]]
+p₂ = [["This", "is"], ["a"]]
+```
+
+のもとで `cost p₁ ≤ cost p₂` が成立。
+
+`w = "pen"` とすると
+
+```
+add p₁ w = [["This"], ["is", "a"], ["pen"]]
+add p₂ w = [["This", "is"], ["a", "pen"]]
+
+cost (add p₁ w) = 3
+cost (add p₂ w) = 2
+```
+
+なので `cost (add p₁ w) ≤ cost (add p₂ w)` が成立しない。
+
 -----
 
 Exercise 12.15
 
-The greedy algorithm for the paragraph problem can be made more  efficient in two steps.
-This exercise deals with the first step and the following  exercise with the second step.
+The greedy algorithm for the paragraph problem can be made more efficient in two steps.
+This exercise deals with the first step and the following exercise with the second step.
 Consider the function help specified by
 
 ```
@@ -1350,24 +1378,128 @@ Prove that
 ```
 greedy (w:ws) = help [w] ws
   where help l [] = [l]
-        help l (w:ws) = if width l ≤ maxWidth
-                        then help l ws  else l : help [w] ws
-                        where l  = l++ [w]
+        help l (w:ws) = if width l' ≤ maxWidth
+                        then help l' ws  else l : help [w] ws
+                        where l' = l ++ [w]
 ```
 
 ---
 
 Answer
 
+```
+greedy = foldl add []
+  where add [] w = snoc w []
+        add p w = head (filter (fits · last) [bind w p,snoc w p])
+
+fits :: Line → Bool
+fits line = width line ≤ maxWidth  -- maxWidthはグローバル値
+width :: Line → Nat
+width = foldrn add length  where add w n = length w+1+n
+```
+
+`p ++ help l ws = foldl add (p ++ [l]) ws ⇒ help [w] ws == foldl add [] (w:ws)` と
+`p ++ help l ws = foldl add (p ++ [l]) ws` を証明する。
+
+
+```
+p ++ help l ws = foldl add (p ++ [l]) ws ⇒ help [w] ws == foldl add [] (w:ws)
+```
+
+の証明
+
+```
+p ++ help l ws = foldl add (p ++ [l]) ws ⇒
+  {- p = [], l = [w] -}
+help [w] ws = foldl add ([[w]]) ws ⇒
+  {- add [] w = snoc w [] = [[w]] -}
+help [w] ws = foldl add (add [] w) ws ⇒
+  {- foldl add [] (w:ws) = foldl add (add [] w) ws -}
+help [w] ws = foldl add [] (w:ws)
+```
+
+```
+p ++ help l ws = foldl add (p ++ [l]) ws
+```
+
+の証明
+
+`ws` についての帰納法で証明する
+
+`[]` のとき
+
+```
+p ++ help l [] =
+  {- help の定義 -}
+p ++ [l] =
+  {- foldl の定義 -}
+foldl add (p ++ [l]) []
+```
+
+で成立。
+
+
+`w:ws` かつ `width (l ++ [w]) ≤ maxWidth` のとき
+
+```
+p ++ help l (w:ws) =
+  {- help の定義 -}
+p ++ help (l ++ [w]) ws =
+  {- 帰納法の仮定 -}
+foldl add (p ++ [l ++ [w]]) ws =
+  {- width (l ++ [w]) ≤ maxWidth なので add (p ++ [l]) w = p ++ [l ++ [w]] -}
+foldl add (add (p ++ [l]) w) ws =
+  {- foldl の定義 -}
+foldl add (p ++ [l]) (w:ws)
+```
+
+で成立。
+
+
+`w:ws` かつ `width (l ++ [w]) > maxWidth` のとき
+
+```
+p ++ help l (w:ws) =
+  {- help の定義 -}
+p ++ (l : help [w] ws) =
+  {- ++ 定義, 結合則 -}
+(p ++ [l]) ++ help [w] ws =
+  {- 帰納法の仮定 -}
+foldl add ((p ++ [l]) ++ [[w]]) ws =
+  {- width (l ++ [w]) > maxWidth なので add (p ++ [l]) w = (p ++ [l]) ++ [[w]] -}
+foldl add (add (p ++ [l]) w) ws =
+  {- foldl の定義 -}
+foldl add (p ++ [l]) (w:ws)
+```
+
+で成立。
+
+証明終わり //
+
 -----
 
 Exercise 12.16
 
-For the second step, memoise width and eliminate the concatenation  with the help of an accumulating function parameter.
+For the second step, memoise width and eliminate the concatenation with the help of an accumulating function parameter.
 
 ---
 
 Answer
+
+```
+help l [] = [l]
+help l (w:ws) = if width l' ≤ maxWidth
+                then help l' ws  else l : help [w] ws
+                where l' = l ++ [w]
+```
+
+```
+help ( _, l) [] = [l []]
+help (sz, l) (w:ws) = if sz2 <= maxWidth
+                      then help (sz2, l . (w:)) ws  else l [] : help (wlen, (w:)) ws
+                      where wlen = length w
+                            sz2 = sz + 1 + wlen
+```
 
 -----
 
