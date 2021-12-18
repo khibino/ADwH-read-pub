@@ -1120,7 +1120,7 @@ q₁ = snoc w p₁ ; q₂ = snoc w p₂ (12.8)
 
 (12.7) の場合を除いて `|q₁| < |q₂|` となる.
 
-(1.27) の場合は
+(12.7) の場合は
 
 ```
 |q₁| ≤ |q₂| ∧ width (last q1) < width (last q2)
@@ -1155,7 +1155,7 @@ width (last p₂ ++ [w]) = width (last (bind w p₂))
 ```
 
 つまり `width (last (bind w p₁)) ≤ width (last (bind w p₂))` となって、
-`not (fits (last (bind w p₁))) ∧ fits (last (bind w p₂))` は成立せず、(1.27) の場合は起こらないことがわかる。
+`not (fits (last (bind w p₁))) ∧ fits (last (bind w p₂))` は成立せず、(12.7) の場合は起こらないことがわかる.
 
 (12.5) と (12.8) では `|q₁| = |q₂| ∧ width (last q₁) = width (last q₂)`
 
@@ -1202,7 +1202,7 @@ cost₂ p₂ = (m − 1) M − (T − (w₂ₘ + m − 1))
 cost₂ p₂ = (m − 1) M − (T − (w₂ₘ + m − 1))
          ≥ ((k + 1) − 1) M − (T − (w₂ₘ + (k + 1) − 1))
          = (k − 1) M − (T − (w₂ₘ + k − 1)) + M + 1
-         = (k − 1) M − (T − (w₁ₘ + k − 1)) + M + 1 + w₂ₘ − w₁ₖ
+         = (k − 1) M − (T − (w₁ₖ + k − 1)) + M + 1 + w₂ₘ − w₁ₖ
          = cost₂ p₁ + M + 1 + w₂ₘ − w₁ₖ
          > cost₂ p₁ + M + w₂ₘ − w₁ₖ
          > cost₂ p₁    -- w₁ₖ < M なので
@@ -1490,7 +1490,7 @@ Exercise 12.16
 
 For the second step, memoise width and eliminate the concatenation with the help of an accumulating function parameter.
 
-二つ目の段階として、width をメモ化と、 help の蓄積引数の連結を除去せよ.
+二つ目の段階として、width のメモ化と、 help の蓄積引数の連結を除去せよ.
 
 ---
 
