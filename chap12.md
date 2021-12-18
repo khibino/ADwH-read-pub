@@ -1050,7 +1050,7 @@ cost₂ = sum · map waste · init  where waste line = maxWidth - width line
 最終行以外の各行の optWidth との差の2乗の合計
 
 ```
-cost₃ = sum·map waste · init  where waste line = (optWidth - width line)²
+cost₃ = sum · map waste · init  where waste line = (optWidth - width line)²
 ```
 
 最終行以外の行の、最大幅に満たない数のうちの最大
@@ -1576,7 +1576,7 @@ cost₂ (snoc w p₂)
 
 ```haskell
 -- 最終行以外の各行の optWidth との差の2乗の合計
-cost₃ = sum·map waste · init  where waste line = (optWidth - width line)²
+cost₃ = sum · map waste · init  where waste line = (optWidth - width line)²
 
 cost₃ p₁ ≤ cost₃ p₂ ∧ width (last p₁) = width (last p₂) のもとで
 
@@ -1671,22 +1671,22 @@ p₁ = [["This", "is"], ["a"]]
 p₂ = [["This"], ["is", "a"]]
 w = "pen"
 
-cost₃ p₁ = 1
-cost₃ p₂ = 4
+cost₃ p₁ = 1*1 = 1
+cost₃ p₂ = 2*2 = 4
 
-cost₃ (snoc w p₁) = 26
-cost₃ (snoc w p₂) = 8
+cost₃ (snoc w p₁) = 1*1 + 5*5 = 26
+cost₃ (snoc w p₂) = 2*2 + 2*2 = 8
 ```
 
-で成立しない。
+p₁側の方がコストが大きくなってしまい、成立しない。
 
 
 -----
 
 Exercise 12.21
 
-Suppose we had gone for a right-to-left thinning algorithm for the  paragraph problem, using a definition of parts based on foldr.
-This time a cost  function is admissible if
+Suppose we had gone for a right-to-left thinning algorithm for the paragraph problem, using a definition of parts based on foldr.
+This time a cost function is admissible if
 
 ```
 cost (glue w p₁) ≤ cost (glue w p₂) ∧ cost (cons w p₁) ≤ cost (cons w p₂)
@@ -1698,26 +1698,59 @@ provided that
 cost p₁ ≤ cost p₂ ∧ width (head p₁) = width (head p₂)
 ```
 
-As can be checked, all five cost functions introduced in the text are admissible in  this sense.
+As can be checked, all five cost functions introduced in the text are admissible in this sense.
 Write down the associated thinning algorithm.
-Give an example to show  that the two different thinning algorithms produce different results for `cost₃`.
+Give an example to show that the two different thinning algorithms produce different results for `cost₃`.
 
 ---
 
 Answer
 
+```
+para = minWith cost . foldr tstep [[]]
+  where tstep w [[]] = [[[w]]]
+        tstep w ps = minWith cost (map (cons w) ps) :
+                     filter (fits . head) (map (glue w) ps)
+```
+
+```
+maxWidth = 16
+optWidth = 16
+
+input:
+["Here","is","just","one","example","that","shows","different","outputs:"]
+```
+
+```
+foldl:
+
+Here is just one
+example that
+shows different
+outputs:
+```
+
+```
+foldr:
+
+Here is just
+one example that
+shows different
+outputs:
+```
+
 -----
 
 Exercise 12.22
 
-The final exercise is to make the thinning algorithm for the para graph problem more efficient.
-Setting `rmr = reverse · map reverse`, we can represent  a paragraph p by a triple
+The final exercise is to make the thinning algorithm for the paragraph problem more efficient.
+Setting `rmr = reverse · map reverse`, we can represent a paragraph `p` by a triple
 
 ```
-(rmr p, cost p,width (last p))
+(rmr p, cost p, width (last p))
 ```
 
-The last two components memoise cost and width, while the first component means  that snoc and bind can be implemented in terms of cons and glue.
+The last two components memoise `cost` and `width`, while the first component means that `snoc` and `bind` can be implemented in terms of `cons` and `glue`.
 More precisely, we have
 
 ```
@@ -1731,6 +1764,38 @@ Write down the resulting algorithm, assuming the cost function is `cost₃`.
 
 Answer
 
+```
+para = minWith cost · foldl tstep [[]]
+  where tstep [[]] w = [[[w]]]
+        tstep ps w = minWith cost (map (snoc w) ps) :
+                     filter (fits · last) (map (bind w) ps)
+```
+
+```
+paraMemo :: Text -> Para
+paraMemo = unMemo . minWithMemo . foldl tstep [([], maxBound, maxBound)]
+  where tstep [([], _, _)] w = [(p, 0, width l)]  where { l = [w]; p = [l] }
+        tstep ps w =
+          minWithMemo
+          [ (cons w p, c + lwaste, width [w])
+          | (p, c, lwidth) <- ps
+          , let lwaste = wwaste lwidth
+          ] :
+          takeWhile fitsMemo
+          [ (glue w p, c, lwidth + 1 + length w)
+          | (p, c, lwidth) <- ps
+          ]
+
+        wwaste width_ = (optWidth - width_)^(2 :: Int)
+
+        minWithMemo = minimumBy (compare `on` (\(_, c, _) -> c))
+        fitsMemo (_, _, lwidth) = lwidth <= maxWidth
+        unMemo (p, _, _) = reverse (map reverse p)
+```
+
+
+
+-----
 
 <!---
  Local Variables:
