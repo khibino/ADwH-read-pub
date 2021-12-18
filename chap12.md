@@ -1159,6 +1159,8 @@ width (last p₂ ++ [w]) = width (last (bind w p₂))
 
 (12.5) と (12.8) では `|q₁| = |q₂| ∧ width (last q₁) = width (last q₂)`
 
+? (12.5) のケースで `width (last q₁) = width (last q₂)` が必ず成立するかは疑問.  `width (last q₁) ≤ width (last q₂)` は成立するので議論の結論には影響なし.
+
 (12.6) では `|q₁| < |q₂|`
 
 なのですべての場合で `cost q₁ ≤ cost q₂` となる.
