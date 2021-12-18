@@ -1764,6 +1764,8 @@ Write down the resulting algorithm, assuming the cost function is `cost₃`.
 
 Answer
 
+元のプログラム
+
 ```
 para = minWith cost · foldl tstep [[]]
   where tstep [[]] w = [[[w]]]
@@ -1771,22 +1773,21 @@ para = minWith cost · foldl tstep [[]]
                      filter (fits · last) (map (bind w) ps)
 ```
 
+メモ化したもの
+
 ```
 paraMemo :: Text -> Para
 paraMemo = unMemo . minWithMemo . foldl tstep [([], maxBound, maxBound)]
   where tstep [([], _, _)] w = [(p, 0, width l)]  where { l = [w]; p = [l] }
         tstep ps w =
           minWithMemo
-          [ (cons w p, c + lwaste, width [w])
+          [ (cons w p, c + (optWidth - lwidth)^(2 :: Int), width [w])
           | (p, c, lwidth) <- ps
-          , let lwaste = wwaste lwidth
           ] :
           takeWhile fitsMemo
           [ (glue w p, c, lwidth + 1 + length w)
           | (p, c, lwidth) <- ps
           ]
-
-        wwaste width_ = (optWidth - width_)^(2 :: Int)
 
         minWithMemo = minimumBy (compare `on` (\(_, c, _) -> c))
         fitsMemo (_, _, lwidth) = lwidth <= maxWidth
