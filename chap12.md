@@ -1329,6 +1329,8 @@ Exercise 12.14
 
 Show that the greedy condition fails when the cost of a paragraph is simply the number of lines.
 
+段落のコストが単に行数であるとき貪欲条件が成立しないことを示せ.
+
 ---
 
 Answer
@@ -1369,11 +1371,17 @@ The greedy algorithm for the paragraph problem can be made more efficient in two
 This exercise deals with the first step and the following exercise with the second step.
 Consider the function help specified by
 
+段落問題に対する貪欲アルゴリズムは二つの段階でより効率化できる.
+この演習では最初の段階を扱い、次の演習では二つ目の段階を扱う.
+次のような関数 help を考える
+
 ```
 p ++ help l ws = foldl add (p ++ [l]) ws
 ```
 
 Prove that
+
+次を示せ
 
 ```
 greedy (w:ws) = help [w] ws
@@ -1482,6 +1490,8 @@ Exercise 12.16
 
 For the second step, memoise width and eliminate the concatenation with the help of an accumulating function parameter.
 
+二つ目の段階として、width をメモ化と、 help の蓄積引数の連結を除去せよ.
+
 ---
 
 Answer
@@ -1507,6 +1517,8 @@ Exercise 12.17
 
 In the thinning version of the paragraph problem, can we replace filter by takeWhile?
 
+段落問題のthinning 版では、filter を takeWhile で置き換えることができるか?
+
 ---
 
 Answer
@@ -1525,6 +1537,8 @@ para = minWith cost · foldl tstep [[]]
 Exercise 12.18
 
 Show that the cost functions described in the text for the paragraph problem are all admissible.
+
+テキストに述べられている、段落問題のコスト関数がすべて admissible であることを示せ.
 
 ---
 
@@ -1639,9 +1653,18 @@ Exercise 12.19
 With some admissible cost functions, the thinning algorithm may select a paragraph with minimum cost but whose length is not as short as possible.
 How can this deficiency be overcome?
 
+ある admissible であるコスト関数で、thinning アルゴリズムが最小コストの段落を選出するが、その長さは最短にはならない.
+この欠陥をどのように克服すればいいか?
+
 ---
 
 Answer
+
+```
+cost' p = (cost p, length p)
+```
+
+のようなコスト関数を定義すれば、 admissible の性質を保ちつつ段落の行数を最短にできる
 
 -----
 
@@ -1649,17 +1672,23 @@ Exercise 12.20
 
 The refinement
 
+次の精緻化は
+
 ```
 snoc w · MinWith cost ← MinWith cost · map (snoc w)
 ```
 
 follows from the condition
 
+次の条件に従う
+
 ```
 cost p₁ ≤ cost p₂ ⇒ cost (snoc w p₁) ≤ cost (snoc w p₂)
 ```
 
 Does this condition hold for `cost₃`?
+
+この条件は `cost₃` で保たれるか?
 
 ---
 
@@ -1688,25 +1717,45 @@ Exercise 12.21
 Suppose we had gone for a right-to-left thinning algorithm for the paragraph problem, using a definition of parts based on foldr.
 This time a cost function is admissible if
 
+foldr にもとづく parts の定義を利用して、右から左への thinning アルゴリズムを考えよう.
+今回は、次が
+
 ```
 cost (glue w p₁) ≤ cost (glue w p₂) ∧ cost (cons w p₁) ≤ cost (cons w p₂)
 ```
 
 provided that
 
+次を条件とするなら
+
 ```
 cost p₁ ≤ cost p₂ ∧ width (head p₁) = width (head p₂)
 ```
 
+コスト関数が admissible である.
+
 As can be checked, all five cost functions introduced in the text are admissible in this sense.
 Write down the associated thinning algorithm.
 Give an example to show that the two different thinning algorithms produce different results for `cost₃`.
+
+確認したように、テキストで紹介した5つのコスト関数はすべてこの意味で admissible である.
+この関連から thinning アルゴリズムを記述せよ.
+二つの異なる(左から右, 右から左) thinning アルゴリズムが `cost ₃` に対して異なる結果を生むことを示す例を挙げよ.
 
 ---
 
 Answer
 
 ```
+-- left-to-right
+para = minWith cost · foldl tstep [[]]
+  where tstep [[]] w = [[[w]]]
+        tstep ps w = minWith cost (map (snoc w) ps) :
+                     filter (fits · last) (map (bind w) ps)
+```
+
+```
+-- right-to-left
 para = minWith cost . foldr tstep [[]]
   where tstep w [[]] = [[[w]]]
         tstep w ps = minWith cost (map (cons w) ps) :
@@ -1746,12 +1795,18 @@ Exercise 12.22
 The final exercise is to make the thinning algorithm for the paragraph problem more efficient.
 Setting `rmr = reverse · map reverse`, we can represent a paragraph `p` by a triple
 
+最後の演習は段落問題の thinning アルゴリズムをより効率化することだ.
+`rmr = reverse · map reverse` とすると、段落 `p` を次の三つ組で表現できる
+
 ```
 (rmr p, cost p, width (last p))
 ```
 
 The last two components memoise `cost` and `width`, while the first component means that `snoc` and `bind` can be implemented in terms of `cons` and `glue`.
 More precisely, we have
+
+後ろ二つの成分で `cost` と `width` をメモ化しつつ、最初の成分は `snoc` と `bind` を `cons` と `glue` を利用して実装できるようにする.
+より明確に言えば次のようになる
 
 ```
 snoc w · rmr = rmr · cons w
@@ -1760,9 +1815,26 @@ bind w · rmr = rmr · glue w
 
 Write down the resulting algorithm, assuming the cost function is `cost₃`.
 
+コスト関数を `cost₃` とし、結果のアルゴリズムを記述せよ.
+
 ---
 
 Answer
+
+逆の式の方がわかりやすい?
+
+```
+rmr · snoc w = cons w · rmr
+rmr · bind w = glue w · rmr
+```
+
+```
+rmr (snoc w p) = cons w (rmr p)
+rmr (bind w p) = glue w (rmr p)
+```
+
+`rmr · rmr = id` を考えればわからなくもない
+
 
 元のプログラム
 
