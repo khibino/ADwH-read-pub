@@ -124,13 +124,13 @@ g1 D = error "undefined vertex D"
 g2 :: Graph
 g2 A = [(B, 1)]
 g2 B = [(A, 1), (C, 100)]
-g2 C = [(B, 100)]
+g2 C = []
 g2 D = error "undefined vertex D"
 
 g3 :: Graph
 g3 A = [(B, 1), (D, 1)]
 g3 B = [(A, 1), (C, 100)]
-g3 C = [(B, 100)]
+g3 C = []
 g3 D = [(A, 1)]
 
 goalD :: Vertex -> Bool
