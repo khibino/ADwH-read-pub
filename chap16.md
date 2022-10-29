@@ -336,6 +336,19 @@ AB を繰り返す経路が、最も良い推論値 4 を持ち続け、経路 A
 
 ----
 
+16.2 Searching with a monotonic heuristic
+
+----
+
+```
+empty :: Ord a ⇒ Set a
+member:: Ord a ⇒ a → Set a → Bool
+insert :: Ord a ⇒ a → Set a → Set a
+```
+
+
+----
+
 Exercise 16.3
 
 ダイクストラのアルゴリズムが A*探索の special case であるのはなぜか?
@@ -370,20 +383,6 @@ A ----> C
 ---+---------
  h | 4  2  0
 ```
-
-----
-
-16.2 Searching with a monotonic heuristic
-
-----
-
-```
-empty :: Ord a ⇒ Set a
-member:: Ord a ⇒ a → Set a → Bool
-insert :: Ord a ⇒ a → Set a → Set a
-```
-
-
 
 ----
 
