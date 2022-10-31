@@ -18,8 +18,8 @@
 ## T* 探索
 
 
-* 最小コストより少ないか等しい推定をするヒューリステイックを楽観的ヒューリステイック (optimistic heuristic) または admissible heuristic と言う
-    * 頂点vからゴール(複数あってもよい)までの経路の最小コストを H(v) とすると、Heuristic関数 h(v) について、 h(v) ≤ H(v)
+* 最小コストより少ないか等しい推定をするヒューリスティックを楽観的ヒューリスティック (optimistic heuristic) または admissible heuristic と言う
+    * 頂点vからゴール(複数あってもよい)までの経路の最小コストを H(v) とすると、ヒューリスティック関数 `h(v)` について、 `h(v) ≤ H(v)`
 * ここでは T* 探索と呼ぶことにする
 
 
@@ -340,12 +340,129 @@ AB を繰り返す経路が、最も良い推論値 4 を持ち続け、経路 A
 
 ----
 
+## 単調ヒューリスティック
+
+ヒューリスティック関数 `h` が
+始点 `u`、終点 `v`、コスト `c` の辺 `(u,v,c)` に対し
+`h(u) ≤ c + h(v)` を満たすとき、単調ヒューリスティックという.
+
+ゴール `v` に対し、`h(v) = 0` とすると、楽観的ヒューリスティックでもあることが分かる.
+
+```
+... (u₃,u₂,c₃) (u₂,u₁,c₂) (u₁,v,c₁)
+h(v) = 0 = H(v)
+h(u₁) ≤ c₁ + h(v)  = c₁ + H(v)  = H(u₁)
+h(u₂) ≤ c₂ + h(u₁) ≤ c₂ + H(u₁) = H(u₂)
+h(u₃) ≤ c₃ + h(u₂) ≤ c₃ + H(u₂) = H(u₃)
+...
+```
+
+----
+
+## 単調ヒューリスティック/訪れた頂点集合
+
+単調ヒューリスティックの場合、同じ頂点を複数回訪れる必要がないことがわかる(後述)ため、有限マップは必要無い.
+
+すでに訪れた頂点集合を持つようにする.
+
+4.4節の集合演算、あるいは Data.Set を利用する.
+
 ```
 empty :: Ord a ⇒ Set a
 member:: Ord a ⇒ a → Set a → Bool
 insert :: Ord a ⇒ a → Set a → Set a
 ```
 
+`member` と `insert` は対数時間.
+名前の衝突を避けるために、qualified import を利用する.
+
+```
+import qualified Data.Set as S
+```
+
+----
+
+## mstar アルゴリズム
+
+`h`が単調という仮定のもとで、
+単調探索アルゴリズムmstarは、ゴールへの最適経路が存在すれば、それを見つけることができる.
+
+```
+mstar :: Graph → Heuristic → (Vertex → Bool) → Vertex → Maybe Path
+mstar g h goal source = msearch S.empty start
+  where start = insertQ ([source],0) (h source) emptyQ
+        msearch vs ps | nullQ ps = Nothing
+                      | goal (end p) = Just (extract p)
+                      | seen (end p) = msearch vs qs
+                      | otherwise = msearch (S.insert (end p) vs) rs
+          where seen v = S.member v vs
+                (p,qs) = removeQ ps
+                rs = addListQ (succs g h vs p) qs
+
+succs :: Graph → Heuristic → S.Set Vertex → Path → [(Path,Cost)]
+succs g h vs p = [extend p v d | (v,d) ← g (end p),not (S.member v vs)]
+  where extend (vs, c) v d = ((v: vs, c+d), c+d +h v)
+```
+
+発見した経路 `p` は `source` から `v` への経路のなかで最小のコストを持つ.
+
+同じ終点を持つ経路を一つだけ候補に追加するので `aster` より効率的.
+
+----
+
+## mstar の論証
+
+頂点 `v` への経路 `p` を `v` への経路 `p'` より先に見つけたとき、`c(p) ≤ c(p')` を示す.
+
+```
+q': `p` を見つけたときに候補にある `p'` の接頭辞
+u : `q'` の終点
+r : `u` から `v` までの `p'` の接尾辞
+```
+
+```
+   c(p)
+ ≤ { q' よりも先に p が選ばれているので c(p) + h(v) ≤ c(q') + h(u) }
+   c(q') + h(u) − h(v)
+ = { 経路のコストの定義から c(q') + c(r) = c(p') }
+   c(p') − c(r) + h(u) − h(v)
+ ≤ { h が単調かつ r は u から v への経路なので h(u) ≤ c(r) + h(v) }
+   c(p')
+```
+
+`h(u) ≤ c(r) + h(v)` は単調性の一般化になっている. 証明は練習問題.
+
+----
+
+## 単調でない h での mstar
+
+図16.1の例で、hが楽観的だが単調でない場合、mstarは最適でない解を返すことがあることを示す.
+
+
+グラフ 図16.1 (再掲)
+```
+    5       5
+A ----> B ----> D
+ \     ↗
+ 2\   /2
+   ↘ /
+    C
+```
+
+```
+   | A  B  C  D
+---+------------
+ h | 9  1  5  0
+```
+
+`h(C) > 2 + h(B)` となり、 `h(C) ≤ 2 + h(B)` が成立しないので単調ではない.
+
+```
+A(0+9)            | A(0+9)  - B,C は未処理
+AB(5+1) AC(2+5)   | AB(5+1) - D は未処理
+ABD(10+0) AC(2+5) | AC(2+5) - B は処理済み
+ABD(10+0)         | ABD(10+0) (最適でない解)
+```
 
 ----
 
