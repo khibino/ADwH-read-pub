@@ -600,7 +600,7 @@ insert :: Ord k ⇒ k → a → Map k a → Map k a
 
 ----
 
-astar の方は Data.Set の insert の間違いだと思う.
+mstar の方は Data.Set の insert の間違いだと思う.
 
 Vertex が Ord であることを仮定している.
 
@@ -624,7 +624,7 @@ Exercise 16.6
          h(u)
 ```
 
-`h(v) ≤ c + h(v)`
+`h(u) ≤ c + h(v)`
 
 ----
 
