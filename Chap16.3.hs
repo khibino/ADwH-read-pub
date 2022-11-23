@@ -6,6 +6,9 @@
 import Data.Array (listArray, (!), (//))
 import qualified Data.Set as S
 
+import qualified Chap16PQ as PQ
+import qualified Chap16PSQ as PSQ
+
 ---
 
 type Nat = Int
@@ -57,8 +60,29 @@ fpath grid source target = mstar (neighbours grid) source target
 
 ---
 
+pq_mstar :: Graph -> Vertex -> Vertex -> Maybe Path
+pq_mstar g source target = msearch S.empty start
+  where start = PQ.insertQ ([source],0) (dist source target) PQ.emptyQ
+        msearch vs ps | PQ.nullQ ps = Nothing
+                      | (== target) (end p) = Just (extract p)
+                      | seen (end p) = msearch vs qs
+                      | otherwise = msearch (S.insert (end p) vs) rs
+          where seen v = S.member v vs
+                (p,qs) = PQ.removeQ ps
+                rs = PQ.addListQ (succs g target vs p) qs
+
+---
+
 mstar :: Graph -> Vertex -> Vertex -> Maybe Path
-mstar = undefined
+mstar g source target = msearch S.empty start
+  where start = PSQ.insertQ end ([source],0) (dist source target) PSQ.emptyQ
+        msearch vs ps | PSQ.nullQ ps = Nothing
+                      | (== target) (end p) = Just (extract p)
+                      | seen (end p) = msearch vs qs
+                      | otherwise = msearch (S.insert (end p) vs) rs
+          where seen v = S.member v vs
+                (p,qs) = PSQ.removeQ ps
+                rs = PSQ.addListQ end (succs g target vs p) qs
 
 ---
 
