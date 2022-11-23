@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -Wno-name-shadowing #-}
 
 -- 16.3
 
@@ -113,14 +114,35 @@ vpath grid source target = mstarV (neighboursV grid) (visible grid) source targe
 
 ---
 
+pq_mstarV :: Graph -> (Segment -> Bool) -> Vertex -> Vertex -> Maybe Path
+pq_mstarV g vtest source target = msearch S.empty start
+  where start = PQ.insertQ ([source],0) (dist source target) PQ.emptyQ
+        msearch vs ps | PQ.nullQ ps = Nothing
+                      | (== target) (end p) = Just (extract p)
+                      | seen (end p) = msearch vs qs
+                      | otherwise = msearch (S.insert (end p) vs) rs
+          where seen v = S.member v vs
+                (p,qs) = PQ.removeQ ps
+                rs = PQ.addListQ (succsV g vtest target vs p) qs
+
+---
+
 mstarV :: Graph -> (Segment -> Bool) -> Vertex -> Vertex -> Maybe Path
-mstarV = undefined
+mstarV g vtest source target = msearch S.empty start
+  where start = PSQ.insertQ end ([source],0) (dist source target) PSQ.emptyQ
+        msearch vs ps | PSQ.nullQ ps = Nothing
+                      | (== target) (end p) = Just (extract p)
+                      | seen (end p) = msearch vs qs
+                      | otherwise = msearch (S.insert (end p) vs) rs
+          where seen v = S.member v vs
+                (p,qs) = PSQ.removeQ ps
+                rs = PSQ.addListQ end (succsV g vtest target vs p) qs
 
 ---
 
 succsV :: Graph -> (Segment -> Bool) -> Vertex -> S.Set Vertex -> Path -> [(Path,Dist)]
 succsV g vtest target vs p = [extend p w | w <- g (end p),not (S.member w vs)]
-  where extend (v: vs,d) w = if not (null vs) && vtest (u,w)
+  where extend (v:vs, d) w = if not (null vs) && vtest (u,w)
                              then ((w: vs,du),du+dist w target)
                              else ((w: v: vs,dw),dw+dist w target)
                              where u = head vs
