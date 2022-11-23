@@ -29,13 +29,13 @@ neighbours :: Grid -> Graph
 neighbours grid = filter (free grid) . adjacents
 adjacents :: Vertex -> [Vertex]
 adjacents (x,y) = [(x-1, y-1),(x-1, y),(x-1, y+1),
-                   (x, y-1),           (x, y+1),
-                   (x+1, y-1),(x+1,y),(x+1, y+1)]
+                   (x,   y-1),         (x,   y+1),
+                   (x+1, y-1),(x+1, y),(x+1, y+1)]
 free ::Grid -> Vertex -> Bool
 free (m,n,bs)=(a!)
   where a = listArray ((0,0),(m+1,n+1)) (repeat True)
             // [((x, y),False) | x <- [0..m+1],y <- [0,n+1]]
-            // [((x, y),False) | x <- [0,m+1],y <- [1..n]]
+            // [((x, y),False) | x <- [0, m+1],y <- [1..n]]
             // [((x, y),False) | b <- bs,(x,y) <- corners b]
 
 ---
@@ -91,6 +91,17 @@ vpath grid source target = mstarV (neighboursV grid) (visible grid) source targe
 
 mstarV :: Graph -> (Segment -> Bool) -> Vertex -> Vertex -> Maybe Path
 mstarV = undefined
+
+---
+
+succsV :: Graph -> (Segment -> Bool) -> Vertex -> S.Set Vertex -> Path -> [(Path,Dist)]
+succsV g vtest target vs p = [extend p w | w <- g (end p),not (S.member w vs)]
+  where extend (v: vs,d) w = if not (null vs) && vtest (u,w)
+                             then ((w: vs,du),du+dist w target)
+                             else ((w: v: vs,dw),dw+dist w target)
+                             where u = head vs
+                                   du = d - dist u v + dist u w
+                                   dw = d + dist v w
 
 ---
 
