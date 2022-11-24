@@ -727,3 +727,138 @@ r: v から w までの q の接尾辞
 ```
 
 ----
+
+# 16.3 Navigating a warehouse
+
+----
+
+## 倉庫内の誘導
+
+A*の例
+
+* 格子点間を移動
+* 障害物(格子点を結んだ単位正方形の箱)を避ける
+
+格子点間の移動(線分)の制約がいくつか考えられる
+
+* 水平および垂直のみ
+* 水平、垂直、45度 (以下で議論)
+* 任意の角度 (以下で議論)
+
+教科書の例: 図 16.2 および 図 16.3
+
+----
+
+## 定式化
+
+* m×n の格子上の点. 座標（x,y）ただし 1≦x≦m、1≦y≦n
+* x＝0、x＝m＋1、y＝0、y＝n＋1 が枠
+* 障害物の箱を左上の点で識別する
+
+```
+type Coord = Nat
+type Vertex = (Coord,Coord)
+type Box = Vertex
+type Grid = (Nat,Nat,[Box])
+boxes :: Grid → [Box]
+boxes (_,_,bs) = bs
+
+-- 箱の四隅
+corners :: Box → [Vertex]
+corners (x,y) = [(x, y),(x+1, y),(x+1,y−1),(x, y−1)]
+```
+
+-----
+
+## 定式化 / 線分を45度まで許す場合
+
+* m×n の格子上の点. 座標（x,y）ただし 1≦x≦m、1≦y≦n
+* x＝0、x＝m＋1、y＝0、y＝n＋1 が枠
+* 障害物の箱を左上の点で識別する
+
+45度まで許す場合、隣接する格子点は 8つ
+
+```
+type Graph = Vertex → [Vertex]
+neighbours::Grid → Graph
+neighbours grid = filter (free grid) · adjacents
+adjacents::Vertex → [Vertex]
+adjacents (x,y) = [(x−1, y−1),(x−1, y),(x−1, y+1),
+                   (x,   y−1),         (x,   y+1),
+                   (x+1, y−1),(x+1, y),(x+1, y+1)]
+free ::Grid → Vertex → Bool
+free (m,n,bs)=(a!)
+  where a = listArray ((0,0),(m+1,n+1)) (repeat True)
+            // [((x, y),False) | x ← [0..m+1],y ← [0,n+1]]
+            // [((x, y),False) | x ← [0,m+1],y ← [1..n]]
+            // [((x, y),False) | b ← bs,(x,y) ← corners b]
+-- 演算子 // は配列の更新
+```
+
+----
+
+## 線分を45度まで許す場合 / 経路の計算
+
+
+```
+type Dist = Float
+type Path = ([Vertex],Dist)
+end :: Path → Vertex
+end = head · fst
+
+extract ::Path → Path
+extract (vs,d)=(reverse vs,d)
+```
+
+```
+-- 経路を計算する関数
+fpath :: Grid → Vertex → Vertex → Maybe Path
+fpath grid source target = mstar (neighbours grid) source target
+
+-- グラフ、ソース頂点、ターゲット頂点を取る
+mstar :: Graph → Vertex → Vertex → Maybe Path
+
+-- ヒューリスティック関数の代わりにターゲット頂点を引数に取る. ヒューリスティック関数はユークリッド距離
+succs :: Graph → Vertex → S.Set Vertex → Path → [(Path,Dist)]
+succs g target visited p = [extend p v | v ← g (end p),not (S.member v visited)]
+  where extend (u:vs, d) v = ((v:u:vs, dv), dv + dist v target)
+                             where dv = d + dist u v
+```
+
+-----
+
+## 線分の角度を任意に取る場合 / 経路の計算
+
+```
+-- 線分の開始地点から行き先が見えるか
+visible :: Grid → Segment → Bool
+
+type Segment = (Vertex,Vertex)
+
+-- 経路を計算する関数
+vpath ::Grid → Vertex → Vertex → Maybe Path
+vpath grid source target = mstar (neighbours grid) (visible grid) source target
+
+-- 引数に、visible grid が追加される
+mstar :: Graph → (Segment → Bool) → Vertex → Vertex → Maybe Path
+
+-- vtest に visible grid が渡される
+succs g vtest target vs p = [extend p w | w ← g (end p),not (S.member w vs)]
+  where extend (v: vs,d) w = if not (null vs) ∧ vtest (u,w)
+                             then ((w: vs,du),du+dist w target)
+                             else ((w: v: vs,dw),dw+dist w target)
+                             where u = head vs
+                                   du = d - dist u v + dist u w
+                                   dw = d + dist v w
+
+neighbours (m,n,bs) (x1, y1) =
+	[ (x2,y2)
+	| x2 ← [1..m], y2 ← [1..n]
+	, visible (m,n,bs) ((x1, y1),(x2,y2)) ]
+```
+
+----
+
+# 16.4 The 8-puzzle
+
+----
