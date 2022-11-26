@@ -94,9 +94,10 @@ succs g target visited p = [extend p v | v <- g (end p), not (S.member v visited
 
 ---
 
--- exercise
+-- Exercise 16.11
 dist :: Vertex -> Vertex -> Dist
-dist = undefined
+dist (x1, y1) (x2, y2) = sqrt $ fromIntegral $ square (x1 - x2) + square (y1 - y2)
+  where square x = x * x
 
 ---
 
@@ -143,8 +144,8 @@ mstarV g vtest source target = msearch S.empty start
 succsV :: Graph -> (Segment -> Bool) -> Vertex -> S.Set Vertex -> Path -> [(Path,Dist)]
 succsV g vtest target vs p = [extend p w | w <- g (end p),not (S.member w vs)]
   where extend (v:vs, d) w = if not (null vs) && vtest (u,w)
-                             then ((w: vs,du),du+dist w target)
-                             else ((w: v: vs,dw),dw+dist w target)
+                             then ((w:vs, du), du + dist w target)
+                             else ((w:v:vs, dw), dw + dist w target)
                              where u = head vs
                                    du = d - dist u v + dist u w
                                    dw = d + dist v w
