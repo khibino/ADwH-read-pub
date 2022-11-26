@@ -108,8 +108,14 @@ borders = concatMap (edges . corners) . boxes
 
 near :: Segment -> Segment -> Bool
 near ((x1,y1), (x2,y2)) ((x3,y3), (x4,y4)) =
+    min x1 x2 <= x3 && x4 <= max x1 x2 &&
+    min y1 y2 <= y3 && y4 <= max y1 y2
+
+{-
+near ((x1,y1), (x2,y2)) ((x3,y3), (x4,y4)) =
     (min x1 x2 <= x3 || x4 <= max x1 x2) &&
     (min y1 y2 <= y3 || y4 <= max y1 y2)
+ -}
 
 orientation :: Segment -> Vertex -> Int
 orientation ((x1,y1),(x2,y2)) (x, y) = signum ((x-x1) * (y2-y1) - (x2-x1) * (y-y1))
@@ -189,3 +195,25 @@ succsV g vtest target vs p = [extend p w | w <- g (end p),not (S.member w vs)]
 
 neighboursV :: Grid -> Graph
 neighboursV (m,n,bs) (x1, y1) = [(x2,y2) | x2 <- [1..m], y2 <- [1..n],visible (m,n,bs) ((x1, y1),(x2,y2))]
+
+---
+
+grid163 :: Grid
+grid163 = (20, 10, boxes)
+  where
+    boxes = [                                         (10, 10), (11, 10), (12, 10),                               (18, 10)
+            ,                                                                                                     (18,  9)
+            , ( 2,  8), ( 3,  8), ( 7,  8),                                                                       (18,  8)
+            ,                                         (10,  7),           (12,  7),                               (18,  7)
+            ,                                                                                 (14,  6),           (18,  6)
+            , ( 2,  5), ( 3,  5), ( 7,  5), ( 8,  5), (10,  5), (11,  5)
+
+            ,                               ( 8,  3), (10,  3),                     (13,  3),           (17,  3), (18,  3), (19,  3)
+            , ( 5,  2)
+            ]
+
+vpath163 :: Maybe Path
+vpath163 = vpath grid163 (1, 10) (20, 1)
+
+fpath163 :: Maybe Path
+fpath163 = fpath grid163 (1, 10) (20, 1)
