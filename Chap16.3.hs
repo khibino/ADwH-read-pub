@@ -101,8 +101,43 @@ dist (x1, y1) (x2, y2) = sqrt $ fromIntegral $ square (x1 - x2) + square (y1 - y
 
 ---
 
+borders :: Grid -> [Segment]
+borders = concatMap (edges . corners) . boxes
+  where edges [u,v,w,x] = [ (u,v), (w,v), (x,w), (x,u) ]
+        edges cs        = error $ "borders.edges: wrong number of corners: " ++ show cs
+
+near :: Segment -> Segment -> Bool
+near ((x1,y1), (x2,y2)) ((x3,y3), (x4,y4)) =
+    (min x1 x2 <= x3 || x4 <= max x1 x2) &&
+    (min y1 y2 <= y3 || y4 <= max y1 y2)
+
+orientation :: Segment -> Vertex -> Int
+orientation ((x1,y1),(x2,y2)) (x, y) = signum ((x-x1) * (y2-y1) - (x2-x1) * (y-y1))
+
+crosses :: Segment -> Segment -> Bool
+crosses p (q1, q2) =
+  orientation p q1 * orientation p q2 <= 0
+
 visible :: Grid -> Segment -> Bool
-visible = undefined
+visible g s
+  | hseg s     = all (free g) (ypoints s)
+  | vseg s     = all (free g) (xpoints s)
+  | dseg s     = all (free g) (dpoints s)
+  | eseg s     = all (free g) (epoints s)
+  | otherwise  = free g (snd s) && all (not . crosses s) es
+  where
+    es = filter (near s) (borders g)
+
+    hseg (( _, y1), ( _, y2)) = y1 == y2
+    vseg ((x1,  _), (x2,  _)) = x1 == x2
+    dseg ((x1, y1), (x2, y2)) = x1 + y1 == x2 + y2
+    eseg ((x1, y1), (x2, y2)) = x1 - y1 == x2 - y2
+
+    ypoints ((x1, y ), (x2, _ )) = [ (x, y) | x <- [min x1 x2 .. max x1 x2] ]
+    xpoints ((x , y1), (_ , y2)) = [ (x, y) | y <- [min y1 y2 .. max y1 y2] ]
+    dpoints ((x1, y1), (x2, _ )) = [ (x, y) | x <- [min x1 x2 .. max x1 x2], let y = x1 + y1 - x ]
+    epoints ((x1, y1), (_ , y2)) = [ (x, y) | y <- [min y1 y2 .. max y1 y2], let x = x1 - y1 + y ]
+    -- epoints ((x1, y1), (x2, _ )) = [ (x, y) | x <- [min x1 x2 .. max x1 x2], let y = x1 - y1 + x ]
 
 ---
 
