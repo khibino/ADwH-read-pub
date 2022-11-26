@@ -935,8 +935,8 @@ borders = concatMap (edges · corners) · boxes
 
 ```
 near ((x1,y1), (x2,y2)) ((x3,y3), (x4,y4)) =
-    (min x1 x2 <= x3 && x4 <= max x1 x2) &&
-    (min y1 y2 <= y3 && y4 <= max y1 y2)
+    min x1 x2 <= x3 && x4 <= max x1 x2 &&
+    min y1 y2 <= y3 && y4 <= max y1 y2
 ```
 
 教科書の解答.
