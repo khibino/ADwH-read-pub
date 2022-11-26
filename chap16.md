@@ -747,6 +747,10 @@ A*の例
 
 教科書の例: 図 16.2 および 図 16.3
 
+* 実線: 18 + 5√2                  ≒ 25.07 (25.071...)
+* 破線: 3 + 2√10 + √205          ≒ 23.64 (23.642...)
+* 点線: 3√2 + √17 + √34 + √53  ≒ 21.48 (21.476...)
+
 ----
 
 ## 定式化
@@ -770,7 +774,7 @@ corners (x,y) = [(x, y),(x+1, y),(x+1,y−1),(x, y−1)]
 
 -----
 
-## 定式化 / 線分を45度まで許す場合
+## 定式化 / 線分の角度を45度刻みで取る場合
 
 * m×n の格子上の点. 座標（x,y）ただし 1≦x≦m、1≦y≦n
 * x＝0、x＝m＋1、y＝0、y＝n＋1 が枠
@@ -780,13 +784,13 @@ corners (x,y) = [(x, y),(x+1, y),(x+1,y−1),(x, y−1)]
 
 ```
 type Graph = Vertex → [Vertex]
-neighbours::Grid → Graph
+neighbours :: Grid → Graph
 neighbours grid = filter (free grid) · adjacents
-adjacents::Vertex → [Vertex]
+adjacents :: Vertex → [Vertex]
 adjacents (x,y) = [(x−1, y−1),(x−1, y),(x−1, y+1),
                    (x,   y−1),         (x,   y+1),
                    (x+1, y−1),(x+1, y),(x+1, y+1)]
-free ::Grid → Vertex → Bool
+free :: Grid → Vertex → Bool
 free (m,n,bs)=(a!)
   where a = listArray ((0,0),(m+1,n+1)) (repeat True)
             // [((x, y),False) | x ← [0..m+1],y ← [0,n+1]]
@@ -797,7 +801,7 @@ free (m,n,bs)=(a!)
 
 ----
 
-## 線分を45度まで許す場合 / 経路の計算
+## 線分の角度を45度刻みで取る場合 / 経路の計算
 
 
 ```
@@ -806,7 +810,7 @@ type Path = ([Vertex],Dist)
 end :: Path → Vertex
 end = head · fst
 
-extract ::Path → Path
+extract :: Path → Path
 extract (vs,d)=(reverse vs,d)
 ```
 
@@ -855,6 +859,166 @@ neighbours (m,n,bs) (x1, y1) =
 	[ (x2,y2)
 	| x2 ← [1..m], y2 ← [1..n]
 	, visible (m,n,bs) ((x1, y1),(x2,y2)) ]
+```
+
+----
+
+### Exercise 16.10
+
+図16.3の格子には、直線18手、斜め5手の固定角のパスが他にいくつあるか？
+
+----
+
+異なる選択肢があるのは、
+45度で下がる、1行目から2行目、2行目から3行目、3行目から4行目.
+2行目から3行目は 2つの選択肢があるが、依存があり、それぞれで可能な 1行目から2行目の選択肢数は 7つと 8つ.
+3行目から4行目の選択肢は 2つで、2行目から3行目での選択とは依存が無く選択できる.
+
+よって
+
+(8 + 7) * 2 = 30
+
+教科書の答えが違う?
+
+----
+
+### Exercise 16.11
+
+倉庫の問題で利用される関数 dist を定義せよ.
+
+----
+
+```
+dist :: Vertex -> Vertex -> Dist
+dist (x1, y1) (x2, y2) = sqrt $ fromIntegral $ square (x1 - x2) + square (y1 - y2)
+  where square x = x * x
+```
+
+----
+
+### Exercise 16.12
+
+2本の任意の線分が交差するかどうかを判定することは、計算幾何学の基本的な課題である.
+完全なアルゴリズムは、多くの様々なケースを考慮しなければならないので、少し複雑だ.
+しかし、倉庫の問題の状況では、まだ多くのケースを区別しなければならないにもかかわらず、この課題はいくらか単純化することができる.
+まず、構成中の経路の線分が水平、垂直、または45度の角度の傾斜である場合、何を示さなければならないか？
+
+----
+
+端点が障害物の角と一致しないことを示せばよい.
+
+----
+
+### Exercise 16.13
+
+前問に引き続き、残りのケースでは、線分の終点に障害物がないこと、どの箱の境界も線分を横断していないことを確認する必要がある.
+格子内の箱の境界線は、次のように定義できる.
+
+```
+borders :: Grid → [Segment]
+borders = concatMap (edges · corners) · boxes
+  where edges [u,v,w,x] = [ (u,v), (w,v), (x,w), (x,u) ]
+```
+
+しかし、すべての境界線が与えられた線分 `s` を横断しているかどうかをテストすることは、`s` から遠く離れた境界線を含むことになる.
+何らかの適切な意味での `near s` で、境界線をフィルタリングする方がよい. `near` の適切な定義とは何か？
+
+```
+ u +--+ v
+   |  |
+ x +--+ w
+```
+
+----
+
+線分が対角線となる長方形の重なりについてだけ考えれば良い.
+
+```
+near ((x1,y1), (x2,y2)) ((x3,y3), (x4,y4)) =
+    (min x1 x2 <= x3 && x4 <= max x1 x2) &&
+    (min y1 y2 <= y3 && y4 <= max y1 y2)
+```
+
+教科書の解答.
+障害物が単位正方形のみなので、これでもよさそう.
+
+一般的には次の方がよさそう.
+
+```
+near ((x1,y1), (x2,y2)) ((x3,y3), (x4,y4)) =
+    (min x1 x2 <= x3 || x4 <= max x1 x2) &&
+    (min y1 y2 <= y3 || y4 <= max y1 y2)
+```
+
+----
+
+### Exercise 16.14
+
+続いて、visibleの定義は次のような形になる。
+
+```
+visible :: Grid → Segment → Bool
+visible g s | hseg s = all (free g) (ypoints s)
+            | vseg s = all (free g) (xpoints s)
+            | dseg s = all (free g) (dpoints s)
+            | eseg s = all (free g) (epoints s)
+            | otherwise = free g (snd s) ∧ all (not · crosses s) es
+  where es = filter (near s) (borders g)
+```
+
+線分は，水平なら hseg，垂直なら vseg，端点の2つの座標の和が同じなら dseg，対角線は左右対象なので，座標の差が同じなら eseg を満足する.
+crosses 以外の残りの関数の妥当な定義を書け.
+
+----
+
+```
+visible :: Grid -> Segment -> Bool
+visible g s
+  | hseg s     = all (free g) (ypoints s)
+  | vseg s     = all (free g) (xpoints s)
+  | dseg s     = all (free g) (dpoints s)
+  | eseg s     = all (free g) (epoints s)
+  | otherwise  = free g (snd s) && all (not . crosses s) es
+  where
+    es = filter (near s) (borders g)
+
+    hseg (( _, y1), ( _, y2)) = y1 == y2
+    vseg ((x1,  _), (x2,  _)) = x1 == x2
+    dseg ((x1, y1), (x2, y2)) = x1 + y1 == x2 + y2
+    eseg ((x1, y1), (x2, y2)) = x1 - y1 == x2 - y2
+
+    ypoints ((x1, y ), (x2, _ )) = [ (x, y) | x <- [min x1 x2 .. max x1 x2] ]
+    xpoints ((x , y1), (_ , y2)) = [ (x, y) | y <- [min y1 y2 .. max y1 y2] ]
+    dpoints ((x1, y1), (x2, _ )) = [ (x, y) | x <- [min x1 x2 .. max x1 x2], let y = x1 + y1 - x ]
+    epoints ((x1, y1), (_ , y2)) = [ (x, y) | y <- [min y1 y2 .. max y1 y2], let x = x1 - y1 + y ]
+    -- epoints ((x1, y1), (x2, _ )) = [ (x, y) | x <- [min x1 x2 .. max x1 x2], let y = x1 - y1 + x ]
+```
+
+----
+
+### Exercise 16.15
+
+あとは、crosses の定義である. そのためには、三角形の向きを決定する必要がある. このとき、関数
+
+```
+orientation :: Segment → Vertex → Int
+orientation ((x1,y1),(x2,y2)) (x, y) = signum ((x-x1)×(y2-y1)-(x2-x1)×(y-y1))
+```
+
+は、A = (x1,y1), B = (x2,y2), C = (x, y) の三角形 ABC の向きが反時計回りなら -1、時計回りなら +1、点 A, B, および C が平行なら 0 を返す.
+たとえば、図16.5では、ABCの向きは反時計回り、ABDの向きは時計回りである.
+したがって、CD がある箱の境界であれば、線分はそれを横切ることになる.
+一方、ABE と ABF の向きが反対であっても、線分は EF を横切らない.
+EFには交差テストが適用されないのはなぜか？ それを考慮して crosses を定義せよ.
+
+----
+
+`near` で線分から決まる長方形の重なりをテストしているので、EF のようなケースは除外される.
+
+```
+crosses :: Segment -> Segment -> Bool
+crosses p (q1, q2) =
+  orientation p q1 * orientation p q2 <= 0
 ```
 
 ----
