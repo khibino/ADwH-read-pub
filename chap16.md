@@ -721,7 +721,7 @@ r: v から w までの q の接尾辞
   {- 補題 h(v) ≤ c(r) + h(w) -}
 ≤ c(p) + c(r) + h(w)
   {- コスト c(q) の定義, q は p と r の連結 -}
-= c(q) + h(u)
+= c(q) + h(w)
   {- f の定義 -}
 = f(q)
 ```
@@ -831,7 +831,7 @@ succs g target visited p = [extend p v | v ← g (end p),not (S.member v visited
 
 -----
 
-## 線分の角度を任意に取る場合 / 経路の計算
+## 線分の角度を任意に取る場合1 / 経路の計算
 
 ```
 -- 線分の開始地点から行き先が見えるか
@@ -854,7 +854,17 @@ succs g vtest target vs p = [extend p w | w ← g (end p),not (S.member w vs)]
                              where u = head vs
                                    du = d - dist u v + dist u w
                                    dw = d + dist v w
+```
 
+`neighbours` は 45度刻みの方を流用すると、図16.3の破線のような経路が導出される.
+
+-----
+
+## 線分の角度を任意に取る場合2 / 経路の計算
+
+`neighbours` で任意の角度を取るようにする.
+
+```
 neighbours (m,n,bs) (x1, y1) =
 	[ (x2,y2)
 	| x2 ← [1..m], y2 ← [1..n]
@@ -865,7 +875,7 @@ neighbours (m,n,bs) (x1, y1) =
 
 ### Exercise 16.10
 
-図16.3の格子には、直線18手、斜め5手の固定角のパスが他にいくつあるか？
+図16.3の格子には、直線18手、斜め5手の固定角の経路が他にいくつあるか？
 
 ----
 
