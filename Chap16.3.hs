@@ -151,6 +151,11 @@ type Segment = (Vertex,Vertex)
 
 ---
 
+vpath0 ::Grid -> Vertex -> Vertex -> Maybe Path
+vpath0 grid source target = mstarV (neighbours grid) (visible grid) source target
+
+---
+
 vpath ::Grid -> Vertex -> Vertex -> Maybe Path
 vpath grid source target = mstarV (neighboursV grid) (visible grid) source target
 
@@ -212,8 +217,11 @@ grid163 = (20, 10, boxes)
             , ( 5,  2)
             ]
 
-vpath163 :: Maybe Path
-vpath163 = vpath grid163 (1, 10) (20, 1)
+fpathG163 :: Maybe Path
+fpathG163 = fpath grid163 (1, 10) (20, 1)
 
-fpath163 :: Maybe Path
-fpath163 = fpath grid163 (1, 10) (20, 1)
+vpath0G163 :: Maybe Path
+vpath0G163 = vpath0 grid163 (1, 10) (20, 1)
+
+vpathG163 :: Maybe Path
+vpathG163 = vpath grid163 (1, 10) (20, 1)
