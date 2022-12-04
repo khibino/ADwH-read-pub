@@ -1,7 +1,7 @@
 
 -- 16.4
 
-import Data.List (sort)
+import Data.List (sort, tails)
 import Data.Array (Array, listArray, (!))
 import qualified Data.Set as S
 import qualified Data.Text as T
@@ -25,6 +25,25 @@ istate,fstate :: State
 istate = (T.pack "083256147",0)
 fstate = (T.pack "123456780",8)
 
+istate2 :: State
+istate2 = (T.pack "032871456", 0)
+
+{-
+ghci> :set +s
+ghci>  mstar h1 istate fstate
+Just [3,6,7,8,5,4,1,0,3,6,7,4,5,8]
+(0.01 secs, 2,555,200 bytes)
+ghci>  mstar h2 istate fstate
+Just [3,6,7,8,5,4,1,0,3,6,7,4,5,8]
+(0.00 secs, 1,216,000 bytes)
+ghci>  mstar h1 istate2 fstate
+Just [1,4,3,6,7,4,1,0,3,4,5,2,1,4,5,8,7,6,3,0,1,4,7,8]
+(0.60 secs, 320,906,248 bytes)
+ghci>  mstar h2 istate2 fstate
+Just [1,4,3,6,7,4,1,0,3,4,5,2,1,4,5,8,7,6,3,0,1,4,7,8]
+(0.09 secs, 63,711,384 bytes)
+ -}
+
 ---
 
 type Move = Nat
@@ -46,8 +65,10 @@ move (xs,i) j = (T.replace ty t0 (T.replace t0 tx (T.replace tx ty xs)),j)
 icparity :: State -> Bool
 mhparity :: State -> State -> Bool
 
-icparity = undefined
-mhparity = undefined
+icparity st = even $ sum [ length $ filter (h >) cs | h:cs  <- tails (perm st) ]
+
+mhparity istate fstate = even $ d (zpoint istate) (zpoint fstate)
+  where d (x0, y0) (x1, y1) = abs (x0 - x1) + abs (y0 - y1)
 
 ---
 
@@ -64,6 +85,12 @@ h1 is fs = length (filter p (zip (perm is) (perm fs)))
 ---
 
 type Coord = (Nat,Nat)
+
+---
+
+zpoint :: State -> Coord
+zpoint st = gridpoints !! posn0 st
+  where gridpoints = map (`divMod` 3) [0..8]
 
 ---
 
