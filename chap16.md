@@ -1036,3 +1036,359 @@ crosses p (q1, q2) =
 # 16.4 The 8-puzzle
 
 ----
+
+## 8-puzzle
+
+図16.4
+
+```
+   | 8 | 3
+---+---+---
+ 2 | 5 | 6
+---+---+---
+ 1 | 4 | 7
+
+
+ 1 | 2 | 3
+---+---+---
+ 4 | 5 | 6
+---+---+---
+ 7 | 8 |
+```
+
+8枚のタイルを配置、一箇所は空ける.
+手順は空きスペースへ隣接するタイルをスライドさせるだけ.
+
+初期状態から終了状態へ到達できるか?
+
+解けるのは全状態のうち半分だけ.
+
+----
+
+## 8-puzzle の論証 / 反転カウント
+
+反転カウント - inversion count
+
+順列 `p` について、列 `p(0),p(1),p(2),...,p(n)` を考えたとき、
+`i < j` かつ `p(i) > p(j)` が成立する `(i,j)` の組の数.
+
+空きスペースを `0` として図16.4 を考えると、
+
+`123456780` の 反転カウントは 8
+
+`083256147` の 反転カウントは 14
+
+```
+(8,3) (8,2) (8,5) (8,6) (8,1) (8,4) (8,7)
+(3,2) (3,1)
+(2,1)
+(5,1) (5,4)
+(6,1) (6,4)
+```
+
+----
+
+## 8-puzzle の論証 / 反転カウントの偶奇
+
+```
+s: 順列 p(1) から p(n) までのうち i から j までの列(i,j を除く)
+m: s の長さ
+Lᵢ: s のうち i より小さいものの数
+Bᵢ: s のうち i より大きいものの数
+Lⱼ: s のうち j より小さいものの数
+Bⱼ: s のうち j より大きいものの数
+
+Lᵢ + Bᵢ = Lⱼ + Bⱼ = m
+```
+
+```
+        i(--    s    --)j
+p(0),..,p(x),  ...   ,p(y),..,p(n)
+
+Lᵢ: 反転カウントのうち片方のみが i のもの
+Bⱼ: 反転カウントのうち片方のみが j のもの
+c₀: s内とs外、s内同士, iとj の 反転カウント
+
+c = c₀ + Lᵢ + Bⱼ
+```
+
+
+`i` と `j` を交換後の 反転カウント
+
+```
+        j(--    s    --)i
+p(0),..,p(x),  ...   ,p(y),..,p(n)
+
+Lⱼ: 反転カウントのうち片方のみが j のもの
+Bᵢ: 反転カウントのうち片方のみが i のもの
+c₀: s内とs外、s内同士, iとj の 反転カウント (教科書だと s の外側とあったけど間違いだと思う)
+
+c' = c0 + Lⱼ + Bᵢ + 1 (i < j)
+c' = c0 + Lⱼ + Bᵢ - 1 (i > j)
+```
+
+----
+
+## 8-puzzle の論証 / 反転カウントの偶奇
+
+
+```
+c = c₀ + Lᵢ + Bⱼ
+
+c' = c0 + Lⱼ + Bᵢ + 1 (i < j)
+c' = c0 + Lⱼ + Bᵢ - 1 (i > j)
+```
+
+```
+c' = c0 + Lⱼ + Bᵢ ± 1
+  { c = c₀ + Lᵢ + Bⱼ  }
+   = (c − Lᵢ − Bⱼ) + Lⱼ + Bᵢ ±1
+  { Lᵢ + Bᵢ = Lⱼ + Bⱼ ⇒ Bᵢ - Bⱼ = - Lᵢ + Lⱼ }
+   = c − 2Lᵢ + 2Lⱼ ± 1
+```
+
+よって `c` と `c'` の偶奇が一致する.
+
+初期状態の 反転カウントが偶数で、終了状態の 反転カウントが偶数なら、偶数回の移動でのみ到達できる.
+
+----
+
+## 8-puzzle の論証 / マンハッタン距離
+
+タイルの垂直水平移動の合計数
+
+図16.4
+
+```
+   | 8 | 3
+---+---+---
+ 2 | 5 | 6
+---+---+---
+ 1 | 4 | 7
+
+
+ 1 | 2 | 3
+---+---+---
+ 4 | 5 | 6
+---+---+---
+ 7 | 8 |
+```
+
+終了状態までのマンハッタン距離を考える.
+
+`1, 2, 4, 7, 8` は 2
+
+`3, 5, 6` は 0
+
+空きスペースは 4
+
+----
+
+## 8-puzzle の論証
+
+```
+1文字目 {E|O}: 順列の反転カウントの偶奇
+2文字目 {E|O}: 空きスペースの終了状態までのマンハッタン距離の偶奇
+```
+
+`EE` から任意の移動を考えると `OO` になり、`OO` から任意の移動を考えると `EE` になる.
+
+`EO` から任意の移動を考えると `OE` になり、`OE` から任意の移動を考えると `EO` になる.
+
+もし空きスペースの行の 2枚のタイルを入れ替えると、
+空きスペースのマンハッタン距離を変えずに、反転カウントの偶奇のみを変える.
+
+つまり、`OE` は `EE` になり、 `EO` は `OO` になり、かつ、これらは全単射なので、
+それぞれの並べ替えの状態集合の大きさは同じになる.
+
+終了状態は空きスペースのマンハッタン距離が 0 なので、 `EE` または `OE` になる.
+
+終了状態が `EE` なら、到達可能な初期状態は `EE` または `OO`.
+
+終了状態が `OE` なら、到達可能な初期状態は `EO` または `OE`.
+
+となり、どちらの場合も半分の場合のみが到達可能となる.
+
+----
+
+## 8-puzzle を楽観ヒューリスティックで解く
+
+図16.4
+
+```
+   | 8 | 3
+---+---+---
+ 2 | 5 | 6
+---+---+---
+ 1 | 4 | 7
+
+
+ 1 | 2 | 3
+---+---+---
+ 4 | 5 | 6
+---+---+---
+ 7 | 8 |
+```
+
+どんなヒューリスティック関数 `h` を選ぶか.
+
+格子 `g` に対して `h(g)` を考える
+
+* 位置違いのヒューリスティック / out-of-place heuristic
+    * 終了状態とは異なるタイルの数 - 図16.4 だと `h(g) = 5`
+* マンハッタンヒューリスティック / Manhattan heuristic
+    * 終了状態までのタイルのマンハッタン距離の和(空きスペースについては含めず) - 図16.4 だと `h(g) = 10`
+
+マンハッタンヒューリスティックは位置違いのヒューリスティックの改良版になっている.
+
+マンハッタンヒューリスティックは単調.
+
+----
+
+## 8-puzzle を解くプログラム
+
+
+```
+import qualified Data.Text as T
+
+type Position = Nat
+type State = (T.Text,Position)
+-- 格子の状態
+perm :: State → String
+perm (xs,j) = T.unpack xs
+-- 空きスペースの位置
+posn0 :: State → Position
+posn0 (xs,j) = j
+```
+
+```
+-- 初期状態と終了状態
+istate,fstate:: State
+istate = (T.pack "083256147",0)
+fstate = (T.pack "123456780",8)
+
+type Move = Nat
+-- 移動できる位置のリストを返す
+moves:: State → [Move]
+moves st = moveTable !(posn0 st)
+moveTable ::Array Nat [Nat]
+moveTable = listArray (0,8) [[1,3], [0,2,4], [1,5],
+                             [0,4,6],[1,3,5,7],[2,4,8],
+                             [3,7], [4,6,8], [5,7]]
+{- 格子内の位置の添字:
+  0 1 2
+  3 4 5
+  6 7 8 -}
+```
+
+----
+
+## 8-puzzle を解くプログラム
+
+```
+move :: State → Move → State
+move (xs,i) j = (T.replace ty t0 (T.replace t0 tx (T.replace tx ty xs)),j)
+                where t0 = T.singleton '0'
+                      ty = T.singleton '?'
+                      tx = T.singleton (T.index xs j)
+-- T.replace x y s は s 内の x をすべて y に置き換える
+-- x -> ?, 0 -> x, ? -> 0
+-- x <---> 0
+```
+
+```
+-- 反転カウントが偶数なら真
+icparity:: State → Bool
+-- 空きスペースの初期状態から終了状態までのマンハッタン距離が偶数なら真
+mhparity:: State → State → Bool
+
+--
+possible:: State → State → Bool
+possible is fs = (mhparity is fs == (icparity is == icparity fs))
+--                2                  1              終了状態
+-- EE ==> E       E                  E              E
+-- OO ==> E       O                  O              E
+-- EO ==> O       O                  E              O
+-- OE ==> O       E                  O              O
+```
+
+----
+
+## 8-puzzle を解くプログラム / 位置違いのヒューリスティック
+
+```
+-- 位置違いのヒューリスティック
+type Heuristic = State → State → Nat
+h1 :: Heuristic
+h1 is fs = length (filter p (zip (perm is) (perm fs)))
+           where p (c,d) = c ≠ '0' ∧ c ≠ d
+```
+
+----
+
+## 8-puzzle を解くプログラム / マンハッタン・ヒューリスティック
+
+マンハッタン・ヒューリスティックを定義するための座標
+```
+(0,0) (0,1) (0,2)
+(1,0) (1,1) (1,2)
+(2,0) (2,1) (2,2)
+```
+
+順列 `083256147` を添字順の座標リストにする (0 は抜かす)
+```
+(0,0) (0,1) (0,2)
+0     8     3
+
+(1,0) (1,1) (1,2)
+2     5     6
+
+(2,0) (2,1) (2,2)
+1     4     7
+```
+
+```
+[(2,0), (1,0), (0,2), (2,1), (1,1), (1,2), (2,2), (0,1)]
+ 1      2      3      4      5      6      7      8
+```
+
+----
+
+## 8-puzzle を解くプログラム / マンハッタン・ヒューリスティック
+
+```
+coords :: State → [Coord]
+coords = tail · map snd · sort · addCoords
+         where addCoords st = zip (perm st) gridpoints
+               gridpoints = map (`divMod` 3) [0..8]
+
+h2 :: Heuristic
+h2 is fs = sum (zipWith d (coords is) (coords fs))
+           where d (x0, y0) (x1, y1) = abs (x0 − x1) + abs (y0 − y1)
+```
+
+
+----
+
+## 8-puzzle を解くプログラム / mstar
+
+```
+type Path = ([Move],Nat,State)
+key :: Path → State
+key (ms,k,st) = st
+
+mstar :: Heuristic → State → State → Maybe [Move]
+mstar h istate fstate =
+  if possible istate fstate then msearch S.empty start else Nothing
+  where start = insertQ key ([],0,istate) (h istate fstate) emptyQ
+        msearch vs ps | st == fstate = Just (reverse ms)
+                      | S.member st vs = msearch vs qs
+                      | otherwise = msearch (S.insert st vs) rs
+          where ((ms, k,st),qs) = removeQ ps {- 先に説明したように、最小優先度のエントリを消すだけなので key 引数は不要 -}
+                rs = addListQ key (succs h fstate (ms, k,st) vs) qs
+
+succs :: Heuristic → State → Path → S.Set State → [(Path,Nat)]
+succs h fstate (ms,k,st) vs =
+  [((m:ms, k +1,st'), k +1+h st' fstate)
+  | m ← moves st,let st' = move st m,not (S.member st' vs)]
+```
