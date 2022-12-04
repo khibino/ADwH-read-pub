@@ -27,7 +27,7 @@ fstate = (T.pack "123456780",8)
 
 type Move = Nat
 moves:: State -> [Move]
-moves st = moveTable !(posn0 st)
+moves st = moveTable ! (posn0 st)
 moveTable ::Array Nat [Nat]
 moveTable = listArray (0,8) [[1,3], [0,2,4], [1,5],
                              [0,4,6],[1,3,5,7],[2,4,8],
@@ -68,7 +68,7 @@ type Coord = (Nat,Nat)
 coords :: State -> [Coord]
 coords = tail . map snd . sort . addCoords
          where addCoords st = zip (perm st) gridpoints
-               gridpoints = map (divMod 3) [0..8]
+               gridpoints = map (`divMod` 3) [0..8]
 
 ---
 
