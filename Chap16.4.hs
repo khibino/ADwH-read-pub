@@ -120,12 +120,12 @@ mstar h istate fstate =
         msearch vs ps | st == fstate = Just (reverse ms)
                       | S.member st vs = msearch vs qs
                       | otherwise = msearch (S.insert st vs) rs
-          where ((ms, k,st),qs) = removeQ ps
-                rs = addListQ key (succs h fstate (ms, k,st) vs) qs
+          where ((ms, k, st), qs) = removeQ ps
+                rs = addListQ key (succs h fstate (ms, k, st) vs) qs
 
 ---
 
 succs :: Heuristic -> State -> Path -> S.Set State -> [(Path,Nat)]
 succs h fstate (ms,k,st) vs =
-  [((m:ms, k+1,st'), k+1+h st' fstate)
+  [((m:ms, k+1, st'), k + 1 + h st' fstate)
   | m <- moves st, let st' = move st m, not (S.member st' vs) ]
