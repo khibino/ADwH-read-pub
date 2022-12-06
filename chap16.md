@@ -1031,6 +1031,8 @@ crosses p (q1, q2) =
   orientation p q1 * orientation p q2 <= 0
 ```
 
+<!-- 2022-11-27 ここまで -->
+
 ----
 
 # 16.4 The 8-puzzle
@@ -1384,11 +1386,78 @@ mstar h istate fstate =
         msearch vs ps | st == fstate = Just (reverse ms)
                       | S.member st vs = msearch vs qs
                       | otherwise = msearch (S.insert st vs) rs
-          where ((ms, k,st),qs) = removeQ ps {- 先に説明したように、最小優先度のエントリを消すだけなので key 引数は不要 -}
+          where ((ms,k,st), qs) = removeQ ps {- 先に説明したように、最小優先度のエントリを消すだけなので key 引数は不要 -}
                 rs = addListQ key (succs h fstate (ms, k,st) vs) qs
 
 succs :: Heuristic → State → Path → S.Set State → [(Path,Nat)]
 succs h fstate (ms,k,st) vs =
-  [((m:ms, k +1,st'), k +1+h st' fstate)
+  [((m:ms, k+1, st'), k+1 + h st' fstate)
   | m ← moves st,let st' = move st m,not (S.member st' vs)]
+```
+
+----
+
+### Exercise 16.16
+
+2×2のマス目に3つのタイルと1つの空白がある3パズルについて考える．最終的なタイルの並べ方が1230であるとき，24通りの初期状態のうち，どれが解けるか？
+
+----
+
+半分の12通りが解ける
+
+TBD
+
+----
+
+### Exercise 16.17
+
+8-puzzle の位置違いヒューリスティック h が単調であることを示せ． また、空きスペースのタイルが位置違いかどうかを数えると、そうならないことを示せ。
+
+----
+
+任意の手順 `m : s1 → s2` について場合分けを行なう.
+手順 `m` のコスト `c(m) = 1` から
+手順 `m` で動かすパネルの位置が合っている状態を T、 合っていない状態を F で表現する.
+また `h(s1) = p` としたとき、以下の 3通りとなり、それぞれ単調ヒューリスティックの条件が成立する.
+
+```
+ s1  | s2  |h(s1)|h(s2)| 単調ヒューリスティックの条件
+-----+-----+-----+-----+--------------------------------------
+  F  |  F  |  p  |  p  | h(s1) = p <= 1 +  p    = c(m) + h(s2)
+     +     +     +     +
+  T  |  F  |  p  | p+1 | h(s1) = p <= 1 + (p+1) = c(m) + h(h2)
+     +     +     +     +
+  F  |  T  |  p  | p-1 | h(s1) = p <= 1 + (p-1) = c(m) + h(h2)
+```
+
+空きスペースのタイルを位置違いと数えると、
+例えば終了状態まで後 1手のときに、 h = 2 となり、これは最短手数より大きいため、楽観ヒューリスティックにならない.
+楽観ヒューリスティックであることは、単調ヒューリスティックであることの必要条件なので、単調ヒューリスティックではない.
+
+----
+
+### Exercise 16.18
+
+空きスペースのタイルの距離が合計に含まれないからこそ、マンハッタン・ヒューリスティックが単調になることを示せ.
+
+----
+
+TBD
+
+----
+
+### Exercise 16.19
+
+関数 icparity と mhparity を定義せよ.
+ここで、icparity は反転数のパリティが偶数の場合に真を返し、mhparity は初期状態の空きスペースのタイルから終了状態の終わりの地までのマンハッタン距離が偶数の場合に真を返す．
+
+----
+
+```
+icparity :: State -> Bool
+icparity st = even $ sum [ length $ filter (h >) cs | h:cs  <- tails (perm st) ]
+
+mhparity :: State -> State -> Bool
+mhparity istate fstate = even $ d (zpoint istate) (zpoint fstate)
+  where d (x0, y0) (x1, y1) = abs (x0 - x1) + abs (y0 - y1)
 ```
