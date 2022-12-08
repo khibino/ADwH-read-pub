@@ -136,16 +136,76 @@ succs h fstate (ms,k,st) vs =
 fstate1616 :: State
 fstate1616 = (T.pack "1230", 3)
 
-solve1616 :: IO ()
-solve1616 = do
-  printSol "OE" solOE
-  printSol "EO" solEO
+istates1616 :: ([(T.Text, Int)], [(T.Text, Int)])
+istates1616 = (stateOE, stateEO)
   where
-    printSol label = putStrLn . ((label ++ ": ") ++) . unwords . map perm
-    solOE = [ s | s <- allState, icparity s == False, mhparity s fstate1616 == True ]
-    solEO = [ s | s <- allState, icparity s == True, mhparity s fstate1616 == False ]
+    stateOE = [ s | s <- allState, icparity s == False, mhparity22 s fstate1616 == True ]
+    stateEO = [ s | s <- allState, icparity s == True, mhparity22 s fstate1616 == False ]
     allState =
       [ (T.pack s, i)
       | s <- L.permutations "0123"
       , Just i <- [L.elemIndex '0' s]
       ]
+
+printStates :: String -> [State] -> IO ()
+printStates label = putStrLn . ((label ++ ": ") ++) . unwords . map perm
+
+printIStates1616 :: IO ()
+printIStates1616 = do
+  printStates "OE" stateOE
+  printStates "EO" stateEO
+  where
+    (stateOE, stateEO) = istates1616
+
+solves1616 :: IO ()
+solves1616 = do
+  solves listOE
+  solves listEO
+  where
+    (listOE, listEO) = istates1616
+    solves is =
+      putStr $ unlines
+        [ perm i ++ ": " ++ unwords (map show ms)
+        | i <- is
+        , Just ms <- [ mstar22 h2 i fstate1616 ]
+        ]
+
+
+moves22:: State -> [Move]
+moves22 st = moveTable22 ! (posn0 st)
+moveTable22 ::Array Nat [Nat]
+moveTable22 = listArray (0,3) [ [1,2], [0,3],
+                                [0,3], [1,2] ]
+
+{-
+0 1
+2 3
+ -}
+
+mstar22 :: Heuristic -> State -> State -> Maybe [Move]
+mstar22 h istate fstate =
+  if possible22 istate fstate then msearch S.empty start else Nothing
+  where start = insertQ key ([],0,istate) (h istate fstate) emptyQ
+        msearch vs ps | st == fstate = Just (reverse ms)
+                      | S.member st vs = msearch vs qs
+                      | otherwise = msearch (S.insert st vs) rs
+          where ((ms, k, st), qs) = removeQ ps
+                rs = addListQ key (succs22 h fstate (ms, k, st) vs) qs
+
+succs22 :: Heuristic -> State -> Path -> S.Set State -> [(Path,Nat)]
+succs22 h fstate (ms,k,st) vs =
+  [((m:ms, k+1, st'), k + 1 + h st' fstate)
+  | m <- moves22 st, let st' = move st m, not (S.member st' vs) ]
+
+---
+
+possible22 :: State -> State -> Bool
+possible22 is fs = (mhparity22 is fs == (icparity is == icparity fs))
+
+mhparity22 :: State -> State -> Bool
+mhparity22 istate fstate = even $ d (zpoint22 istate) (zpoint22 fstate)
+  where d (x0, y0) (x1, y1) = abs (x0 - x1) + abs (y0 - y1)
+
+zpoint22 :: State -> Coord
+zpoint22 st = gridpoints !! posn0 st
+  where gridpoints = map (`divMod` 2) [0..3]
