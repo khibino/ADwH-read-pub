@@ -2,6 +2,7 @@
 -- 16.4
 
 import Data.List (sort, tails)
+import qualified Data.List as L
 import Data.Array (Array, listArray, (!))
 import qualified Data.Set as S
 import qualified Data.Text as T
@@ -129,3 +130,22 @@ succs :: Heuristic -> State -> Path -> S.Set State -> [(Path,Nat)]
 succs h fstate (ms,k,st) vs =
   [((m:ms, k+1, st'), k + 1 + h st' fstate)
   | m <- moves st, let st' = move st m, not (S.member st' vs) ]
+
+----
+
+fstate1616 :: State
+fstate1616 = (T.pack "1230", 3)
+
+solve1616 :: IO ()
+solve1616 = do
+  printSol "OE" solOE
+  printSol "EO" solEO
+  where
+    printSol label = putStrLn . ((label ++ ": ") ++) . unwords . map perm
+    solOE = [ s | s <- allState, icparity s == False, mhparity s fstate1616 == True ]
+    solEO = [ s | s <- allState, icparity s == True, mhparity s fstate1616 == False ]
+    allState =
+      [ (T.pack s, i)
+      | s <- L.permutations "0123"
+      , Just i <- [L.elemIndex '0' s]
+      ]
