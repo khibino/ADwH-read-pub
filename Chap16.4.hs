@@ -68,8 +68,10 @@ mhparity :: State -> State -> Bool
 
 icparity st = even $ sum [ length $ filter (h >) cs | h:cs  <- tails (perm st) ]
 
-mhparity istate fstate = even $ d (zpoint istate) (zpoint fstate)
+mhparity is fs = even $ d (zpoint is) (zpoint fs)
   where d (x0, y0) (x1, y1) = abs (x0 - x1) + abs (y0 - y1)
+        zpoint st = gridpoints $ posn0 st
+          where gridpoints = (`divMod` 3)
 
 ---
 
@@ -86,12 +88,6 @@ h1 is fs = length (filter p (zip (perm is) (perm fs)))
 ---
 
 type Coord = (Nat,Nat)
-
----
-
-zpoint :: State -> Coord
-zpoint st = gridpoints !! posn0 st
-  where gridpoints = map (`divMod` 3) [0..8]
 
 ---
 
@@ -203,9 +199,7 @@ possible22 :: State -> State -> Bool
 possible22 is fs = (mhparity22 is fs == (icparity is == icparity fs))
 
 mhparity22 :: State -> State -> Bool
-mhparity22 istate fstate = even $ d (zpoint22 istate) (zpoint22 fstate)
+mhparity22 is fs = even $ d (zpoint22 is) (zpoint22 fs)
   where d (x0, y0) (x1, y1) = abs (x0 - x1) + abs (y0 - y1)
-
-zpoint22 :: State -> Coord
-zpoint22 st = gridpoints !! posn0 st
-  where gridpoints = map (`divMod` 2) [0..3]
+        zpoint22 st = gridpoints $ posn0 st
+          where gridpoints = (`divMod` 2)
