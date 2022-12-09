@@ -73,6 +73,14 @@ mhparity is fs = even $ d (zpoint is) (zpoint fs)
         zpoint st = gridpoints $ posn0 st
           where gridpoints = (`divMod` 3)
 
+icparith2 :: State -> Bool
+icparith2 st =
+  even $ length
+  [ (h, c)
+  | h:cs  <- tails (perm st)
+  , c <- cs
+  , h > c ]
+
 ---
 
 possible :: State -> State -> Bool
